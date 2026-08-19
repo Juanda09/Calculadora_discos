@@ -823,12 +823,12 @@ select:focus-visible {
 }
 
 .left-stack {
-    left: 3%;
+    left: 15%;
     flex-direction: row-reverse;
 }
 
 .right-stack {
-    right: 3%;
+    right: 15%;
 }
 
 
