@@ -1,27 +1,57 @@
 /* ==========================================================
    POWERLOAD v6
-   Powerlifting Training Calculator
-
-   Mejoras:
-   - KG / LB consistente
-   - Inventario físico
-   - Objetivos con disponibilidad real
-   - 1RM Epley / Brzycki / Lombardi
+   Calculadora de discos para Powerlifting
+   - KG / LB
+   - Configuración de discos por lado
+   - Visualización de barra
+   - Búsqueda de combinación para un objetivo
+   - Calculadora de 1RM
+   - Estimador de 1RM por repeticiones
    - Favoritos
    - Historial
-   - Toasts
-   - Tema persistente
-   - Responsive
+   - Tema claro / oscuro
+   - Sin inventario: no se limita la búsqueda por disponibilidad física
 ========================================================== */
 
+"use strict";
 
 /* ==========================================================
    CONFIGURACIÓN
 ========================================================== */
 
-const STORAGE_PREFIX = "pl-v6";
+const STORAGE_KEYS = {
+    theme: "powerload_theme",
+    unit: "powerload_unit",
+    favorites: "powerload_favorites",
+    history: "powerload_history"
+};
 
-const PLATES = [
+const LB_TO_KG = 0.45359237;
+const KG_TO_LB = 1 / LB_TO_KG;
+
+/*
+    Discos disponibles para calcular combinaciones.
+
+    Importante:
+    NO representan inventario físico.
+    El calculador puede utilizar cualquier cantidad de estos discos.
+*/
+const PLATES_KG = [
+    25,
+    20,
+    15,
+    10,
+    5,
+    2.5,
+    1.25,
+    0.5
+];
+
+/*
+    Para la visualización solamente usamos los tamaños
+    que tienen representación gráfica en el CSS.
+*/
+const VISUAL_PLATES = [
     45,
     25,
     10,
@@ -29,1198 +59,337 @@ const PLATES = [
     2.5
 ];
 
-const KG_PER_LB = 0.45359237;
+/*
+    Pesos internos de barra.
+    El value del HTML está expresado en LB.
+*/
+const BAR_OPTIONS = [
+    {
+        lb: 45,
+        kg: 20.41,
+        label: "45 lb"
+    },
+    {
+        lb: 55,
+        kg: 24.95,
+        label: "55 lb"
+    },
+    {
+        lb: 35,
+        kg: 15.88,
+        label: "35 lb"
+    },
+    {
+        lb: 44.0924,
+        kg: 20,
+        label: "20 kg"
+    },
+    {
+        lb: 33.0693,
+        kg: 15,
+        label: "15 kg"
+    },
+    {
+        lb: 0,
+        kg: 0,
+        label: "Sin barra"
+    }
+];
 
-const TARGET_TOLERANCE_LB = 0.25;
-
-const MAX_FAVORITES = 12;
-
-const MAX_HISTORY = 15;
-
-const PERCENTAGES = [
-    50,
-    55,
+const QUICK_TARGETS_KG = [
     60,
-    65,
-    70,
-    75,
-    77.5,
     80,
-    82.5,
-    85,
-    87.5,
-    90,
-    92.5,
-    95,
-    100
+    100,
+    120,
+    140,
+    160
+];
+
+const RM_PERCENTAGES = [
+    0.50,
+    0.55,
+    0.60,
+    0.65,
+    0.70,
+    0.75,
+    0.775,
+    0.80,
+    0.825,
+    0.85,
+    0.875,
+    0.90,
+    0.925,
+    0.95,
+    1
 ];
 
 
 /* ==========================================================
-   VALORES PREDETERMINADOS
+   ESTADO
 ========================================================== */
 
-/*
-    Inventario TOTAL de discos.
+const state = {
+    unit: "kg",
+    theme: "dark",
 
-    Ejemplo:
-    45: 2
-    significa que tienes dos discos de 45 lb,
-    uno para cada lado.
+    barKg: 20.41,
 
-    Para trabajar simétricamente:
-    disponibles por lado = Math.floor(total / 2)
-*/
+    plates: {
+        25: 0,
+        20: 0,
+        15: 0,
+        10: 0,
+        5: 0,
+        2.5: 0,
+        1.25: 0,
+        0.5: 0
+    },
 
-const DEFAULT_INVENTORY = {
+    formula: "epley",
 
-    45: 2,
-    25: 2,
-    10: 4,
-    5: 4,
-    2.5: 4
+    targetCombination: null,
 
+    favorites: [],
+
+    history: []
 };
 
 
-const DEFAULT_COUNTS = {
+/* ==========================================================
+   HELPERS DOM
+========================================================== */
 
-    45: 0,
-    25: 0,
-    10: 0,
-    5: 0,
-    2.5: 0
+const $ = (id) => document.getElementById(id);
 
+const elements = {
+    body: document.body,
+
+    themeButton: $("themeButton"),
+
+    kgButton: $("kgButton"),
+    lbButton: $("lbButton"),
+
+    mainWeight: $("mainWeight"),
+    mainUnit: $("mainUnit"),
+    secondaryWeight: $("secondaryWeight"),
+
+    sideWeight: $("sideWeight"),
+    platesWeight: $("platesWeight"),
+    barDisplay: $("barDisplay"),
+
+    saveCurrentButton: $("saveCurrentButton"),
+
+    leftVisual: $("leftVisual"),
+    rightVisual: $("rightVisual"),
+
+    visualPlateCount: $("visualPlateCount"),
+    visualTotal: $("visualTotal"),
+
+    clearPlates: $("clearPlates"),
+
+    platesContainer: $("platesContainer"),
+    barWeight: $("barWeight"),
+
+    targetWeight: $("targetWeight"),
+    targetUnit: $("targetUnit"),
+    calculateTarget: $("calculateTarget"),
+    quickTargets: $("quickTargets"),
+
+    targetResult: $("targetResult"),
+    targetResultTitle: $("targetResultTitle"),
+    targetAccuracy: $("targetAccuracy"),
+    targetCombination: $("targetCombination"),
+    targetRequested: $("targetRequested"),
+    targetReal: $("targetReal"),
+    targetDifference: $("targetDifference"),
+    applyTarget: $("applyTarget"),
+
+    oneRm: $("oneRm"),
+    oneRmUnit: $("oneRmUnit"),
+    percentage: $("percentage"),
+    rmResult: $("rmResult"),
+    sendRmToTarget: $("sendRmToTarget"),
+
+    percentageGrid: $("percentageGrid"),
+
+    estimateWeight: $("estimateWeight"),
+    estimateReps: $("estimateReps"),
+    estimateUnit: $("estimateUnit"),
+    estimatedOneRm: $("estimatedOneRm"),
+    sendEstimatedToTarget: $("sendEstimatedToTarget"),
+
+    favoritesContainer: $("favoritesContainer"),
+    clearFavorites: $("clearFavorites"),
+
+    historyContainer: $("historyContainer"),
+    clearHistory: $("clearHistory"),
+
+    toastContainer: $("toastContainer")
 };
 
 
-let unit =
-    loadValue(
-        "unit",
-        "kg"
-    );
-
-
-let counts =
-    normalizeCounts(
-        loadValue(
-            "counts",
-            DEFAULT_COUNTS
-        )
-    );
-
-
-let inventory =
-    normalizeInventory(
-        loadValue(
-            "inventory",
-            DEFAULT_INVENTORY
-        )
-    );
-
-
-let favorites =
-    normalizeArray(
-        loadValue(
-            "favorites",
-            []
-        )
-    );
-
-
-let history =
-    normalizeArray(
-        loadValue(
-            "history",
-            []
-        )
-    );
-
-
-let selectedFormula = "epley";
-
-let lastTarget = null;
-
-
 /* ==========================================================
-   STORAGE
+   FORMATO DE PESO
 ========================================================== */
 
-function loadValue(key, fallback) {
-
-    try {
-
-        const value =
-            localStorage.getItem(
-                `${STORAGE_PREFIX}-${key}`
-            );
-
-        return value !== null
-            ? JSON.parse(value)
-            : fallback;
-
-    } catch {
-
-        return fallback;
-
-    }
-
+function round(value, decimals = 2) {
+    const factor = Math.pow(10, decimals);
+    return Math.round((value + Number.EPSILON) * factor) / factor;
 }
 
 
-function saveValue(key, value) {
-
-    try {
-
-        localStorage.setItem(
-            `${STORAGE_PREFIX}-${key}`,
-            JSON.stringify(value)
-        );
-
-    } catch {
-
-        console.warn(
-            "No se pudo guardar:",
-            key
-        );
-
-    }
-
-}
-
-
-function saveData() {
-
-    saveValue(
-        "unit",
-        unit
-    );
-
-    saveValue(
-        "counts",
-        counts
-    );
-
-    saveValue(
-        "inventory",
-        inventory
-    );
-
-    saveValue(
-        "favorites",
-        favorites
-    );
-
-    saveValue(
-        "history",
-        history
-    );
-
-}
-
-
-/* ==========================================================
-   NORMALIZACIÓN
-========================================================== */
-
-function normalizeCounts(data) {
-
-    const result = {
-        ...DEFAULT_COUNTS
-    };
-
-    PLATES.forEach(weight => {
-
-        const value =
-            Number(
-                data?.[weight] ?? 0
-            );
-
-        result[weight] =
-            Number.isFinite(value)
-                ? Math.max(
-                    0,
-                    Math.floor(value)
-                )
-                : 0;
-
-    });
-
-    return result;
-
-}
-
-
-function normalizeInventory(data) {
-
-    const result = {
-        ...DEFAULT_INVENTORY
-    };
-
-    PLATES.forEach(weight => {
-
-        const value =
-            Number(
-                data?.[weight] ??
-                DEFAULT_INVENTORY[weight]
-            );
-
-        result[weight] =
-            Number.isFinite(value)
-                ? Math.max(
-                    0,
-                    Math.floor(value)
-                )
-                : DEFAULT_INVENTORY[weight];
-
-    });
-
-    return result;
-
-}
-
-
-function normalizeArray(value) {
-
-    return Array.isArray(value)
-        ? value
-        : [];
-
-}
-
-
-/* ==========================================================
-   CONVERSIONES
-========================================================== */
-
-function lbToKg(lb) {
-
-    return lb * KG_PER_LB;
-
-}
-
-
-function kgToLb(kg) {
-
-    return kg / KG_PER_LB;
-
-}
-
-
-/* ==========================================================
-   FORMATO
-========================================================== */
-
-function cleanNumber(
-    value,
-    decimals = 2
-) {
-
+function formatNumber(value, decimals = 2) {
     if (!Number.isFinite(value)) {
         return "0";
     }
 
-    return Number(value)
+    const rounded = round(value, decimals);
+
+    return rounded
         .toFixed(decimals)
         .replace(/\.00$/, "")
         .replace(/(\.\d)0$/, "$1");
-
 }
 
 
-function formatKg(value) {
-
-    return `${cleanNumber(value)} kg`;
-
+function kgToLb(kg) {
+    return kg * KG_TO_LB;
 }
 
 
-function formatLb(value) {
-
-    return `${cleanNumber(value)} lb`;
-
+function lbToKg(lb) {
+    return lb * LB_TO_KG;
 }
 
 
-function formatWeightFromLb(lb) {
+function displayWeight(kg, decimals = 2) {
+    const value = state.unit === "kg"
+        ? kg
+        : kgToLb(kg);
 
-    return unit === "kg"
-        ? formatKg(lbToKg(lb))
-        : formatLb(lb);
-
+    return `${formatNumber(value, decimals)} ${state.unit}`;
 }
 
 
-function displayValueFromLb(lb) {
+function displayWeightValue(kg, decimals = 2) {
+    const value = state.unit === "kg"
+        ? kg
+        : kgToLb(kg);
 
-    return unit === "kg"
-        ? lbToKg(lb)
-        : lb;
-
+    return formatNumber(value, decimals);
 }
 
 
 /* ==========================================================
-   DOM
+   LOCAL STORAGE
 ========================================================== */
 
-const mainWeight =
-    document.getElementById(
-        "mainWeight"
-    );
+function loadStorage() {
+    try {
+        const savedTheme = localStorage.getItem(STORAGE_KEYS.theme);
 
+        if (savedTheme === "light" || savedTheme === "dark") {
+            state.theme = savedTheme;
+        }
 
-const mainUnit =
-    document.getElementById(
-        "mainUnit"
-    );
+        const savedUnit = localStorage.getItem(STORAGE_KEYS.unit);
 
+        if (savedUnit === "kg" || savedUnit === "lb") {
+            state.unit = savedUnit;
+        }
 
-const secondaryWeight =
-    document.getElementById(
-        "secondaryWeight"
-    );
+        const favorites = localStorage.getItem(STORAGE_KEYS.favorites);
 
+        if (favorites) {
+            const parsed = JSON.parse(favorites);
 
-const sideWeight =
-    document.getElementById(
-        "sideWeight"
-    );
+            if (Array.isArray(parsed)) {
+                state.favorites = parsed;
+            }
+        }
 
+        const history = localStorage.getItem(STORAGE_KEYS.history);
 
-const platesWeight =
-    document.getElementById(
-        "platesWeight"
-    );
+        if (history) {
+            const parsed = JSON.parse(history);
 
+            if (Array.isArray(parsed)) {
+                state.history = parsed;
+            }
+        }
 
-const barDisplay =
-    document.getElementById(
-        "barDisplay"
-    );
-
-
-const barWeight =
-    document.getElementById(
-        "barWeight"
-    );
-
-
-const platesContainer =
-    document.getElementById(
-        "platesContainer"
-    );
-
-
-const inventoryContainer =
-    document.getElementById(
-        "inventoryContainer"
-    );
-
-
-const targetWeight =
-    document.getElementById(
-        "targetWeight"
-    );
-
-
-const targetUnit =
-    document.getElementById(
-        "targetUnit"
-    );
-
-
-const quickTargets =
-    document.getElementById(
-        "quickTargets"
-    );
-
-
-const targetResult =
-    document.getElementById(
-        "targetResult"
-    );
-
-
-const targetResultTitle =
-    document.getElementById(
-        "targetResultTitle"
-    );
-
-
-const targetCombination =
-    document.getElementById(
-        "targetCombination"
-    );
-
-
-const targetRequested =
-    document.getElementById(
-        "targetRequested"
-    );
-
-
-const targetReal =
-    document.getElementById(
-        "targetReal"
-    );
-
-
-const targetDifference =
-    document.getElementById(
-        "targetDifference"
-    );
-
-
-const targetAccuracy =
-    document.getElementById(
-        "targetAccuracy"
-    );
-
-
-const oneRm =
-    document.getElementById(
-        "oneRm"
-    );
-
-
-const oneRmUnit =
-    document.getElementById(
-        "oneRmUnit"
-    );
-
-
-const percentage =
-    document.getElementById(
-        "percentage"
-    );
-
-
-const rmResult =
-    document.getElementById(
-        "rmResult"
-    );
-
-
-const percentageGrid =
-    document.getElementById(
-        "percentageGrid"
-    );
-
-
-const estimatedOneRm =
-    document.getElementById(
-        "estimatedOneRm"
-    );
-
-
-const estimateWeight =
-    document.getElementById(
-        "estimateWeight"
-    );
-
-
-const estimateReps =
-    document.getElementById(
-        "estimateReps"
-    );
-
-
-const estimateUnit =
-    document.getElementById(
-        "estimateUnit"
-    );
-
-
-const favoritesContainer =
-    document.getElementById(
-        "favoritesContainer"
-    );
-
-
-const historyContainer =
-    document.getElementById(
-        "historyContainer"
-    );
-
-
-const leftVisual =
-    document.getElementById(
-        "leftVisual"
-    );
-
-
-const rightVisual =
-    document.getElementById(
-        "rightVisual"
-    );
-
-
-const visualPlateCount =
-    document.getElementById(
-        "visualPlateCount"
-    );
-
-
-const visualTotal =
-    document.getElementById(
-        "visualTotal"
-    );
-
-
-const toastContainer =
-    document.getElementById(
-        "toastContainer"
-    );
-
-
-/* ==========================================================
-   TOAST
-========================================================== */
-
-function showToast(
-    message,
-    type = "success"
-) {
-
-    const toast =
-        document.createElement(
-            "div"
-        );
-
-    toast.className =
-        `toast ${type}`;
-
-    toast.textContent =
-        message;
-
-    toastContainer.appendChild(
-        toast
-    );
-
-    setTimeout(() => {
-
-        toast.classList.add(
-            "out"
-        );
-
-        setTimeout(() => {
-
-            toast.remove();
-
-        }, 220);
-
-    }, 2800);
-
-}
-
-
-/* ==========================================================
-   INVENTARIO
-========================================================== */
-
-function getAvailablePerSide(
-    weight
-) {
-
-    return Math.floor(
-        inventory[weight] / 2
-    );
-
-}
-
-
-function renderInventory() {
-
-    inventoryContainer.innerHTML =
-        "";
-
-    PLATES.forEach(weight => {
-
-        const item =
-            document.createElement(
-                "div"
-            );
-
-        item.className =
-            "inventory-item";
-
-        const className =
-            String(weight)
-                .replace(".", "-");
-
-        const availablePerSide =
-            getAvailablePerSide(
-                weight
-            );
-
-        item.innerHTML = `
-
-            <div
-                class="inventory-color plate-${className}"
-            ></div>
-
-            <strong>
-                ${weight} lb
-            </strong>
-
-            <small>
-                ${cleanNumber(
-                    lbToKg(weight)
-                )} kg
-            </small>
-
-            <div class="inventory-counter">
-
-                <button
-                    type="button"
-                    data-inventory-action="minus"
-                    data-weight="${weight}"
-                    aria-label="Quitar disco de ${weight} libras del inventario"
-                >
-                    −
-                </button>
-
-                <span>
-                    ${inventory[weight]}
-                </span>
-
-                <button
-                    type="button"
-                    data-inventory-action="plus"
-                    data-weight="${weight}"
-                    aria-label="Agregar disco de ${weight} libras al inventario"
-                >
-                    +
-                </button>
-
-            </div>
-
-            <small>
-                ${availablePerSide} / lado
-            </small>
-
-        `;
-
-        inventoryContainer.appendChild(
-            item
-        );
-
-    });
-
-
-    inventoryContainer
-        .querySelectorAll(
-            "[data-inventory-action]"
-        )
-        .forEach(button => {
-
-            button.addEventListener(
-                "click",
-                handleInventoryButton
-            );
-
-        });
-
-}
-
-
-function handleInventoryButton(
-    event
-) {
-
-    const button =
-        event.currentTarget;
-
-    const weight =
-        Number(
-            button.dataset.weight
-        );
-
-    const action =
-        button.dataset.inventoryAction;
-
-    if (!PLATES.includes(weight)) {
-        return;
+    } catch (error) {
+        console.warn("No fue posible cargar los datos guardados.", error);
     }
+}
 
-    if (action === "plus") {
 
-        inventory[weight] =
-            Number(
-                inventory[weight] || 0
-            ) + 1;
+function saveStorage() {
+    try {
+        localStorage.setItem(
+            STORAGE_KEYS.theme,
+            state.theme
+        );
 
+        localStorage.setItem(
+            STORAGE_KEYS.unit,
+            state.unit
+        );
+
+        localStorage.setItem(
+            STORAGE_KEYS.favorites,
+            JSON.stringify(state.favorites)
+        );
+
+        localStorage.setItem(
+            STORAGE_KEYS.history,
+            JSON.stringify(state.history)
+        );
+
+    } catch (error) {
+        console.warn("No fue posible guardar los datos.", error);
+    }
+}
+
+
+/* ==========================================================
+   TEMA
+========================================================== */
+
+function applyTheme() {
+    if (state.theme === "light") {
+        elements.body.classList.add("light");
+        elements.themeButton.textContent = "☀";
+        elements.themeButton.setAttribute(
+            "aria-label",
+            "Cambiar a tema oscuro"
+        );
+        elements.themeButton.setAttribute(
+            "title",
+            "Cambiar a tema oscuro"
+        );
     } else {
-
-        inventory[weight] =
-            Math.max(
-                0,
-                Number(
-                    inventory[weight] || 0
-                ) - 1
-            );
-
+        elements.body.classList.remove("light");
+        elements.themeButton.textContent = "☾";
+        elements.themeButton.setAttribute(
+            "aria-label",
+            "Cambiar a tema claro"
+        );
+        elements.themeButton.setAttribute(
+            "title",
+            "Cambiar a tema claro"
+        );
     }
-
-
-    /*
-        Si se reduce el inventario,
-        también reducimos la carga actual
-        si supera la disponibilidad.
-    */
-
-    const maxPerSide =
-        getAvailablePerSide(
-            weight
-        );
-
-    if (
-        counts[weight] >
-        maxPerSide
-    ) {
-
-        counts[weight] =
-            maxPerSide;
-
-        showToast(
-            `Carga ajustada: no tienes suficientes discos de ${weight} lb.`,
-            "warning"
-        );
-
-    }
-
-
-    saveData();
-
-    renderInventory();
-
-    renderPlates();
-
-    calculate();
-
 }
 
 
-/* ==========================================================
-   DISCOS ACTUALES
-========================================================== */
-
-function renderPlates() {
-
-    platesContainer.innerHTML =
-        "";
-
-    PLATES.forEach(weight => {
-
-        const row =
-            document.createElement(
-                "div"
-            );
-
-        row.className =
-            "plate-row";
-
-        if (
-            counts[weight] > 0
-        ) {
-
-            row.classList.add(
-                "has-plates"
-            );
-
-        }
-
-
-        const className =
-            String(weight)
-                .replace(".", "-");
-
-
-        const maxPerSide =
-            getAvailablePerSide(
-                weight
-            );
-
-
-        const current =
-            counts[weight];
-
-
-        row.innerHTML = `
-
-            <div class="plate-info">
-
-                <div
-                    class="plate-circle plate-${className}"
-                >
-                    ${weight}
-                </div>
-
-                <div>
-
-                    <strong>
-                        ${weight} lb
-                    </strong>
-
-                    <small>
-                        ${cleanNumber(
-                            lbToKg(weight)
-                        )} kg cada uno
-                    </small>
-
-                    <small class="plate-limit">
-                        Máximo:
-                        ${maxPerSide}
-                        / lado
-                    </small>
-
-                </div>
-
-            </div>
-
-
-            <div class="counter">
-
-                <button
-                    type="button"
-                    data-action="minus"
-                    data-weight="${weight}"
-                    aria-label="Quitar disco de ${weight} libras"
-                    ${current <= 0 ? "disabled" : ""}
-                >
-                    −
-                </button>
-
-
-                <span>
-                    ${current}
-                </span>
-
-
-                <button
-                    type="button"
-                    data-action="plus"
-                    data-weight="${weight}"
-                    aria-label="Agregar disco de ${weight} libras"
-                    ${current >= maxPerSide ? "disabled" : ""}
-                >
-                    +
-                </button>
-
-            </div>
-
-        `;
-
-        platesContainer.appendChild(
-            row
-        );
-
-    });
-
-
-    platesContainer
-        .querySelectorAll(
-            "[data-action]"
-        )
-        .forEach(button => {
-
-            button.addEventListener(
-                "click",
-                handlePlateButton
-            );
-
-        });
-
-}
-
-
-function handlePlateButton(
-    event
-) {
-
-    const button =
-        event.currentTarget;
-
-    const weight =
-        Number(
-            button.dataset.weight
-        );
-
-    const action =
-        button.dataset.action;
-
-
-    if (!PLATES.includes(weight)) {
-        return;
-    }
-
-
-    if (action === "plus") {
-
-        const maxPerSide =
-            getAvailablePerSide(
-                weight
-            );
-
-        if (
-            counts[weight] >=
-            maxPerSide
-        ) {
-
-            showToast(
-                `No tienes más discos de ${weight} lb disponibles.`,
-                "warning"
-            );
-
-            return;
-
-        }
-
-        counts[weight]++;
-
-    } else {
-
-        counts[weight] =
-            Math.max(
-                0,
-                counts[weight] - 1
-            );
-
-    }
-
-
-    saveData();
-
-    renderPlates();
-
-    calculate();
-
-}
-
-
-/* ==========================================================
-   CALCULADORA PRINCIPAL
-========================================================== */
-
-function getCurrentLoad() {
-
-    let perSide = 0;
-
-
-    PLATES.forEach(weight => {
-
-        perSide +=
-            weight *
-            Number(
-                counts[weight] || 0
-            );
-
-    });
-
-
-    const plates =
-        perSide * 2;
-
-
-    const bar =
-        Number(
-            barWeight.value
-        );
-
-
-    const total =
-        plates + bar;
-
-
-    return {
-
-        perSide,
-        plates,
-        bar,
-        total
-
-    };
-
-}
-
-
-function calculate() {
-
-    const load =
-        getCurrentLoad();
-
-
-    const totalDisplay =
-        displayValueFromLb(
-            load.total
-        );
-
-
-    mainWeight.textContent =
-        cleanNumber(
-            totalDisplay
-        );
-
-
-    mainUnit.textContent =
-        unit;
-
-
-    secondaryWeight.textContent =
-        unit === "kg"
-            ? formatLb(load.total)
-            : formatKg(
-                lbToKg(load.total)
-            );
-
-
-    sideWeight.textContent =
-        formatWeightFromLb(
-            load.perSide
-        );
-
-
-    platesWeight.textContent =
-        formatWeightFromLb(
-            load.plates
-        );
-
-
-    barDisplay.textContent =
-        formatWeightFromLb(
-            load.bar
-        );
-
-
-    renderBar();
-
-    updateVisualSummary(
-        load
-    );
-
-    saveData();
-
-}
-
-
-/* ==========================================================
-   RESUMEN VISUAL
-========================================================== */
-
-function updateVisualSummary(
-    load
-) {
-
-    const amount =
-        PLATES.reduce(
-            (total, weight) => {
-
-                return total +
-                    Number(
-                        counts[weight] || 0
-                    );
-
-            },
-            0
-        );
-
-
-    visualPlateCount.textContent =
-        amount;
-
-
-    visualTotal.textContent =
-        formatWeightFromLb(
-            load.total
-        );
-
-}
-
-
-/* ==========================================================
-   VISUAL DE LA BARRA
-========================================================== */
-
-function renderBar() {
-
-    leftVisual.innerHTML =
-        "";
-
-    rightVisual.innerHTML =
-        "";
-
-
-    /*
-        Las placas se agregan desde
-        las más grandes hacia las pequeñas.
-    */
-
-    PLATES.forEach(weight => {
-
-        const amount =
-            Number(
-                counts[weight] || 0
-            );
-
-
-        for (
-            let i = 0;
-            i < amount;
-            i++
-        ) {
-
-            leftVisual.appendChild(
-                createVisualPlate(
-                    weight
-                )
-            );
-
-
-            rightVisual.appendChild(
-                createVisualPlate(
-                    weight
-                )
-            );
-
-        }
-
-    });
-
-}
-
-
-function createVisualPlate(
-    weight
-) {
-
-    const plate =
-        document.createElement(
-            "div"
-        );
-
-
-    const className =
-        String(weight)
-            .replace(".", "-");
-
-
-    plate.className =
-        `visual-plate visual-${className}`;
-
-
-    plate.textContent =
-        weight;
-
-
-    plate.title =
-        `${weight} lb / ${cleanNumber(
-            lbToKg(weight)
-        )} kg`;
-
-
-    return plate;
-
+function toggleTheme() {
+    state.theme = state.theme === "dark"
+        ? "light"
+        : "dark";
+
+    applyTheme();
+    saveStorage();
 }
 
 
@@ -1228,79 +397,45 @@ function createVisualPlate(
    UNIDADES
 ========================================================== */
 
-document
-    .getElementById("kgButton")
-    .addEventListener(
-        "click",
-        () => setUnit("kg")
+function updateUnitButtons() {
+    elements.kgButton.classList.toggle(
+        "active",
+        state.unit === "kg"
     );
 
-
-document
-    .getElementById("lbButton")
-    .addEventListener(
-        "click",
-        () => setUnit("lb")
+    elements.lbButton.classList.toggle(
+        "active",
+        state.unit === "lb"
     );
+}
 
 
-function setUnit(
-    newUnit
-) {
+function updateUnitsUI() {
+    elements.mainUnit.textContent = state.unit;
+    elements.targetUnit.textContent = state.unit;
+    elements.oneRmUnit.textContent = state.unit;
+    elements.estimateUnit.textContent = state.unit;
 
-    if (
-        !["kg", "lb"].includes(
-            newUnit
-        )
-    ) {
+    updateUnitButtons();
 
+    updateMainWeight();
+    updateBarStats();
+    updatePercentageTable();
+    updateRMResult();
+    updateEstimatedRM();
+    renderQuickTargets();
+}
+
+
+function setUnit(unit) {
+    if (unit !== "kg" && unit !== "lb") {
         return;
-
     }
 
+    state.unit = unit;
 
-    unit =
-        newUnit;
-
-
-    document
-        .getElementById("kgButton")
-        .classList.toggle(
-            "active",
-            unit === "kg"
-        );
-
-
-    document
-        .getElementById("lbButton")
-        .classList.toggle(
-            "active",
-            unit === "lb"
-        );
-
-
-    targetUnit.textContent =
-        unit;
-
-
-    oneRmUnit.textContent =
-        unit;
-
-
-    estimateUnit.textContent =
-        unit;
-
-
-    renderQuickTargets();
-
-    updateOneRm();
-
-    estimateOneRm();
-
-    calculate();
-
-    saveData();
-
+    updateUnitsUI();
+    saveStorage();
 }
 
 
@@ -1308,77 +443,954 @@ function setUnit(
    BARRA
 ========================================================== */
 
-barWeight.addEventListener(
-    "change",
-    () => {
+function getBarKg() {
+    return Number(state.barKg) || 0;
+}
 
-        calculate();
 
-    }
-);
+function getPlatesPerSideKg() {
+    let total = 0;
+
+    Object.entries(state.plates).forEach(
+        ([weight, quantity]) => {
+            total +=
+                Number(weight) *
+                Number(quantity || 0);
+        }
+    );
+
+    return total;
+}
+
+
+function getTotalPlatesKg() {
+    return getPlatesPerSideKg() * 2;
+}
+
+
+function getTotalWeightKg() {
+    return getBarKg() + getTotalPlatesKg();
+}
+
+
+function getPlateCountPerSide() {
+    return Object.values(state.plates).reduce(
+        (sum, quantity) => sum + Number(quantity || 0),
+        0
+    );
+}
+
+
+function getPlateList() {
+    const list = [];
+
+    Object.entries(state.plates)
+        .sort((a, b) => Number(b[0]) - Number(a[0]))
+        .forEach(([weight, quantity]) => {
+
+            for (let i = 0; i < Number(quantity || 0); i++) {
+                list.push(Number(weight));
+            }
+
+        });
+
+    return list;
+}
+
+
+function updateMainWeight() {
+    elements.mainWeight.textContent =
+        displayWeightValue(getTotalWeightKg(), 2);
+
+    elements.mainUnit.textContent =
+        state.unit;
+
+    elements.secondaryWeight.textContent =
+        state.unit === "kg"
+            ? `${formatNumber(kgToLb(getTotalWeightKg()), 2)} lb`
+            : `${formatNumber(getTotalWeightKg(), 2)} kg`;
+}
+
+
+function updateBarStats() {
+    const sideKg = getPlatesPerSideKg();
+    const platesKg = getTotalPlatesKg();
+    const totalKg = getTotalWeightKg();
+    const barKg = getBarKg();
+
+    elements.sideWeight.textContent =
+        displayWeight(sideKg);
+
+    elements.platesWeight.textContent =
+        displayWeight(platesKg);
+
+    elements.barDisplay.textContent =
+        displayWeight(barKg);
+
+    elements.visualPlateCount.textContent =
+        getPlateCountPerSide();
+
+    elements.visualTotal.textContent =
+        displayWeight(totalKg);
+}
+
+
+function updateAllBarUI() {
+    updateMainWeight();
+    updateBarStats();
+    renderVisualBar();
+}
 
 
 /* ==========================================================
-   LIMPIAR DISCOS
+   SELECTOR DE BARRA
 ========================================================== */
 
-document
-    .getElementById("clearPlates")
-    .addEventListener(
-        "click",
-        () => {
+function updateBarFromSelect() {
+    const value = Number(elements.barWeight.value);
 
-            const hasPlates =
-                Object.values(
-                    counts
-                ).some(
-                    value => value > 0
-                );
+    const option = BAR_OPTIONS.find(
+        item => Math.abs(item.lb - value) < 0.0001
+    );
+
+    if (!option) {
+        return;
+    }
+
+    state.barKg = option.kg;
+
+    updateAllBarUI();
+}
 
 
-            if (!hasPlates) {
+/* ==========================================================
+   DISCO SELECTOR
+========================================================== */
 
-                showToast(
-                    "La barra ya está limpia.",
-                    "info"
-                );
+function plateClass(weight) {
+    return String(weight)
+        .replace(".", "-");
+}
 
-                return;
 
+function plateColorClass(weight) {
+    return `plate-${plateClass(weight)}`;
+}
+
+
+function renderPlates() {
+    elements.platesContainer.innerHTML = "";
+
+    PLATES_KG.forEach(weight => {
+
+        const quantity =
+            Number(state.plates[weight] || 0);
+
+        const row =
+            document.createElement("div");
+
+        row.className = "plate-row";
+
+        if (quantity > 0) {
+            row.classList.add("has-plates");
+        }
+
+        const info =
+            document.createElement("div");
+
+        info.className = "plate-info";
+
+        const circle =
+            document.createElement("div");
+
+        circle.className =
+            `plate-circle ${plateColorClass(weight)}`;
+
+        circle.textContent =
+            formatNumber(weight);
+
+        const text =
+            document.createElement("div");
+
+        const strong =
+            document.createElement("strong");
+
+        strong.textContent =
+            `${formatNumber(weight)} kg`;
+
+        const small =
+            document.createElement("small");
+
+        small.textContent =
+            `${formatNumber(weight * KG_TO_LB, 2)} lb`;
+
+        const limit =
+            document.createElement("span");
+
+        limit.className = "plate-limit";
+
+        limit.textContent =
+            "Por lado";
+
+        text.appendChild(strong);
+        text.appendChild(small);
+        text.appendChild(limit);
+
+        info.appendChild(circle);
+        info.appendChild(text);
+
+        const counter =
+            document.createElement("div");
+
+        counter.className = "counter";
+
+        const minus =
+            document.createElement("button");
+
+        minus.type = "button";
+        minus.textContent = "−";
+        minus.setAttribute(
+            "aria-label",
+            `Quitar disco de ${weight} kg`
+        );
+
+        const count =
+            document.createElement("span");
+
+        count.textContent = quantity;
+
+        const plus =
+            document.createElement("button");
+
+        plus.type = "button";
+        plus.textContent = "+";
+        plus.setAttribute(
+            "aria-label",
+            `Agregar disco de ${weight} kg`
+        );
+
+        minus.disabled = quantity <= 0;
+
+        minus.addEventListener(
+            "click",
+            () => {
+                changePlate(weight, -1);
+            }
+        );
+
+        plus.addEventListener(
+            "click",
+            () => {
+                changePlate(weight, 1);
+            }
+        );
+
+        counter.appendChild(minus);
+        counter.appendChild(count);
+        counter.appendChild(plus);
+
+        row.appendChild(info);
+        row.appendChild(counter);
+
+        elements.platesContainer.appendChild(row);
+    });
+}
+
+
+function changePlate(weight, amount) {
+    if (!state.plates.hasOwnProperty(weight)) {
+        return;
+    }
+
+    const current =
+        Number(state.plates[weight] || 0);
+
+    const next =
+        Math.max(0, current + amount);
+
+    state.plates[weight] = next;
+
+    renderPlates();
+    updateAllBarUI();
+}
+
+
+function clearPlates() {
+    Object.keys(state.plates).forEach(weight => {
+        state.plates[weight] = 0;
+    });
+
+    renderPlates();
+    updateAllBarUI();
+
+    showToast(
+        "Configuración de discos limpiada.",
+        "info"
+    );
+}
+
+
+/* ==========================================================
+   VISUALIZACIÓN DE LA BARRA
+========================================================== */
+
+function createVisualPlate(weight) {
+    const plate =
+        document.createElement("div");
+
+    plate.className =
+        `visual-plate visual-${plateClass(weight)}`;
+
+    plate.textContent =
+        formatNumber(weight);
+
+    plate.title =
+        `${formatNumber(weight)} kg`;
+
+    return plate;
+}
+
+
+function renderVisualStack(container, plates) {
+    container.innerHTML = "";
+
+    /*
+        La visualización utiliza los discos reales seleccionados.
+        Los discos de 1.25 y 0.5 kg no tienen tamaño propio
+        en el CSS original, así que se representan con una
+        pequeña placa compatible.
+    */
+
+    plates.forEach(weight => {
+
+        let visualWeight = weight;
+
+        if (!VISUAL_PLATES.includes(weight)) {
+            visualWeight = 2.5;
+        }
+
+        const plate =
+            createVisualPlate(visualWeight);
+
+        if (!VISUAL_PLATES.includes(weight)) {
+            plate.textContent = formatNumber(weight);
+            plate.style.height = "45px";
+            plate.style.minWidth = "9px";
+            plate.style.width = "9px";
+            plate.style.fontSize = "4px";
+        }
+
+        container.appendChild(plate);
+    });
+}
+
+
+function renderVisualBar() {
+    const plates =
+        getPlateList();
+
+    /*
+        Para que ambas caras tengan exactamente
+        la misma configuración.
+    */
+
+    renderVisualStack(
+        elements.leftVisual,
+        [...plates]
+    );
+
+    renderVisualStack(
+        elements.rightVisual,
+        [...plates]
+    );
+}
+
+
+/* ==========================================================
+   COMBINACIONES DE DISCOS
+========================================================== */
+
+/*
+    Busca una combinación exacta o la más cercana.
+
+    IMPORTANTE:
+    No consulta inventario.
+
+    Se permite utilizar cualquier cantidad de discos
+    disponibles en PLATES_KG.
+
+    El objetivo se busca por LADO.
+*/
+
+function findBestCombination(targetPerSideKg) {
+
+    const target =
+        round(targetPerSideKg, 2);
+
+    if (target <= 0) {
+        return null;
+    }
+
+    /*
+        Escalamos a décimas para evitar problemas
+        de precisión con números decimales.
+    */
+
+    const SCALE = 100;
+
+    const targetInt =
+        Math.round(target * SCALE);
+
+    const plateInts =
+        PLATES_KG.map(weight => ({
+            weight,
+            value: Math.round(weight * SCALE)
+        }))
+        .sort((a, b) => b.value - a.value);
+
+    /*
+        DP:
+        dp[valor] = combinación con menor cantidad
+        de discos para alcanzar ese valor.
+    */
+
+    const dp = new Array(targetInt + 1);
+
+    dp[0] = [];
+
+    for (let current = 0; current <= targetInt; current++) {
+
+        if (!dp[current]) {
+            continue;
+        }
+
+        for (const plate of plateInts) {
+
+            const next =
+                current + plate.value;
+
+            if (next > targetInt) {
+                continue;
             }
 
+            const candidate =
+                [...dp[current], plate.weight];
 
             if (
-                !confirm(
-                    "¿Quieres quitar todos los discos de la barra?"
-                )
+                !dp[next] ||
+                candidate.length < dp[next].length
             ) {
-
-                return;
-
+                dp[next] = candidate;
             }
+        }
+    }
 
+    if (dp[targetInt]) {
 
-            counts =
-                {
-                    ...DEFAULT_COUNTS
-                };
+        return {
+            exact: true,
+            perSide: target,
+            actualPerSide: target,
+            difference: 0,
+            plates: normalizeCombination(
+                dp[targetInt]
+            )
+        };
+    }
 
+    /*
+        Si no existe una combinación exacta,
+        buscamos la más cercana.
 
-            saveData();
+        Permitimos una diferencia máxima
+        de 1 kg por lado.
+    */
 
-            renderPlates();
+    let best = null;
 
-            calculate();
+    const MAX_DIFFERENCE =
+        Math.round(1 * SCALE);
 
+    for (
+        let difference = 1;
+        difference <= MAX_DIFFERENCE;
+        difference++
+    ) {
 
-            showToast(
-                "Barra limpiada.",
-                "success"
+        const lower =
+            targetInt - difference;
+
+        const upper =
+            targetInt + difference;
+
+        const candidates = [];
+
+        if (
+            lower >= 0 &&
+            dp[lower]
+        ) {
+            candidates.push({
+                value: lower,
+                plates: dp[lower]
+            });
+        }
+
+        /*
+            Para valores superiores al objetivo,
+            necesitamos calcularlos de forma separada.
+        */
+
+        const upperCombination =
+            findCombinationUpTo(
+                upper,
+                plateInts
             );
 
+        if (upperCombination) {
+            candidates.push({
+                value: upper,
+                plates: upperCombination
+            });
         }
+
+        if (candidates.length > 0) {
+
+            candidates.sort(
+                (a, b) => {
+
+                    const diffA =
+                        Math.abs(targetInt - a.value);
+
+                    const diffB =
+                        Math.abs(targetInt - b.value);
+
+                    if (diffA !== diffB) {
+                        return diffA - diffB;
+                    }
+
+                    return (
+                        a.plates.length -
+                        b.plates.length
+                    );
+                }
+            );
+
+            const winner =
+                candidates[0];
+
+            const actual =
+                winner.value / SCALE;
+
+            return {
+                exact: false,
+                perSide: target,
+                actualPerSide: actual,
+                difference: round(
+                    actual - target,
+                    2
+                ),
+                plates: normalizeCombination(
+                    winner.plates
+                )
+            };
+        }
+    }
+
+    return null;
+}
+
+
+function findCombinationUpTo(targetInt, plateInts) {
+
+    const dp =
+        new Array(targetInt + 1);
+
+    dp[0] = [];
+
+    for (
+        let current = 0;
+        current <= targetInt;
+        current++
+    ) {
+
+        if (!dp[current]) {
+            continue;
+        }
+
+        for (const plate of plateInts) {
+
+            const next =
+                current + plate.value;
+
+            if (next > targetInt) {
+                continue;
+            }
+
+            const candidate =
+                [...dp[current], plate.weight];
+
+            if (
+                !dp[next] ||
+                candidate.length < dp[next].length
+            ) {
+                dp[next] = candidate;
+            }
+        }
+    }
+
+    /*
+        Busca el valor más cercano al objetivo.
+    */
+
+    for (
+        let value = targetInt;
+        value >= 0;
+        value--
+    ) {
+        if (dp[value]) {
+            return dp[value];
+        }
+    }
+
+    return null;
+}
+
+
+function normalizeCombination(plates) {
+
+    const result = {};
+
+    PLATES_KG.forEach(weight => {
+        result[weight] = 0;
+    });
+
+    plates.forEach(weight => {
+
+        if (result.hasOwnProperty(weight)) {
+            result[weight]++;
+        }
+
+    });
+
+    return result;
+}
+
+
+function combinationTotal(combination) {
+
+    return Object.entries(combination)
+        .reduce(
+            (total, [weight, quantity]) => {
+                return total +
+                    Number(weight) *
+                    Number(quantity || 0);
+            },
+            0
+        );
+}
+
+
+function combinationToArray(combination) {
+
+    const array = [];
+
+    Object.entries(combination)
+        .sort(
+            (a, b) =>
+                Number(b[0]) - Number(a[0])
+        )
+        .forEach(([weight, quantity]) => {
+
+            for (
+                let i = 0;
+                i < Number(quantity || 0);
+                i++
+            ) {
+                array.push(Number(weight));
+            }
+
+        });
+
+    return array;
+}
+
+
+/* ==========================================================
+   OBJETIVO
+========================================================== */
+
+function getTargetKg() {
+
+    const value =
+        Number(elements.targetWeight.value);
+
+    if (!Number.isFinite(value) || value <= 0) {
+        return null;
+    }
+
+    return state.unit === "kg"
+        ? value
+        : lbToKg(value);
+}
+
+
+function calculateTarget() {
+
+    const targetKg =
+        getTargetKg();
+
+    if (targetKg === null) {
+
+        showToast(
+            "Ingresa un peso objetivo válido.",
+            "error"
+        );
+
+        return;
+    }
+
+    const barKg =
+        getBarKg();
+
+    const platesNeededKg =
+        targetKg - barKg;
+
+    if (platesNeededKg < 0) {
+
+        showToast(
+            "El objetivo es menor que el peso de la barra.",
+            "warning"
+        );
+
+        showTargetUnavailable(
+            targetKg,
+            "El objetivo es menor que la barra."
+        );
+
+        return;
+    }
+
+    /*
+        El peso que deben aportar los discos
+        se divide entre ambos lados.
+    */
+
+    const perSide =
+        platesNeededKg / 2;
+
+    const combination =
+        findBestCombination(perSide);
+
+    if (!combination) {
+
+        showTargetUnavailable(
+            targetKg,
+            "No se encontró una combinación válida."
+        );
+
+        return;
+    }
+
+    state.targetCombination = {
+        targetKg,
+        barKg,
+        combination,
+        perSideTarget: perSide,
+        perSideActual: combination.actualPerSide
+    };
+
+    renderTargetResult();
+}
+
+
+function showTargetUnavailable(targetKg, reason) {
+
+    elements.targetResult.classList.remove("hidden");
+
+    elements.targetResultTitle.textContent =
+        "Sin combinación";
+
+    elements.targetAccuracy.textContent =
+        "NO DISPONIBLE";
+
+    elements.targetAccuracy.className =
+        "accuracy unavailable";
+
+    elements.targetCombination.innerHTML = "";
+
+    const message =
+        document.createElement("div");
+
+    message.className = "plate-chip";
+
+    message.textContent = reason;
+
+    elements.targetCombination.appendChild(message);
+
+    elements.targetRequested.textContent =
+        displayWeight(targetKg);
+
+    elements.targetReal.textContent =
+        "-";
+
+    elements.targetDifference.textContent =
+        "-";
+
+    elements.applyTarget.disabled = true;
+
+    elements.applyTarget.style.opacity = ".4";
+
+    state.targetCombination = null;
+}
+
+
+function renderTargetResult() {
+
+    const result =
+        state.targetCombination;
+
+    if (!result) {
+        return;
+    }
+
+    elements.targetResult.classList.remove("hidden");
+
+    const combination =
+        result.combination;
+
+    const actualTotal =
+        result.barKg +
+        combination.actualPerSide * 2;
+
+    const difference =
+        actualTotal -
+        result.targetKg;
+
+    elements.targetResultTitle.textContent =
+        result.combination.exact
+            ? "Combinación exacta"
+            : "Combinación más cercana";
+
+    if (result.combination.exact) {
+
+        elements.targetAccuracy.textContent =
+            "EXACTO";
+
+        elements.targetAccuracy.className =
+            "accuracy exact";
+
+    } else {
+
+        elements.targetAccuracy.textContent =
+            "CERCANO";
+
+        elements.targetAccuracy.className =
+            "accuracy close";
+    }
+
+    renderCombinationChips(
+        combination.plates
     );
+
+    elements.targetRequested.textContent =
+        displayWeight(result.targetKg);
+
+    elements.targetReal.textContent =
+        displayWeight(actualTotal);
+
+    const differenceText =
+        difference === 0
+            ? "0"
+            : `${difference > 0 ? "+" : ""}${displayWeight(
+                Math.abs(difference)
+            )}`;
+
+    elements.targetDifference.textContent =
+        difference === 0
+            ? "0"
+            : `${difference > 0 ? "+" : "-"}${displayWeight(
+                Math.abs(difference)
+            )}`;
+
+    elements.applyTarget.disabled = false;
+    elements.applyTarget.style.opacity = "1";
+}
+
+
+function renderCombinationChips(combination) {
+
+    elements.targetCombination.innerHTML = "";
+
+    const array =
+        combinationToArray(combination);
+
+    if (array.length === 0) {
+
+        const chip =
+            document.createElement("div");
+
+        chip.className = "plate-chip";
+
+        chip.textContent =
+            "Sin discos";
+
+        elements.targetCombination.appendChild(chip);
+
+        return;
+    }
+
+    array.forEach(weight => {
+
+        const chip =
+            document.createElement("div");
+
+        chip.className = "plate-chip";
+
+        chip.textContent =
+            `${formatNumber(weight)} kg`;
+
+        elements.targetCombination.appendChild(chip);
+    });
+}
+
+
+function applyTarget() {
+
+    const result =
+        state.targetCombination;
+
+    if (!result) {
+        return;
+    }
+
+    state.plates =
+        normalizeCombination(
+            combinationToArray(
+                result.combination.plates
+            )
+        );
+
+    renderPlates();
+    updateAllBarUI();
+
+    addHistory({
+        weightKg: getTotalWeightKg(),
+        barKg: getBarKg(),
+        plates: { ...state.plates }
+    });
+
+    showToast(
+        "Configuración aplicada.",
+        "success"
+    );
+
+    document
+        .querySelector(".bar-card")
+        ?.scrollIntoView({
+            behavior: "smooth",
+            block: "center"
+        });
+}
 
 
 /* ==========================================================
@@ -1387,1539 +1399,561 @@ document
 
 function renderQuickTargets() {
 
-    quickTargets.innerHTML =
-        "";
+    elements.quickTargets.innerHTML = "";
 
+    QUICK_TARGETS_KG.forEach(targetKg => {
 
-    const targetsKg = [
-        60,
-        70,
-        80,
-        90,
-        100,
-        120,
-        140
-    ];
+        const button =
+            document.createElement("button");
 
+        button.type = "button";
 
-    targetsKg.forEach(
-        kg => {
+        const display =
+            state.unit === "kg"
+                ? `${formatNumber(targetKg)} kg`
+                : `${formatNumber(
+                    kgToLb(targetKg),
+                    1
+                )} lb`;
 
-            const value =
-                unit === "kg"
-                    ? kg
-                    : Math.round(
-                        kgToLb(kg)
-                    );
+        button.textContent = display;
 
+        button.addEventListener(
+            "click",
+            () => {
 
-            const button =
-                document.createElement(
-                    "button"
-                );
+                elements.targetWeight.value =
+                    state.unit === "kg"
+                        ? formatNumber(targetKg)
+                        : formatNumber(
+                            kgToLb(targetKg),
+                            1
+                        );
 
-
-            button.type =
-                "button";
-
-
-            button.textContent =
-                cleanNumber(value);
-
-
-            button.dataset.target =
-                value;
-
-
-            button.addEventListener(
-                "click",
-                () => {
-
-                    targetWeight.value =
-                        value;
-
-                    calculateTarget();
-
-                }
-            );
-
-
-            quickTargets.appendChild(
-                button
-            );
-
-        }
-    );
-
-}
-
-
-/* ==========================================================
-   CALCULAR OBJETIVO
-========================================================== */
-
-document
-    .getElementById("calculateTarget")
-    .addEventListener(
-        "click",
-        calculateTarget
-    );
-
-
-targetWeight.addEventListener(
-    "keydown",
-    event => {
-
-        if (
-            event.key === "Enter"
-        ) {
-
-            calculateTarget();
-
-        }
-
-    }
-);
-
-
-function calculateTarget() {
-
-    const input =
-        Number(
-            targetWeight.value
-        );
-
-
-    if (
-        !Number.isFinite(input) ||
-        input <= 0
-    ) {
-
-        showTargetError(
-            "Introduce un peso objetivo válido."
-        );
-
-        return;
-
-    }
-
-
-    const targetLb =
-        unit === "kg"
-            ? kgToLb(input)
-            : input;
-
-
-    const bar =
-        Number(
-            barWeight.value
-        );
-
-
-    const discLoad =
-        targetLb - bar;
-
-
-    if (
-        discLoad < -TARGET_TOLERANCE_LB
-    ) {
-
-        showTargetError(
-            "El objetivo es menor que el peso de la barra."
-        );
-
-        return;
-
-    }
-
-
-    const targetPerSide =
-        Math.max(
-            0,
-            discLoad / 2
-        );
-
-
-    const result =
-        findBestCombination(
-            targetPerSide
-        );
-
-
-    if (!result) {
-
-        showTargetError(
-            "No existe una combinación posible con tu inventario actual."
-        );
-
-        return;
-
-    }
-
-
-    const actualTotal =
-        result.perSide * 2 +
-        bar;
-
-
-    const difference =
-        actualTotal -
-        targetLb;
-
-
-    lastTarget = {
-
-        counts:
-            result.counts,
-
-        total:
-            actualTotal,
-
-        bar
-
-    };
-
-
-    renderTarget(
-        targetLb,
-        actualTotal,
-        difference,
-        result.counts
-    );
-
-}
-
-
-/* ==========================================================
-   ALGORITMO DE DISCOS
-========================================================== */
-
-function findBestCombination(
-    targetPerSide
-) {
-
-    /*
-        Convertimos todo a unidades
-        de 2.5 lb para evitar problemas
-        de precisión decimal.
-    */
-
-    const targetUnits =
-        Math.round(
-            targetPerSide / 2.5
-        );
-
-
-    const values = {
-
-        45: 18,
-        25: 10,
-        10: 4,
-        5: 2,
-        2.5: 1
-
-    };
-
-
-    const maxCounts = {};
-
-
-    PLATES.forEach(
-        weight => {
-
-            maxCounts[weight] =
-                getAvailablePerSide(
-                    weight
-                );
-
-        }
-    );
-
-
-    let best = null;
-
-
-    /*
-        La cantidad máxima de combinaciones
-        es pequeña, por lo que una búsqueda
-        exhaustiva es suficiente y confiable.
-    */
-
-    for (
-        let a = 0;
-        a <= maxCounts[45];
-        a++
-    ) {
-
-        for (
-            let b = 0;
-            b <= maxCounts[25];
-            b++
-        ) {
-
-            for (
-                let c = 0;
-                c <= maxCounts[10];
-                c++
-            ) {
-
-                for (
-                    let d = 0;
-                    d <= maxCounts[5];
-                    d++
-                ) {
-
-                    for (
-                        let e = 0;
-                        e <= maxCounts[2.5];
-                        e++
-                    ) {
-
-                        const totalUnits =
-                            a * values[45] +
-                            b * values[25] +
-                            c * values[10] +
-                            d * values[5] +
-                            e * values[2.5];
-
-
-                        const difference =
-                            Math.abs(
-                                totalUnits -
-                                targetUnits
-                            );
-
-
-                        const plateCount =
-                            a +
-                            b +
-                            c +
-                            d +
-                            e;
-
-
-                        /*
-                            Preferimos discos grandes
-                            cuando hay empate.
-                        */
-
-                        const largePreference =
-                            -(
-                                a * 100 +
-                                b * 50 +
-                                c * 20 +
-                                d * 10 +
-                                e * 5
-                            );
-
-
-                        const current = {
-
-                            difference,
-
-                            plateCount,
-
-                            largePreference,
-
-                            perSide:
-                                totalUnits *
-                                2.5,
-
-                            counts: {
-
-                                45: a,
-                                25: b,
-                                10: c,
-                                5: d,
-                                2.5: e
-
-                            }
-
-                        };
-
-
-                        if (
-                            best === null ||
-
-                            current.difference <
-                            best.difference ||
-
-                            (
-                                current.difference ===
-                                best.difference &&
-
-                                current.plateCount <
-                                best.plateCount
-                            ) ||
-
-                            (
-                                current.difference ===
-                                best.difference &&
-
-                                current.plateCount ===
-                                best.plateCount &&
-
-                                current.largePreference <
-                                best.largePreference
-                            )
-                        ) {
-
-                            best =
-                                current;
-
-                        }
-
-                    }
-
-                }
-
+                calculateTarget();
             }
-
-        }
-
-    }
-
-
-    return best;
-
-}
-
-
-/* ==========================================================
-   MOSTRAR OBJETIVO
-========================================================== */
-
-function renderTarget(
-    requested,
-    actual,
-    difference,
-    combination
-) {
-
-    targetResult.classList.remove(
-        "hidden"
-    );
-
-
-    targetResultTitle.textContent =
-        "Combinación recomendada";
-
-
-    targetCombination.innerHTML =
-        "";
-
-
-    const items = [
-
-        [45, combination[45]],
-        [25, combination[25]],
-        [10, combination[10]],
-        [5, combination[5]],
-        [2.5, combination[2.5]]
-
-    ];
-
-
-    let totalDiscs = 0;
-
-
-    items.forEach(
-        ([weight, count]) => {
-
-            for (
-                let i = 0;
-                i < count;
-                i++
-            ) {
-
-                totalDiscs++;
-
-
-                const chip =
-                    document.createElement(
-                        "div"
-                    );
-
-
-                chip.className =
-                    "plate-chip";
-
-
-                chip.textContent =
-                    `${weight} lb`;
-
-
-                chip.title =
-                    `${cleanNumber(
-                        lbToKg(weight)
-                    )} kg`;
-
-
-                targetCombination
-                    .appendChild(
-                        chip
-                    );
-
-            }
-
-        }
-    );
-
-
-    if (
-        totalDiscs === 0
-    ) {
-
-        const chip =
-            document.createElement(
-                "div"
-            );
-
-
-        chip.className =
-            "plate-chip";
-
-
-        chip.textContent =
-            "Sin discos";
-
-
-        targetCombination
-            .appendChild(
-                chip
-            );
-
-    }
-
-
-    targetRequested.textContent =
-        formatWeightFromLb(
-            requested
         );
 
-
-    targetReal.textContent =
-        formatWeightFromLb(
-            actual
-        );
-
-
-    if (
-        Math.abs(difference) <=
-        TARGET_TOLERANCE_LB
-    ) {
-
-        targetAccuracy.textContent =
-            "EXACTO";
-
-
-        targetAccuracy.className =
-            "accuracy exact";
-
-    } else {
-
-        targetAccuracy.textContent =
-            "APROXIMADO";
-
-
-        targetAccuracy.className =
-            "accuracy close";
-
-    }
-
-
-    const sign =
-        difference > 0
-            ? "+"
-            : "";
-
-
-    targetDifference.textContent =
-        Math.abs(difference) < 0.01
-            ? "0"
-            : `${sign}${formatWeightFromLb(
-                difference
-            )}`;
-
+        elements.quickTargets.appendChild(button);
+    });
 }
-
-
-/* ==========================================================
-   ERROR DE OBJETIVO
-========================================================== */
-
-function showTargetError(
-    message
-) {
-
-    targetResult.classList.remove(
-        "hidden"
-    );
-
-
-    targetResultTitle.textContent =
-        "No disponible";
-
-
-    targetCombination.innerHTML =
-        "";
-
-
-    const chip =
-        document.createElement(
-            "div"
-        );
-
-
-    chip.className =
-        "plate-chip";
-
-    chip.style.color =
-        "var(--danger)";
-
-    chip.style.borderColor =
-        "rgba(255,102,102,.25)";
-
-
-    chip.textContent =
-        `⚠ ${message}`;
-
-
-    targetCombination.appendChild(
-        chip
-    );
-
-
-    targetRequested.textContent =
-        "-";
-
-
-    targetReal.textContent =
-        "-";
-
-
-    targetDifference.textContent =
-        "-";
-
-
-    targetAccuracy.textContent =
-        "NO DISPONIBLE";
-
-
-    targetAccuracy.className =
-        "accuracy unavailable";
-
-
-    lastTarget = null;
-
-
-    showToast(
-        message,
-        "error"
-    );
-
-}
-
-
-/* ==========================================================
-   APLICAR OBJETIVO
-========================================================== */
-
-document
-    .getElementById("applyTarget")
-    .addEventListener(
-        "click",
-        () => {
-
-            if (!lastTarget) {
-
-                showToast(
-                    "Primero calcula un objetivo.",
-                    "warning"
-                );
-
-                return;
-
-            }
-
-
-            counts =
-                normalizeCounts(
-                    lastTarget.counts
-                );
-
-
-            barWeight.value =
-                String(
-                    lastTarget.bar
-                );
-
-
-            renderPlates();
-
-            calculate();
-
-
-            saveHistory(
-                lastTarget.total,
-                counts,
-                lastTarget.bar
-            );
-
-
-            showToast(
-                "Configuración aplicada correctamente.",
-                "success"
-            );
-
-
-            window.scrollTo({
-
-                top: 0,
-
-                behavior: "smooth"
-
-            });
-
-        }
-    );
 
 
 /* ==========================================================
    1RM
 ========================================================== */
 
-oneRm.addEventListener(
-    "input",
-    updateOneRm
-);
+function calculateOneRM() {
 
+    const weightInput =
+        Number(elements.oneRm.value);
 
-percentage.addEventListener(
-    "change",
-    updateOneRm
-);
-
-
-document
-    .querySelectorAll(
-        "[data-formula]"
-    )
-    .forEach(button => {
-
-        button.addEventListener(
-            "click",
-            () => {
-
-                selectedFormula =
-                    button.dataset.formula;
-
-
-                document
-                    .querySelectorAll(
-                        "[data-formula]"
-                    )
-                    .forEach(
-                        other => {
-
-                            other.classList.toggle(
-                                "active",
-                                other === button
-                            );
-
-                        }
-                    );
-
-
-                updateOneRm();
-
-            }
-        );
-
-    });
-
-
-function calculateOneRm(
-    weight,
-    reps,
-    formula
-) {
+    const percentage =
+        Number(elements.percentage.value);
 
     if (
-        !Number.isFinite(weight) ||
+        !Number.isFinite(weightInput) ||
+        weightInput <= 0
+    ) {
+        return 0;
+    }
+
+    if (
+        !Number.isFinite(percentage) ||
+        percentage <= 0
+    ) {
+        return 0;
+    }
+
+    const weightKg =
+        state.unit === "kg"
+            ? weightInput
+            : lbToKg(weightInput);
+
+    return weightKg * percentage;
+}
+
+
+function calculateFormulaOneRM(weightKg, reps) {
+
+    if (
+        !Number.isFinite(weightKg) ||
+        weightKg <= 0 ||
         !Number.isFinite(reps) ||
-        weight <= 0 ||
         reps <= 0
     ) {
-
         return 0;
-
     }
-
 
     if (reps === 1) {
-        return weight;
+        return weightKg;
     }
 
-
-    switch (formula) {
+    switch (state.formula) {
 
         case "brzycki":
 
+            /*
+                1RM = peso × 36 / (37 - repeticiones)
+            */
+
             if (reps >= 37) {
-                return weight;
+                return 0;
             }
 
-            return weight *
-                (
-                    36 /
-                    (
-                        37 - reps
-                    )
-                );
+            return (
+                weightKg *
+                36 /
+                (37 - reps)
+            );
 
 
         case "lombardi":
 
-            return weight *
-                Math.pow(
-                    reps,
-                    0.10
-                );
+            /*
+                1RM = peso × repeticiones^0.10
+            */
+
+            return (
+                weightKg *
+                Math.pow(reps, 0.10)
+            );
 
 
         case "epley":
-
         default:
 
-            return weight *
-                (
-                    1 +
-                    reps / 30
-                );
+            /*
+                1RM = peso × (1 + reps / 30)
+            */
 
+            return (
+                weightKg *
+                (1 + reps / 30)
+            );
     }
-
 }
 
 
-function updateOneRm() {
+function updateRMResult() {
 
-    const rm =
-        Number(
-            oneRm.value
-        );
+    const rmKg =
+        calculateOneRM();
+
+    elements.rmResult.textContent =
+        displayWeight(rmKg);
+}
 
 
-    const percent =
-        Number(
-            percentage.value
-        );
-
+function setFormula(formula) {
 
     if (
-        !Number.isFinite(rm) ||
-        rm <= 0
+        !["epley", "brzycki", "lombardi"]
+            .includes(formula)
     ) {
+        return;
+    }
 
-        rmResult.textContent =
-            `0 ${unit}`;
+    state.formula = formula;
 
-        renderPercentageTable(
-            0
+    document
+        .querySelectorAll(".formula-button")
+        .forEach(button => {
+
+            button.classList.toggle(
+                "active",
+                button.dataset.formula === formula
+            );
+
+        });
+
+    updateRMResult();
+    updatePercentageTable();
+}
+
+
+function updatePercentageTable() {
+
+    elements.percentageGrid.innerHTML = "";
+
+    const oneRmInput =
+        Number(elements.oneRm.value);
+
+    let oneRmKg = 0;
+
+    if (
+        Number.isFinite(oneRmInput) &&
+        oneRmInput > 0
+    ) {
+        oneRmKg =
+            state.unit === "kg"
+                ? oneRmInput
+                : lbToKg(oneRmInput);
+    }
+
+    RM_PERCENTAGES.forEach(percentage => {
+
+        const cell =
+            document.createElement("div");
+
+        cell.className =
+            "percentage-cell";
+
+        const span =
+            document.createElement("span");
+
+        span.textContent =
+            `${formatNumber(percentage * 100, 1)}%`;
+
+        const strong =
+            document.createElement("strong");
+
+        const value =
+            oneRmKg > 0
+                ? oneRmKg * percentage
+                : 0;
+
+        strong.textContent =
+            displayWeight(value);
+
+        cell.appendChild(span);
+        cell.appendChild(strong);
+
+        cell.addEventListener(
+            "click",
+            () => {
+
+                elements.percentage.value =
+                    String(percentage);
+
+                updateRMResult();
+
+                document
+                    .querySelectorAll(
+                        ".percentage-cell"
+                    )
+                    .forEach(item => {
+                        item.classList.remove("active");
+                    });
+
+                cell.classList.add("active");
+            }
+        );
+
+        elements.percentageGrid.appendChild(cell);
+    });
+}
+
+
+function sendRMToTarget() {
+
+    const rmKg =
+        calculateOneRM();
+
+    if (rmKg <= 0) {
+
+        showToast(
+            "Primero ingresa un 1RM válido.",
+            "warning"
         );
 
         return;
-
     }
 
-
-    const result =
-        rm * percent;
-
-
-    rmResult.textContent =
-        `${cleanNumber(
-            result
-        )} ${unit}`;
-
-
-    renderPercentageTable(
-        rm
-    );
-
-}
-
-
-/* ==========================================================
-   TABLA DE PORCENTAJES
-========================================================== */
-
-function renderPercentageTable(
-    rm
-) {
-
-    percentageGrid.innerHTML =
-        "";
-
-
-    PERCENTAGES.forEach(
-        percent => {
-
-            const cell =
-                document.createElement(
-                    "div"
-                );
-
-
-            cell.className =
-                "percentage-cell";
-
-
-            const selected =
-                Number(
-                    percentage.value
-                ) ===
-                percent / 100;
-
-
-            if (
-                selected &&
-                rm > 0
-            ) {
-
-                cell.classList.add(
-                    "active"
-                );
-
-            }
-
-
-            const result =
-                rm > 0
-                    ? rm * percent / 100
-                    : 0;
-
-
-            cell.innerHTML = `
-
-                <span>
-                    ${percent}%
-                </span>
-
-                <strong>
-                    ${
-                        rm > 0
-                            ? `${cleanNumber(
-                                result
-                            )} ${unit}`
-                            : "—"
-                    }
-                </strong>
-
-            `;
-
-
-            cell.addEventListener(
-                "click",
-                () => {
-
-                    percentage.value =
-                        String(
-                            percent / 100
-                        );
-
-
-                    updateOneRm();
-
-                }
+    elements.targetWeight.value =
+        state.unit === "kg"
+            ? formatNumber(rmKg)
+            : formatNumber(
+                kgToLb(rmKg),
+                1
             );
 
+    calculateTarget();
 
-            percentageGrid
-                .appendChild(
-                    cell
-                );
+    elements.targetWeight.scrollIntoView({
+        behavior: "smooth",
+        block: "center"
+    });
 
-        }
-    );
-
+    elements.targetWeight.focus();
 }
 
 
 /* ==========================================================
-   ENVIAR 1RM A OBJETIVO
+   ESTIMADOR DE 1RM
 ========================================================== */
 
-document
-    .getElementById("sendRmToTarget")
-    .addEventListener(
-        "click",
-        () => {
-
-            const rm =
-                Number(
-                    oneRm.value
-                );
-
-
-            const percent =
-                Number(
-                    percentage.value
-                );
-
-
-            if (
-                !Number.isFinite(rm) ||
-                rm <= 0
-            ) {
-
-                showToast(
-                    "Introduce primero un 1RM válido.",
-                    "warning"
-                );
-
-                return;
-
-            }
-
-
-            const result =
-                rm * percent;
-
-
-            targetWeight.value =
-                cleanNumber(
-                    result
-                );
-
-
-            calculateTarget();
-
-
-            targetResult.scrollIntoView({
-
-                behavior: "smooth",
-
-                block: "center"
-
-            });
-
-        }
-    );
-
-
-/* ==========================================================
-   ESTIMADOR 1RM
-========================================================== */
-
-estimateWeight.addEventListener(
-    "input",
-    estimateOneRm
-);
-
-
-estimateReps.addEventListener(
-    "input",
-    estimateOneRm
-);
-
-
-function estimateOneRm() {
+function calculateEstimatedRM() {
 
     const weightInput =
-        Number(
-            estimateWeight.value
-        );
-
+        Number(elements.estimateWeight.value);
 
     const reps =
-        Number(
-            estimateReps.value
-        );
-
+        Number(elements.estimateReps.value);
 
     if (
-        !Number.isFinite(
-            weightInput
-        ) ||
-        !Number.isFinite(reps) ||
-        weightInput <= 0 ||
-        reps <= 0
+        !Number.isFinite(weightInput) ||
+        weightInput <= 0
     ) {
-
-        estimatedOneRm.textContent =
-            `0 ${unit}`;
-
-        return;
-
+        return 0;
     }
 
+    if (
+        !Number.isFinite(reps) ||
+        reps < 1 ||
+        reps > 30
+    ) {
+        return 0;
+    }
 
     const weightKg =
-        unit === "kg"
+        state.unit === "kg"
             ? weightInput
-            : lbToKg(
-                weightInput
-            );
+            : lbToKg(weightInput);
 
-
-    const resultKg =
-        calculateOneRm(
-            weightKg,
-            reps,
-            selectedFormula
-        );
-
-
-    const result =
-        unit === "kg"
-            ? resultKg
-            : kgToLb(
-                resultKg
-            );
-
-
-    estimatedOneRm.textContent =
-        `${cleanNumber(
-            result
-        )} ${unit}`;
-
+    return calculateFormulaOneRM(
+        weightKg,
+        reps
+    );
 }
 
 
-/* ==========================================================
-   ENVIAR ESTIMACIÓN A OBJETIVO
-========================================================== */
+function updateEstimatedRM() {
 
-document
-    .getElementById(
-        "sendEstimatedToTarget"
-    )
-    .addEventListener(
-        "click",
-        () => {
+    const estimated =
+        calculateEstimatedRM();
 
-            const weight =
-                Number(
-                    estimateWeight.value
-                );
+    elements.estimatedOneRm.textContent =
+        displayWeight(estimated);
+}
 
 
-            const reps =
-                Number(
-                    estimateReps.value
-                );
+function sendEstimatedToTarget() {
 
+    const estimated =
+        calculateEstimatedRM();
 
-            if (
-                !Number.isFinite(weight) ||
-                !Number.isFinite(reps) ||
-                weight <= 0 ||
-                reps <= 0
-            ) {
+    if (estimated <= 0) {
 
-                showToast(
-                    "Introduce peso y repeticiones válidos.",
-                    "warning"
-                );
+        showToast(
+            "Ingresa un peso y número de repeticiones válidos.",
+            "warning"
+        );
 
-                return;
+        return;
+    }
 
-            }
+    elements.targetWeight.value =
+        state.unit === "kg"
+            ? formatNumber(estimated)
+            : formatNumber(
+                kgToLb(estimated),
+                1
+            );
 
+    calculateTarget();
 
-            const weightKg =
-                unit === "kg"
-                    ? weight
-                    : lbToKg(weight);
+    elements.targetWeight.scrollIntoView({
+        behavior: "smooth",
+        block: "center"
+    });
 
-
-            const estimatedKg =
-                calculateOneRm(
-                    weightKg,
-                    reps,
-                    selectedFormula
-                );
-
-
-            const result =
-                unit === "kg"
-                    ? estimatedKg
-                    : kgToLb(
-                        estimatedKg
-                    );
-
-
-            targetWeight.value =
-                cleanNumber(
-                    result
-                );
-
-
-            calculateTarget();
-
-
-            targetResult.scrollIntoView({
-
-                behavior: "smooth",
-
-                block: "center"
-
-            });
-
-        }
-    );
+    elements.targetWeight.focus();
+}
 
 
 /* ==========================================================
    FAVORITOS
 ========================================================== */
 
-document
-    .getElementById(
-        "saveCurrentButton"
-    )
-    .addEventListener(
-        "click",
-        saveCurrentFavorite
-    );
+function getCurrentConfiguration() {
 
-
-function areCountsEqual(
-    first,
-    second
-) {
-
-    return PLATES.every(
-        weight =>
-            Number(
-                first?.[weight] || 0
-            ) ===
-            Number(
-                second?.[weight] || 0
-            )
-    );
-
+    return {
+        weightKg: getTotalWeightKg(),
+        barKg: getBarKg(),
+        plates: { ...state.plates },
+        createdAt: new Date().toISOString()
+    };
 }
 
 
 function saveCurrentFavorite() {
 
-    const load =
-        getCurrentLoad();
+    const configuration =
+        getCurrentConfiguration();
 
-
-    if (
-        load.total <= 0
-    ) {
+    if (configuration.weightKg <= 0) {
 
         showToast(
-            "No hay una carga válida para guardar.",
+            "No hay una configuración para guardar.",
             "warning"
         );
 
         return;
-
     }
 
-
-    const duplicate =
-        favorites.some(
-            item =>
-
-                Number(
-                    item.bar
-                ) ===
-                Number(
-                    load.bar
-                ) &&
-
-                areCountsEqual(
-                    item.counts,
-                    counts
-                )
-        );
-
-
-    if (duplicate) {
-
-        showToast(
-            "Esta configuración ya está en favoritos.",
-            "info"
-        );
-
-        return;
-
-    }
-
-
-    const item = {
-
-        id:
-            Date.now(),
-
-        total:
-            load.total,
-
-        counts: {
-            ...counts
-        },
-
-        bar:
-            load.bar,
-
-        date:
-            new Date()
-                .toLocaleString(
-                    "es-CO",
-                    {
-                        day: "2-digit",
-                        month: "2-digit",
-                        year: "numeric",
-                        hour: "2-digit",
-                        minute: "2-digit"
-                    }
-                )
-
+    const favorite = {
+        id: Date.now(),
+        ...configuration
     };
 
+    state.favorites.unshift(favorite);
 
-    favorites.unshift(
-        item
-    );
+    /*
+        Máximo 20 favoritos.
+    */
 
+    state.favorites =
+        state.favorites.slice(0, 20);
 
-    favorites =
-        favorites.slice(
-            0,
-            MAX_FAVORITES
-        );
-
-
-    saveData();
-
+    saveStorage();
     renderFavorites();
 
-
     showToast(
-        "✓ Carga guardada en favoritos.",
+        "Configuración guardada en favoritos.",
         "success"
     );
-
 }
 
 
-/* ==========================================================
-   RENDER FAVORITOS
-========================================================== */
-
 function renderFavorites() {
 
-    favoritesContainer.innerHTML =
-        "";
+    elements.favoritesContainer.innerHTML = "";
 
+    if (state.favorites.length === 0) {
 
-    if (
-        favorites.length === 0
-    ) {
+        const empty =
+            document.createElement("div");
 
-        favoritesContainer.innerHTML = `
+        empty.className = "empty";
 
-            <div class="empty">
-                No tienes cargas favoritas todavía.
-            </div>
+        empty.textContent =
+            "Todavía no tienes cargas guardadas.";
 
-        `;
+        elements.favoritesContainer.appendChild(empty);
 
         return;
-
     }
 
+    state.favorites.forEach(favorite => {
 
-    favorites.forEach(
-        item => {
+        const item =
+            document.createElement("div");
 
-            const row =
-                document.createElement(
-                    "div"
+        item.className = "favorite-item";
+
+        const information =
+            document.createElement("div");
+
+        const weight =
+            document.createElement("div");
+
+        weight.className = "item-weight";
+
+        weight.textContent =
+            displayWeight(
+                Number(favorite.weightKg)
+            );
+
+        const detail =
+            document.createElement("div");
+
+        detail.className = "item-detail";
+
+        detail.textContent =
+            getPlateDescription(
+                favorite.plates
+            );
+
+        information.appendChild(weight);
+        information.appendChild(detail);
+
+        const actions =
+            document.createElement("div");
+
+        actions.className = "item-actions";
+
+        const useButton =
+            document.createElement("button");
+
+        useButton.type = "button";
+        useButton.textContent = "Usar";
+
+        useButton.addEventListener(
+            "click",
+            () => {
+
+                loadConfiguration(
+                    favorite
                 );
 
-
-            row.className =
-                "favorite-item";
-
-
-            row.innerHTML = `
-
-                <div>
-
-                    <div class="item-weight">
-                        ${formatWeightFromLb(
-                            item.total
-                        )}
-                    </div>
-
-                    <div class="item-detail">
-                        ${describeCounts(
-                            item.counts
-                        )}
-                        · Barra:
-                        ${formatWeightFromLb(
-                            item.bar
-                        )}
-                        · ${item.date || ""}
-                    </div>
-
-                </div>
-
-
-                <div class="item-actions">
-
-                    <button
-                        type="button"
-                        data-load="${item.id}"
-                    >
-                        Usar
-                    </button>
-
-
-                    <button
-                        type="button"
-                        class="delete"
-                        data-delete="${item.id}"
-                        aria-label="Eliminar favorito"
-                    >
-                        ×
-                    </button>
-
-                </div>
-
-            `;
-
-
-            favoritesContainer
-                .appendChild(
-                    row
+                showToast(
+                    "Favorito aplicado.",
+                    "success"
                 );
+            }
+        );
 
-        }
+        const deleteButton =
+            document.createElement("button");
+
+        deleteButton.type = "button";
+        deleteButton.textContent = "Eliminar";
+        deleteButton.className = "delete";
+
+        deleteButton.addEventListener(
+            "click",
+            () => {
+
+                deleteFavorite(
+                    favorite.id
+                );
+            }
+        );
+
+        actions.appendChild(useButton);
+        actions.appendChild(deleteButton);
+
+        item.appendChild(information);
+        item.appendChild(actions);
+
+        elements.favoritesContainer.appendChild(item);
+    });
+}
+
+
+function deleteFavorite(id) {
+
+    state.favorites =
+        state.favorites.filter(
+            item => item.id !== id
+        );
+
+    saveStorage();
+    renderFavorites();
+
+    showToast(
+        "Favorito eliminado.",
+        "info"
     );
+}
 
 
-    favoritesContainer
-        .querySelectorAll(
-            "[data-load]"
-        )
-        .forEach(
-            button => {
+function clearFavorites() {
 
-                button.addEventListener(
-                    "click",
-                    () => {
+    if (state.favorites.length === 0) {
+        return;
+    }
 
-                        const id =
-                            Number(
-                                button.dataset.load
-                            );
+    state.favorites = [];
 
+    saveStorage();
+    renderFavorites();
 
-                        const item =
-                            favorites.find(
-                                x =>
-                                    x.id === id
-                            );
-
-
-                        if (!item) {
-                            return;
-                        }
-
-
-                        counts =
-                            normalizeCounts(
-                                item.counts
-                            );
-
-
-                        if (
-                            item.bar !== undefined
-                        ) {
-
-                            barWeight.value =
-                                String(
-                                    item.bar
-                                );
-
-                        }
-
-
-                        renderPlates();
-
-                        calculate();
-
-
-                        showToast(
-                            "Favorito aplicado.",
-                            "success"
-                        );
-
-
-                        window.scrollTo({
-
-                            top: 0,
-
-                            behavior: "smooth"
-
-                        });
-
-                    }
-                );
-
-            }
-        );
-
-
-    favoritesContainer
-        .querySelectorAll(
-            "[data-delete]"
-        )
-        .forEach(
-            button => {
-
-                button.addEventListener(
-                    "click",
-                    () => {
-
-                        const id =
-                            Number(
-                                button.dataset.delete
-                            );
-
-
-                        favorites =
-                            favorites.filter(
-                                x =>
-                                    x.id !== id
-                            );
-
-
-                        saveData();
-
-                        renderFavorites();
-
-
-                        showToast(
-                            "Favorito eliminado.",
-                            "success"
-                        );
-
-                    }
-                );
-
-            }
-        );
-
+    showToast(
+        "Favoritos eliminados.",
+        "info"
+    );
 }
 
 
@@ -2927,524 +1961,457 @@ function renderFavorites() {
    HISTORIAL
 ========================================================== */
 
-function saveHistory(
-    total,
-    selectedCounts,
-    selectedBar
-) {
+function addHistory(configuration) {
 
-    const entry = {
-
-        id:
-            Date.now(),
-
-        total,
-
-        counts:
-            normalizeCounts(
-                selectedCounts
-            ),
-
-        bar:
-            Number(
-                selectedBar
-            ),
-
-        date:
-            new Date()
-                .toLocaleString(
-                    "es-CO",
-                    {
-                        day: "2-digit",
-                        month: "2-digit",
-                        year: "numeric",
-                        hour: "2-digit",
-                        minute: "2-digit"
-                    }
-                )
-
+    const item = {
+        id: Date.now(),
+        ...configuration,
+        createdAt: new Date().toISOString()
     };
 
+    state.history.unshift(item);
 
-    history.unshift(
-        entry
-    );
+    /*
+        Guardamos solamente las últimas 20
+        configuraciones.
+    */
 
+    state.history =
+        state.history.slice(0, 20);
 
-    history =
-        history.slice(
-            0,
-            MAX_HISTORY
-        );
-
-
-    saveData();
-
+    saveStorage();
     renderHistory();
-
 }
 
-
-/* ==========================================================
-   RENDER HISTORIAL
-========================================================== */
 
 function renderHistory() {
 
-    historyContainer.innerHTML =
-        "";
+    elements.historyContainer.innerHTML = "";
 
+    if (state.history.length === 0) {
 
-    if (
-        history.length === 0
-    ) {
+        const empty =
+            document.createElement("div");
 
-        historyContainer.innerHTML = `
+        empty.className = "empty";
 
-            <div class="empty">
-                Todavía no hay levantamientos registrados.
-            </div>
+        empty.textContent =
+            "Todavía no hay configuraciones en el historial.";
 
-        `;
+        elements.historyContainer.appendChild(empty);
 
         return;
-
     }
 
+    state.history.forEach(item => {
 
-    history.forEach(
-        item => {
+        const historyItem =
+            document.createElement("div");
 
-            const row =
-                document.createElement(
-                    "div"
+        historyItem.className =
+            "history-item";
+
+        const information =
+            document.createElement("div");
+
+        const weight =
+            document.createElement("div");
+
+        weight.className = "item-weight";
+
+        weight.textContent =
+            displayWeight(
+                Number(item.weightKg)
+            );
+
+        const detail =
+            document.createElement("div");
+
+        detail.className = "item-detail";
+
+        detail.textContent =
+            getPlateDescription(
+                item.plates
+            );
+
+        information.appendChild(weight);
+        information.appendChild(detail);
+
+        const actions =
+            document.createElement("div");
+
+        actions.className =
+            "item-actions";
+
+        const useButton =
+            document.createElement("button");
+
+        useButton.type = "button";
+        useButton.textContent = "Usar";
+
+        useButton.addEventListener(
+            "click",
+            () => {
+
+                loadConfiguration(item);
+
+                showToast(
+                    "Configuración del historial aplicada.",
+                    "success"
                 );
-
-
-            row.className =
-                "history-item";
-
-
-            row.innerHTML = `
-
-                <div>
-
-                    <div class="item-weight">
-                        ${formatWeightFromLb(
-                            item.total
-                        )}
-                    </div>
-
-                    <div class="item-detail">
-
-                        ${describeCounts(
-                            item.counts
-                        )}
-
-                        · Barra:
-                        ${formatWeightFromLb(
-                            item.bar || 0
-                        )}
-
-                        · ${item.date}
-
-                    </div>
-
-                </div>
-
-
-                <div class="item-actions">
-
-                    <button
-                        type="button"
-                        data-history-load="${item.id}"
-                    >
-                        Usar
-                    </button>
-
-                </div>
-
-            `;
-
-
-            historyContainer
-                .appendChild(
-                    row
-                );
-
-        }
-    );
-
-
-    historyContainer
-        .querySelectorAll(
-            "[data-history-load]"
-        )
-        .forEach(
-            button => {
-
-                button.addEventListener(
-                    "click",
-                    () => {
-
-                        const id =
-                            Number(
-                                button.dataset
-                                    .historyLoad
-                            );
-
-
-                        const item =
-                            history.find(
-                                x =>
-                                    x.id === id
-                            );
-
-
-                        if (!item) {
-                            return;
-                        }
-
-
-                        counts =
-                            normalizeCounts(
-                                item.counts
-                            );
-
-
-                        if (
-                            item.bar !== undefined
-                        ) {
-
-                            barWeight.value =
-                                String(
-                                    item.bar
-                                );
-
-                        }
-
-
-                        renderPlates();
-
-                        calculate();
-
-
-                        showToast(
-                            "Configuración del historial aplicada.",
-                            "success"
-                        );
-
-
-                        window.scrollTo({
-
-                            top: 0,
-
-                            behavior: "smooth"
-
-                        });
-
-                    }
-                );
-
             }
         );
 
+        actions.appendChild(useButton);
+
+        historyItem.appendChild(information);
+        historyItem.appendChild(actions);
+
+        elements.historyContainer.appendChild(
+            historyItem
+        );
+    });
+}
+
+
+function clearHistory() {
+
+    if (state.history.length === 0) {
+        return;
+    }
+
+    state.history = [];
+
+    saveStorage();
+    renderHistory();
+
+    showToast(
+        "Historial eliminado.",
+        "info"
+    );
 }
 
 
 /* ==========================================================
-   DESCRIBIR COMBINACIÓN
+   CARGAR CONFIGURACIÓN
 ========================================================== */
 
-function describeCounts(
-    selected
+function loadConfiguration(configuration) {
+
+    if (!configuration) {
+        return;
+    }
+
+    if (Number.isFinite(Number(configuration.barKg))) {
+        state.barKg =
+            Number(configuration.barKg);
+    }
+
+    Object.keys(state.plates).forEach(weight => {
+
+        state.plates[weight] =
+            Number(
+                configuration.plates?.[weight] || 0
+            );
+    });
+
+    syncBarSelect();
+
+    renderPlates();
+    updateAllBarUI();
+}
+
+
+function syncBarSelect() {
+
+    const target =
+        BAR_OPTIONS.find(
+            option =>
+                Math.abs(
+                    option.kg - state.barKg
+                ) < 0.02
+        );
+
+    if (target) {
+        elements.barWeight.value =
+            String(target.lb);
+    }
+}
+
+
+/* ==========================================================
+   DESCRIPCIÓN DE CONFIGURACIÓN
+========================================================== */
+
+function getPlateDescription(plates) {
+
+    if (!plates) {
+        return "Sin discos";
+    }
+
+    const parts = [];
+
+    Object.entries(plates)
+        .sort(
+            (a, b) =>
+                Number(b[0]) - Number(a[0])
+        )
+        .forEach(([weight, quantity]) => {
+
+            const amount =
+                Number(quantity || 0);
+
+            if (amount > 0) {
+
+                parts.push(
+                    `${amount}×${formatNumber(weight)} kg`
+                );
+            }
+        });
+
+    if (parts.length === 0) {
+        return "Sin discos";
+    }
+
+    return parts.join(" · ");
+}
+
+
+/* ==========================================================
+   TOAST
+========================================================== */
+
+function showToast(
+    message,
+    type = "info",
+    duration = 2800
 ) {
 
-    const result = [];
+    const toast =
+        document.createElement("div");
 
+    toast.className =
+        `toast ${type}`;
 
-    PLATES.forEach(
-        weight => {
+    toast.textContent =
+        message;
 
-            const count =
-                Number(
-                    selected?.[weight] || 0
-                );
-
-
-            if (
-                count > 0
-            ) {
-
-                result.push(
-                    `${weight}×${count}`
-                );
-
-            }
-
-        }
+    elements.toastContainer.appendChild(
+        toast
     );
 
+    window.setTimeout(
+        () => {
 
-    return result.length
-        ? result.join(" · ")
-        : "Sin discos";
+            toast.classList.add("out");
 
+            window.setTimeout(
+                () => {
+                    toast.remove();
+                },
+                220
+            );
+
+        },
+        duration
+    );
 }
 
 
 /* ==========================================================
-   LIMPIAR FAVORITOS
+   VALIDACIÓN DE INPUTS
 ========================================================== */
 
-document
-    .getElementById(
-        "clearFavorites"
-    )
-    .addEventListener(
-        "click",
+function sanitizeNumberInput(input) {
+
+    if (!input) {
+        return;
+    }
+
+    input.addEventListener(
+        "input",
         () => {
 
             if (
-                favorites.length === 0
+                input.value !== "" &&
+                Number(input.value) < 0
             ) {
-
-                showToast(
-                    "No hay favoritos para eliminar.",
-                    "info"
-                );
-
-                return;
-
+                input.value = "0";
             }
-
-
-            if (
-                !confirm(
-                    "¿Quieres eliminar todos los favoritos?"
-                )
-            ) {
-
-                return;
-
-            }
-
-
-            favorites = [];
-
-
-            saveData();
-
-            renderFavorites();
-
-
-            showToast(
-                "Favoritos eliminados.",
-                "success"
-            );
-
         }
     );
+}
 
 
 /* ==========================================================
-   LIMPIAR HISTORIAL
+   EVENTOS
 ========================================================== */
 
-document
-    .getElementById(
-        "clearHistory"
-    )
-    .addEventListener(
-        "click",
-        () => {
+function bindEvents() {
 
-            if (
-                history.length === 0
-            ) {
+    /* Tema */
 
-                showToast(
-                    "No hay historial para eliminar.",
-                    "info"
-                );
-
-                return;
-
-            }
-
-
-            if (
-                !confirm(
-                    "¿Quieres eliminar todo el historial?"
-                )
-            ) {
-
-                return;
-
-            }
-
-
-            history = [];
-
-
-            saveData();
-
-            renderHistory();
-
-
-            showToast(
-                "Historial eliminado.",
-                "success"
-            );
-
-        }
-    );
-
-
-/* ==========================================================
-   TEMA
-========================================================== */
-
-document
-    .getElementById(
-        "themeButton"
-    )
-    .addEventListener(
+    elements.themeButton.addEventListener(
         "click",
         toggleTheme
     );
 
 
-function toggleTheme() {
+    /* Unidades */
 
-    document.body
-        .classList
-        .toggle(
-            "light"
-        );
+    elements.kgButton.addEventListener(
+        "click",
+        () => setUnit("kg")
+    );
 
-
-    const isLight =
-        document.body
-            .classList
-            .contains(
-                "light"
-            );
-
-
-    saveValue(
-        "theme",
-        isLight
-            ? "light"
-            : "dark"
+    elements.lbButton.addEventListener(
+        "click",
+        () => setUnit("lb")
     );
 
 
-    updateThemeButton();
+    /* Barra */
 
-
-    showToast(
-        isLight
-            ? "Tema claro activado."
-            : "Tema oscuro activado.",
-        "info"
+    elements.barWeight.addEventListener(
+        "change",
+        updateBarFromSelect
     );
 
-}
+
+    elements.clearPlates.addEventListener(
+        "click",
+        clearPlates
+    );
 
 
-function updateThemeButton() {
+    /* Guardar */
 
-    const isLight =
-        document.body
-            .classList
-            .contains(
-                "light"
-            );
+    elements.saveCurrentButton.addEventListener(
+        "click",
+        saveCurrentFavorite
+    );
 
 
-    document
-        .getElementById(
-            "themeButton"
-        )
-        .textContent =
-            isLight
-                ? "☀"
-                : "☾";
+    /* Objetivo */
 
-}
+    elements.calculateTarget.addEventListener(
+        "click",
+        calculateTarget
+    );
 
 
-function loadTheme() {
+    elements.targetWeight.addEventListener(
+        "keydown",
+        event => {
 
-    const theme =
-        loadValue(
-            "theme",
-            "dark"
-        );
-
-
-    if (
-        theme === "light"
-    ) {
-
-        document.body
-            .classList
-            .add(
-                "light"
-            );
-
-    }
-
-
-    updateThemeButton();
-
-}
-
-
-/* ==========================================================
-   VALIDACIÓN DEL INVENTARIO
-========================================================== */
-
-function validateCurrentCounts() {
-
-    let changed = false;
-
-
-    PLATES.forEach(
-        weight => {
-
-            const max =
-                getAvailablePerSide(
-                    weight
-                );
-
-
-            if (
-                counts[weight] >
-                max
-            ) {
-
-                counts[weight] =
-                    max;
-
-                changed = true;
-
+            if (event.key === "Enter") {
+                event.preventDefault();
+                calculateTarget();
             }
+        }
+    );
+
+
+    elements.applyTarget.addEventListener(
+        "click",
+        applyTarget
+    );
+
+
+    /* 1RM */
+
+    elements.oneRm.addEventListener(
+        "input",
+        () => {
+
+            updateRMResult();
+            updatePercentageTable();
 
         }
     );
 
 
-    if (changed) {
+    elements.percentage.addEventListener(
+        "change",
+        updateRMResult
+    );
 
-        showToast(
-            "La carga fue ajustada según tu inventario.",
-            "warning"
-        );
 
-    }
+    elements.sendRmToTarget.addEventListener(
+        "click",
+        sendRMToTarget
+    );
 
+
+    /* Fórmulas */
+
+    document
+        .querySelectorAll(".formula-button")
+        .forEach(button => {
+
+            button.addEventListener(
+                "click",
+                () => {
+
+                    setFormula(
+                        button.dataset.formula
+                    );
+
+                }
+            );
+
+        });
+
+
+    /* Estimador */
+
+    elements.estimateWeight.addEventListener(
+        "input",
+        updateEstimatedRM
+    );
+
+
+    elements.estimateReps.addEventListener(
+        "input",
+        updateEstimatedRM
+    );
+
+
+    elements.sendEstimatedToTarget.addEventListener(
+        "click",
+        sendEstimatedToTarget
+    );
+
+
+    /* Favoritos */
+
+    elements.clearFavorites.addEventListener(
+        "click",
+        clearFavorites
+    );
+
+
+    /* Historial */
+
+    elements.clearHistory.addEventListener(
+        "click",
+        clearHistory
+    );
+
+
+    /* Validaciones */
+
+    sanitizeNumberInput(
+        elements.targetWeight
+    );
+
+    sanitizeNumberInput(
+        elements.oneRm
+    );
+
+    sanitizeNumberInput(
+        elements.estimateWeight
+    );
 }
 
 
@@ -3452,45 +2419,88 @@ function validateCurrentCounts() {
    INICIALIZACIÓN
 ========================================================== */
 
-function init() {
+function initialize() {
 
-    loadTheme();
+    loadStorage();
 
+    applyTheme();
 
-    validateCurrentCounts();
+    /*
+        Sincronizamos el selector de barra
+        con el valor inicial.
+    */
 
+    syncBarSelect();
 
-    renderInventory();
+    /*
+        Inicializamos botones de fórmula.
+    */
 
+    document
+        .querySelectorAll(".formula-button")
+        .forEach(button => {
+
+            button.classList.toggle(
+                "active",
+                button.dataset.formula ===
+                state.formula
+            );
+
+        });
 
     renderPlates();
 
-
-    renderFavorites();
-
-
-    renderHistory();
-
+    renderVisualBar();
 
     renderQuickTargets();
 
+    renderFavorites();
 
-    renderPercentageTable(
-        0
+    renderHistory();
+
+    updateUnitsUI();
+
+    updateAllBarUI();
+
+    updateRMResult();
+
+    updatePercentageTable();
+
+    updateEstimatedRM();
+
+    /*
+        El resultado de objetivo comienza oculto.
+    */
+
+    elements.targetResult.classList.add(
+        "hidden"
     );
 
+    elements.applyTarget.disabled = true;
+    elements.applyTarget.style.opacity = ".4";
 
-    setUnit(
-        unit
-    );
+    /*
+        Eventos al final para evitar problemas
+        durante la construcción inicial.
+    */
 
-
-    calculate();
-
-
-    saveData();
-
+    bindEvents();
 }
 
 
-init();
+/* ==========================================================
+   ARRANQUE
+========================================================== */
+
+if (document.readyState === "loading") {
+
+    document.addEventListener(
+        "DOMContentLoaded",
+        initialize
+    );
+
+} else {
+
+    initialize();
+
+}

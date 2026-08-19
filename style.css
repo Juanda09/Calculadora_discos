@@ -26,7 +26,6 @@
 
     --transition:
         .18s ease;
-
 }
 
 
@@ -40,11 +39,9 @@
     padding: 0;
 }
 
-
 html {
     scroll-behavior: smooth;
 }
-
 
 body {
 
@@ -72,9 +69,7 @@ body {
     transition:
         background .25s ease,
         color .25s ease;
-
 }
-
 
 button,
 input,
@@ -82,16 +77,16 @@ select {
     font: inherit;
 }
 
-
 button {
     cursor: pointer;
 }
 
-
 button:focus-visible,
 input:focus-visible,
 select:focus-visible {
+
     outline: 2px solid var(--accent);
+
     outline-offset: 2px;
 }
 
@@ -107,7 +102,6 @@ select:focus-visible {
     max-width: 920px;
 
     margin: auto;
-
 }
 
 
@@ -124,9 +118,7 @@ select:focus-visible {
     justify-content: space-between;
 
     margin-bottom: 17px;
-
 }
-
 
 .brand {
 
@@ -135,9 +127,7 @@ select:focus-visible {
     align-items: center;
 
     gap: 12px;
-
 }
-
 
 .brand-mark {
 
@@ -160,9 +150,7 @@ select:focus-visible {
 
     box-shadow:
         0 0 35px rgba(217,255,63,.13);
-
 }
-
 
 .brand h1 {
 
@@ -171,9 +159,7 @@ select:focus-visible {
     line-height: 1;
 
     letter-spacing: -1px;
-
 }
-
 
 .brand p {
 
@@ -182,20 +168,18 @@ select:focus-visible {
     font-size: 10px;
 
     margin-top: 5px;
-
 }
-
 
 .brand p b {
     color: var(--accent);
 }
 
-
 .header-actions {
+
     display: flex;
+
     gap: 7px;
 }
-
 
 .icon-button {
 
@@ -211,16 +195,13 @@ select:focus-visible {
     color: var(--text);
 
     transition: var(--transition);
-
 }
-
 
 .icon-button:hover {
 
     background: var(--surface-3);
 
     transform: translateY(-2px);
-
 }
 
 
@@ -245,9 +226,7 @@ select:focus-visible {
     background: var(--surface);
 
     border-radius: 12px;
-
 }
-
 
 .unit {
 
@@ -266,21 +245,17 @@ select:focus-visible {
     font-weight: 950;
 
     transition: var(--transition);
-
 }
-
 
 .unit:hover {
     color: var(--text);
 }
-
 
 .unit.active {
 
     background: var(--accent);
 
     color: #111508;
-
 }
 
 
@@ -307,14 +282,11 @@ select:focus-visible {
     transition:
         background .25s ease,
         border-color .25s ease;
-
 }
-
 
 .card:hover {
     border-color: #364251;
 }
-
 
 .section-title {
 
@@ -325,18 +297,14 @@ select:focus-visible {
     justify-content: space-between;
 
     margin-bottom: 17px;
-
 }
-
 
 .section-title h2 {
 
     font-size: 15px;
 
     letter-spacing: -.3px;
-
 }
-
 
 .section-title p {
 
@@ -345,9 +313,7 @@ select:focus-visible {
     font-size: 10px;
 
     margin-top: 4px;
-
 }
-
 
 .section-heading {
 
@@ -356,9 +322,7 @@ select:focus-visible {
     align-items: center;
 
     gap: 9px;
-
 }
-
 
 .section-icon {
 
@@ -374,9 +338,7 @@ select:focus-visible {
     background: var(--surface-3);
 
     font-size: 16px;
-
 }
-
 
 .text-button {
 
@@ -389,22 +351,17 @@ select:focus-visible {
     font-size: 9px;
 
     font-weight: 900;
-
 }
-
 
 .text-button:hover {
     color: var(--accent);
 }
 
-
 .text-button.danger:hover {
     color: var(--danger);
 }
 
-
-.side-badge,
-.inventory-badge {
+.side-badge {
 
     padding: 7px 10px;
 
@@ -417,12 +374,6 @@ select:focus-visible {
     font-size: 9px;
 
     font-weight: 950;
-
-}
-
-
-.inventory-badge {
-    color: var(--accent);
 }
 
 
@@ -442,9 +393,7 @@ select:focus-visible {
             #1b222c,
             #10141a
         );
-
 }
-
 
 .hero-card::after {
 
@@ -465,9 +414,7 @@ select:focus-visible {
     opacity: .045;
 
     pointer-events: none;
-
 }
-
 
 .hero-header {
 
@@ -476,9 +423,7 @@ select:focus-visible {
     align-items: center;
 
     justify-content: space-between;
-
 }
-
 
 .eyebrow {
 
@@ -489,9 +434,7 @@ select:focus-visible {
     letter-spacing: 1.8px;
 
     font-weight: 950;
-
 }
-
 
 .live-indicator {
 
@@ -508,9 +451,7 @@ select:focus-visible {
     font-weight: 950;
 
     margin-left: 8px;
-
 }
-
 
 .live-indicator i {
 
@@ -525,18 +466,14 @@ select:focus-visible {
         0 0 7px var(--accent);
 
     animation: pulse 1.6s infinite;
-
 }
-
 
 @keyframes pulse {
 
     50% {
         opacity: .3;
     }
-
 }
-
 
 .save-button {
 
@@ -555,18 +492,14 @@ select:focus-visible {
     font-weight: 900;
 
     transition: var(--transition);
-
 }
-
 
 .save-button:hover {
 
     color: var(--accent);
 
     border-color: var(--accent);
-
 }
-
 
 .hero-number {
 
@@ -577,9 +510,7 @@ select:focus-visible {
     gap: 8px;
 
     margin-top: 8px;
-
 }
-
 
 .hero-number strong {
 
@@ -590,9 +521,7 @@ select:focus-visible {
     letter-spacing: -6px;
 
     font-weight: 1000;
-
 }
-
 
 .hero-number span {
 
@@ -601,9 +530,7 @@ select:focus-visible {
     font-size: 18px;
 
     font-weight: 900;
-
 }
-
 
 .secondary-weight {
 
@@ -612,9 +539,7 @@ select:focus-visible {
     font-size: 11px;
 
     margin-top: 7px;
-
 }
-
 
 .hero-stats {
 
@@ -629,9 +554,7 @@ select:focus-visible {
     padding-top: 15px;
 
     border-top: 1px solid var(--border);
-
 }
-
 
 .hero-stats span {
 
@@ -646,9 +569,7 @@ select:focus-visible {
     font-weight: 950;
 
     margin-bottom: 5px;
-
 }
-
 
 .hero-stats strong {
     font-size: 12px;
@@ -662,7 +583,6 @@ select:focus-visible {
 .bar-card {
     padding-bottom: 17px;
 }
-
 
 .bar-stage {
 
@@ -688,9 +608,7 @@ select:focus-visible {
             #171d25,
             #090c11 72%
         );
-
 }
-
 
 .bar-stage::before {
 
@@ -709,9 +627,7 @@ select:focus-visible {
     background-size: 100% 20px;
 
     pointer-events: none;
-
 }
-
 
 .bar-graphic {
 
@@ -726,9 +642,7 @@ select:focus-visible {
     align-items: center;
 
     z-index: 1;
-
 }
-
 
 .bar-shaft {
 
@@ -750,9 +664,7 @@ select:focus-visible {
     box-shadow:
         0 2px 6px #000,
         0 0 2px #fff;
-
 }
-
 
 .bar-sleeve {
 
@@ -772,19 +684,15 @@ select:focus-visible {
 
     box-shadow:
         0 4px 8px rgba(0,0,0,.5);
-
 }
-
 
 .left-sleeve {
     left: 3%;
 }
 
-
 .right-sleeve {
     right: 3%;
 }
-
 
 .bar-center {
 
@@ -822,9 +730,7 @@ select:focus-visible {
         0 4px 10px rgba(0,0,0,.45);
 
     z-index: 3;
-
 }
-
 
 .plate-stack {
 
@@ -845,23 +751,18 @@ select:focus-visible {
     max-width: 42%;
 
     overflow: visible;
-
 }
-
 
 .left-stack {
 
     right: 53%;
 
     flex-direction: row-reverse;
-
 }
-
 
 .right-stack {
     left: 53%;
 }
-
 
 .visual-plate {
 
@@ -889,9 +790,7 @@ select:focus-visible {
 
     animation:
         plateIn .18s ease-out;
-
 }
-
 
 .visual-plate::after {
 
@@ -911,9 +810,7 @@ select:focus-visible {
     background: rgba(255,255,255,.25);
 
     border-radius: 10px;
-
 }
-
 
 @keyframes plateIn {
 
@@ -926,11 +823,12 @@ select:focus-visible {
         opacity: 1;
         transform: scale(1);
     }
-
 }
 
 
-/* PLATE COLORS */
+/* ==========================================================
+   PLATE COLORS
+========================================================== */
 
 .visual-45,
 .plate-45 {
@@ -942,7 +840,6 @@ select:focus-visible {
         );
 }
 
-
 .visual-25,
 .plate-25 {
     background:
@@ -952,7 +849,6 @@ select:focus-visible {
             #087a36
         );
 }
-
 
 .visual-10,
 .plate-10 {
@@ -966,7 +862,6 @@ select:focus-visible {
     color: #17120a;
 }
 
-
 .visual-5,
 .plate-5 {
     background:
@@ -979,7 +874,6 @@ select:focus-visible {
     color: #20242a;
 }
 
-
 .visual-2-5,
 .plate-2-5 {
     background:
@@ -990,6 +884,25 @@ select:focus-visible {
         );
 }
 
+.visual-1-25,
+.plate-1-25 {
+    background:
+        linear-gradient(
+            145deg,
+            #a855f7,
+            #6b21a8
+        );
+}
+
+.visual-0-5,
+.plate-0-5 {
+    background:
+        linear-gradient(
+            145deg,
+            #f97316,
+            #9a3412
+        );
+}
 
 .visual-45 {
     height: 116px;
@@ -1011,6 +924,14 @@ select:focus-visible {
     height: 58px;
 }
 
+.visual-1-25 {
+    height: 49px;
+}
+
+.visual-0-5 {
+    height: 40px;
+}
+
 
 /* ==========================================================
    BAR SUMMARY
@@ -1025,9 +946,7 @@ select:focus-visible {
     justify-content: space-between;
 
     margin-top: 14px;
-
 }
-
 
 .bar-count {
 
@@ -1036,18 +955,14 @@ select:focus-visible {
     align-items: baseline;
 
     gap: 5px;
-
 }
-
 
 .bar-count strong {
 
     font-size: 13px;
 
     font-weight: 1000;
-
 }
-
 
 .bar-count span {
 
@@ -1056,9 +971,7 @@ select:focus-visible {
     font-size: 9px;
 
     font-weight: 800;
-
 }
-
 
 .bar-total {
 
@@ -1075,27 +988,21 @@ select:focus-visible {
     border-radius: 9px;
 
     background: var(--surface-2);
-
 }
-
 
 .bar-total strong {
 
     font-size: 10px;
 
     color: var(--accent);
-
 }
-
 
 .bar-total span {
 
     color: var(--muted);
 
     font-size: 8px;
-
 }
-
 
 .bar-labels {
 
@@ -1114,7 +1021,6 @@ select:focus-visible {
     letter-spacing: 1.3px;
 
     font-weight: 900;
-
 }
 
 
@@ -1129,9 +1035,7 @@ select:focus-visible {
     flex-direction: column;
 
     gap: 8px;
-
 }
-
 
 .plate-row {
 
@@ -1150,18 +1054,14 @@ select:focus-visible {
     background: var(--surface-2);
 
     transition: var(--transition);
-
 }
-
 
 .plate-row:hover {
 
     border-color: var(--border);
 
     transform: translateX(2px);
-
 }
-
 
 .plate-row.has-plates {
 
@@ -1174,9 +1074,7 @@ select:focus-visible {
             rgba(217,255,63,.035),
             var(--surface-2)
         );
-
 }
-
 
 .plate-info {
 
@@ -1185,9 +1083,7 @@ select:focus-visible {
     align-items: center;
 
     gap: 11px;
-
 }
-
 
 .plate-circle {
 
@@ -1210,18 +1106,14 @@ select:focus-visible {
 
     box-shadow:
         0 4px 10px rgba(0,0,0,.3);
-
 }
-
 
 .plate-info strong {
 
     display: block;
 
     font-size: 12px;
-
 }
-
 
 .plate-info small {
 
@@ -1232,20 +1124,6 @@ select:focus-visible {
     font-size: 9px;
 
     margin-top: 3px;
-
-}
-
-
-.plate-limit {
-
-    display: block;
-
-    color: var(--muted);
-
-    font-size: 8px;
-
-    margin-top: 3px;
-
 }
 
 
@@ -1260,9 +1138,7 @@ select:focus-visible {
     align-items: center;
 
     gap: 7px;
-
 }
-
 
 .counter button {
 
@@ -1282,9 +1158,7 @@ select:focus-visible {
     font-weight: 500;
 
     transition: var(--transition);
-
 }
-
 
 .counter button:hover:not(:disabled) {
 
@@ -1295,18 +1169,7 @@ select:focus-visible {
     color: #111508;
 
     transform: scale(1.05);
-
 }
-
-
-.counter button:disabled {
-
-    opacity: .3;
-
-    cursor: not-allowed;
-
-}
-
 
 .counter span {
 
@@ -1317,7 +1180,6 @@ select:focus-visible {
     font-size: 14px;
 
     font-weight: 1000;
-
 }
 
 
@@ -1336,9 +1198,7 @@ label {
     font-weight: 800;
 
     margin-bottom: 6px;
-
 }
-
 
 input,
 select {
@@ -1360,9 +1220,7 @@ select {
     padding: 10px 11px;
 
     transition: var(--transition);
-
 }
-
 
 input:focus,
 select:focus {
@@ -1372,21 +1230,15 @@ select:focus {
     box-shadow:
         0 0 0 3px
         rgba(217,255,63,.07);
-
 }
-
 
 .input-wrap {
-
     position: relative;
-
 }
-
 
 .input-wrap input {
     padding-right: 45px;
 }
-
 
 .input-wrap span {
 
@@ -1405,153 +1257,10 @@ select:focus {
     font-weight: 900;
 
     pointer-events: none;
-
 }
-
 
 .bar-control {
     margin-top: 15px;
-}
-
-
-/* ==========================================================
-   INVENTORY
-========================================================== */
-
-.inventory-info {
-
-    padding: 10px 12px;
-
-    border-radius: 10px;
-
-    background:
-        rgba(109,183,255,.06);
-
-    border: 1px solid
-        rgba(109,183,255,.14);
-
-    color: var(--muted);
-
-    font-size: 9px;
-
-    margin-bottom: 10px;
-
-}
-
-
-.inventory-grid {
-
-    display: grid;
-
-    grid-template-columns:
-        repeat(5, 1fr);
-
-    gap: 8px;
-
-}
-
-
-.inventory-item {
-
-    padding: 12px 8px;
-
-    border-radius: 12px;
-
-    background: var(--surface-2);
-
-    border: 1px solid var(--border);
-
-    text-align: center;
-
-}
-
-
-.inventory-color {
-
-    width: 30px;
-    height: 30px;
-
-    margin: 0 auto 7px;
-
-    border-radius: 50%;
-
-    border: 2px solid rgba(255,255,255,.25);
-
-}
-
-
-.inventory-item strong {
-
-    display: block;
-
-    font-size: 11px;
-
-}
-
-
-.inventory-item small {
-
-    display: block;
-
-    color: var(--muted);
-
-    font-size: 8px;
-
-    margin-top: 3px;
-
-}
-
-
-.inventory-counter {
-
-    display: flex;
-
-    justify-content: center;
-
-    align-items: center;
-
-    gap: 6px;
-
-    margin-top: 9px;
-
-}
-
-
-.inventory-counter button {
-
-    width: 25px;
-    height: 25px;
-
-    border: 1px solid var(--border);
-
-    border-radius: 7px;
-
-    background: var(--surface-3);
-
-    color: var(--text);
-
-    font-weight: 900;
-
-}
-
-
-.inventory-counter button:hover {
-
-    border-color: var(--accent);
-
-    color: var(--accent);
-
-}
-
-
-.inventory-counter span {
-
-    min-width: 20px;
-
-    font-size: 10px;
-
-    font-weight: 950;
-
 }
 
 
@@ -1567,9 +1276,7 @@ select:focus {
         1fr 180px;
 
     gap: 8px;
-
 }
-
 
 .primary-button {
 
@@ -1584,18 +1291,14 @@ select:focus {
     font-weight: 950;
 
     transition: var(--transition);
-
 }
-
 
 .primary-button:hover {
 
     background: var(--accent-hover);
 
     transform: translateY(-1px);
-
 }
-
 
 .quick-targets {
 
@@ -1608,9 +1311,7 @@ select:focus {
     margin-top: 9px;
 
     padding-bottom: 2px;
-
 }
-
 
 .quick-targets button {
 
@@ -1633,9 +1334,7 @@ select:focus {
     font-weight: 900;
 
     transition: var(--transition);
-
 }
-
 
 .quick-targets button:hover {
 
@@ -1645,9 +1344,7 @@ select:focus {
 
     background:
         rgba(217,255,63,.05);
-
 }
-
 
 .target-result {
 
@@ -1662,9 +1359,7 @@ select:focus {
     background: var(--surface-2);
 
     animation: resultIn .2s ease-out;
-
 }
-
 
 @keyframes resultIn {
 
@@ -1677,14 +1372,11 @@ select:focus {
         opacity: 1;
         transform: translateY(0);
     }
-
 }
-
 
 .hidden {
     display: none !important;
 }
-
 
 .result-header {
 
@@ -1695,9 +1387,7 @@ select:focus {
     justify-content: space-between;
 
     margin-bottom: 12px;
-
 }
-
 
 .result-header span {
 
@@ -1710,9 +1400,7 @@ select:focus {
     letter-spacing: 1px;
 
     font-weight: 950;
-
 }
-
 
 .result-header strong {
 
@@ -1721,9 +1409,7 @@ select:focus {
     margin-top: 3px;
 
     font-size: 12px;
-
 }
-
 
 .accuracy {
 
@@ -1734,9 +1420,7 @@ select:focus {
     font-size: 7px;
 
     font-weight: 950;
-
 }
-
 
 .accuracy.exact {
 
@@ -1744,9 +1428,7 @@ select:focus {
         rgba(142,230,106,.1);
 
     color: var(--success);
-
 }
-
 
 .accuracy.close {
 
@@ -1754,9 +1436,7 @@ select:focus {
         rgba(255,189,89,.1);
 
     color: var(--warning);
-
 }
-
 
 .accuracy.unavailable {
 
@@ -1764,9 +1444,7 @@ select:focus {
         rgba(255,102,102,.1);
 
     color: var(--danger);
-
 }
-
 
 .combination {
 
@@ -1775,9 +1453,7 @@ select:focus {
     flex-wrap: wrap;
 
     gap: 6px;
-
 }
-
 
 .plate-chip {
 
@@ -1792,9 +1468,7 @@ select:focus {
     font-size: 10px;
 
     font-weight: 950;
-
 }
-
 
 .target-values {
 
@@ -1806,9 +1480,7 @@ select:focus {
     gap: 6px;
 
     margin-top: 12px;
-
 }
-
 
 .target-values div {
 
@@ -1817,9 +1489,7 @@ select:focus {
     border-radius: 8px;
 
     background: rgba(0,0,0,.15);
-
 }
-
 
 .target-values span {
 
@@ -1830,14 +1500,11 @@ select:focus {
     font-size: 7px;
 
     margin-bottom: 4px;
-
 }
-
 
 .target-values strong {
     font-size: 10px;
 }
-
 
 .apply-button {
 
@@ -1860,16 +1527,13 @@ select:focus {
     font-weight: 950;
 
     transition: var(--transition);
-
 }
-
 
 .apply-button:hover {
 
     background: var(--accent-hover);
 
     transform: translateY(-1px);
-
 }
 
 
@@ -1885,16 +1549,11 @@ select:focus {
         1fr 150px;
 
     gap: 8px;
-
 }
-
 
 .formula-selector {
-
     margin-top: 14px;
-
 }
-
 
 .formula-selector > span {
 
@@ -1909,18 +1568,14 @@ select:focus {
     font-weight: 950;
 
     margin-bottom: 7px;
-
 }
-
 
 .formula-buttons {
 
     display: flex;
 
     gap: 6px;
-
 }
-
 
 .formula-button {
 
@@ -1941,18 +1596,14 @@ select:focus {
     font-weight: 900;
 
     transition: var(--transition);
-
 }
-
 
 .formula-button:hover {
 
     color: var(--text);
 
     border-color: var(--accent);
-
 }
-
 
 .formula-button.active {
 
@@ -1961,9 +1612,7 @@ select:focus {
     background: var(--accent);
 
     border-color: var(--accent);
-
 }
-
 
 .rm-result {
 
@@ -1982,9 +1631,7 @@ select:focus {
     border-radius: 11px;
 
     background: var(--surface-2);
-
 }
-
 
 .rm-result span,
 .estimate-result span {
@@ -1998,9 +1645,7 @@ select:focus {
     letter-spacing: 1px;
 
     font-weight: 950;
-
 }
-
 
 .rm-result strong {
 
@@ -2011,9 +1656,7 @@ select:focus {
     color: var(--accent);
 
     font-size: 20px;
-
 }
-
 
 .small-button {
 
@@ -2032,16 +1675,13 @@ select:focus {
     font-weight: 900;
 
     transition: var(--transition);
-
 }
-
 
 .small-button:hover {
 
     border-color: var(--accent);
 
     color: var(--accent);
-
 }
 
 
@@ -2056,9 +1696,7 @@ select:focus {
     padding-top: 13px;
 
     border-top: 1px solid var(--border);
-
 }
-
 
 .percentage-title {
 
@@ -2071,9 +1709,7 @@ select:focus {
     font-weight: 950;
 
     margin-bottom: 8px;
-
 }
-
 
 .percentage-grid {
 
@@ -2083,9 +1719,7 @@ select:focus {
         repeat(5,1fr);
 
     gap: 5px;
-
 }
-
 
 .percentage-cell {
 
@@ -2100,18 +1734,14 @@ select:focus {
     cursor: pointer;
 
     transition: var(--transition);
-
 }
-
 
 .percentage-cell:hover {
 
     border-color: var(--border);
 
     transform: translateY(-1px);
-
 }
-
 
 .percentage-cell.active {
 
@@ -2119,9 +1749,7 @@ select:focus {
 
     background:
         rgba(217,255,63,.06);
-
 }
-
 
 .percentage-cell span {
 
@@ -2130,9 +1758,7 @@ select:focus {
     color: var(--muted);
 
     font-size: 7px;
-
 }
-
 
 .percentage-cell strong {
 
@@ -2141,7 +1767,6 @@ select:focus {
     margin-top: 3px;
 
     font-size: 10px;
-
 }
 
 
@@ -2157,9 +1782,7 @@ select:focus {
         1fr 1fr;
 
     gap: 8px;
-
 }
-
 
 .estimate-result {
 
@@ -2178,9 +1801,7 @@ select:focus {
     border-radius: 11px;
 
     background: var(--surface-2);
-
 }
-
 
 .estimate-result strong {
 
@@ -2191,7 +1812,6 @@ select:focus {
     font-size: 19px;
 
     margin-top: 3px;
-
 }
 
 
@@ -2207,9 +1827,7 @@ select:focus {
     flex-direction: column;
 
     gap: 6px;
-
 }
-
 
 .empty {
 
@@ -2220,9 +1838,7 @@ select:focus {
     color: var(--muted);
 
     font-size: 10px;
-
 }
-
 
 .favorite-item,
 .history-item {
@@ -2242,9 +1858,7 @@ select:focus {
     background: var(--surface-2);
 
     transition: var(--transition);
-
 }
-
 
 .favorite-item:hover,
 .history-item:hover {
@@ -2252,18 +1866,14 @@ select:focus {
     border-color: var(--border);
 
     transform: translateX(2px);
-
 }
-
 
 .item-weight {
 
     font-size: 12px;
 
     font-weight: 950;
-
 }
-
 
 .item-detail {
 
@@ -2272,9 +1882,7 @@ select:focus {
     font-size: 8px;
 
     margin-top: 3px;
-
 }
-
 
 .item-actions {
 
@@ -2283,9 +1891,7 @@ select:focus {
     align-items: center;
 
     gap: 5px;
-
 }
-
 
 .item-actions button {
 
@@ -2304,25 +1910,20 @@ select:focus {
     font-weight: 900;
 
     transition: var(--transition);
-
 }
-
 
 .item-actions button:hover {
 
     border-color: var(--accent);
 
     color: var(--accent);
-
 }
-
 
 .item-actions .delete:hover {
 
     border-color: var(--danger);
 
     color: var(--danger);
-
 }
 
 
@@ -2348,9 +1949,7 @@ select:focus {
     z-index: 9999;
 
     pointer-events: none;
-
 }
-
 
 .toast {
 
@@ -2377,33 +1976,27 @@ select:focus {
 
     animation:
         toastIn .22s ease-out;
-
 }
-
 
 .toast.success {
     border-color:
         rgba(142,230,106,.35);
 }
 
-
 .toast.error {
     border-color:
         rgba(255,102,102,.35);
 }
-
 
 .toast.warning {
     border-color:
         rgba(255,189,89,.35);
 }
 
-
 .toast.info {
     border-color:
         rgba(109,183,255,.35);
 }
-
 
 @keyframes toastIn {
 
@@ -2416,17 +2009,13 @@ select:focus {
         opacity: 1;
         transform: translateY(0);
     }
-
 }
-
 
 .toast.out {
 
     animation:
         toastOut .2s ease-in forwards;
-
 }
-
 
 @keyframes toastOut {
 
@@ -2434,7 +2023,6 @@ select:focus {
         opacity: 0;
         transform: translateY(12px);
     }
-
 }
 
 
@@ -2459,7 +2047,6 @@ footer {
     color: #4e5661;
 
     font-size: 8px;
-
 }
 
 
@@ -2489,9 +2076,7 @@ body.light {
             #fff,
             #e7eaee
         );
-
 }
-
 
 body.light .hero-card {
 
@@ -2501,9 +2086,7 @@ body.light .hero-card {
             #fff,
             #f1f3f6
         );
-
 }
-
 
 body.light .bar-stage {
 
@@ -2513,14 +2096,11 @@ body.light .bar-stage {
             #dce1e6,
             #c8ced5
         );
-
 }
-
 
 body.light .target-values div {
 
     background: #e7e9ed;
-
 }
 
 
@@ -2533,14 +2113,7 @@ body.light .target-values div {
     .app {
         max-width: 700px;
     }
-
-    .inventory-grid {
-        grid-template-columns:
-            repeat(3, 1fr);
-    }
-
 }
-
 
 @media(max-width: 560px) {
 
@@ -2548,26 +2121,21 @@ body.light .target-values div {
         padding: 13px 8px;
     }
 
-
     .card,
     .hero-card {
         padding: 15px;
     }
-
 
     .hero-number strong {
 
         font-size: 55px;
 
         letter-spacing: -5px;
-
     }
-
 
     .hero-stats {
         grid-template-columns: 1fr;
     }
-
 
     .hero-stats > div {
 
@@ -2581,57 +2149,41 @@ body.light .target-values div {
 
         border-bottom:
             1px solid var(--border);
-
     }
-
 
     .hero-stats > div:last-child {
         border-bottom: 0;
     }
-
 
     .target-input,
     .rm-input {
         grid-template-columns: 1fr;
     }
 
-
     .primary-button {
         min-height: 42px;
     }
-
 
     .percentage-grid {
         grid-template-columns:
             repeat(3,1fr);
     }
 
-
     .estimator-grid {
         grid-template-columns: 1fr;
     }
-
 
     .target-values {
         grid-template-columns: 1fr;
     }
 
-
-    .inventory-grid {
-        grid-template-columns:
-            repeat(2,1fr);
-    }
-
-
     .bar-stage {
         height: 120px;
     }
 
-
     .bar-sleeve {
         width: 70px;
     }
-
 
     .bar-center {
 
@@ -2639,47 +2191,45 @@ body.light .target-values div {
         height: 30px;
 
         font-size: 6px;
-
     }
-
 
     .visual-plate {
 
         min-width: 10px;
         width: 10px;
-
     }
-
 
     .visual-45 {
         height: 82px;
     }
 
-
     .visual-25 {
         height: 73px;
     }
-
 
     .visual-10 {
         height: 63px;
     }
 
-
     .visual-5 {
         height: 54px;
     }
-
 
     .visual-2-5 {
         height: 45px;
     }
 
+    .visual-1-25 {
+        height: 38px;
+    }
+
+    .visual-0-5 {
+        height: 32px;
+    }
 
     .formula-buttons {
         flex-direction: column;
     }
-
 
     .favorite-item,
     .history-item {
@@ -2687,9 +2237,7 @@ body.light .target-values div {
         align-items: flex-start;
 
         gap: 8px;
-
     }
-
 
     .toast-container {
 
@@ -2698,28 +2246,18 @@ body.light .target-values div {
         bottom: 10px;
 
         align-items: stretch;
-
     }
-
 
     .toast {
 
         min-width: 0;
         max-width: none;
-
     }
-
 }
 
-
 @media(max-width: 380px) {
-
-    .inventory-grid {
-        grid-template-columns: 1fr;
-    }
 
     .plate-row {
         gap: 8px;
     }
-
 }
