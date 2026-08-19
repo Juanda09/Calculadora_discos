@@ -48,11 +48,9 @@ body {
     min-height: 100vh;
 
     background:
-        radial-gradient(
-            circle at 50% -15%,
+        radial-gradient(circle at 50% -15%,
             #202833 0,
-            #080b10 45%
-        );
+            #080b10 45%);
 
     color: var(--text);
 
@@ -149,7 +147,7 @@ select:focus-visible {
     font-weight: 1000;
 
     box-shadow:
-        0 0 35px rgba(217,255,63,.13);
+        0 0 35px rgba(217, 255, 63, .13);
 }
 
 .brand h1 {
@@ -388,11 +386,9 @@ select:focus-visible {
     overflow: hidden;
 
     background:
-        linear-gradient(
-            145deg,
+        linear-gradient(145deg,
             #1b222c,
-            #10141a
-        );
+            #10141a);
 }
 
 .hero-card::after {
@@ -586,7 +582,7 @@ select:focus-visible {
 
 .bar-stage {
 
-    height: 190px;
+    height: 220px;
 
     position: relative;
 
@@ -603,12 +599,16 @@ select:focus-visible {
     border-radius: 16px;
 
     background:
-        radial-gradient(
-            circle at center,
-            #171d25,
-            #090c11 72%
-        );
+        radial-gradient(ellipse at center,
+            #1b222b 0%,
+            #10151b 42%,
+            #080b10 100%);
+
+    box-shadow:
+        inset 0 0 40px rgba(0, 0, 0, .45);
 }
+
+/* Líneas de fondo */
 
 .bar-stage::before {
 
@@ -619,15 +619,43 @@ select:focus-visible {
     inset: 0;
 
     background:
-        linear-gradient(
-            rgba(255,255,255,.018) 1px,
-            transparent 1px
-        );
+        linear-gradient(rgba(255, 255, 255, .025) 1px,
+            transparent 1px);
 
-    background-size: 100% 20px;
+    background-size: 100% 22px;
 
     pointer-events: none;
 }
+
+/* Brillo central */
+
+.bar-stage::after {
+
+    content: "";
+
+    position: absolute;
+
+    width: 75%;
+
+    height: 1px;
+
+    left: 12.5%;
+
+    top: 50%;
+
+    background:
+        linear-gradient(90deg,
+            transparent,
+            rgba(255, 255, 255, .08),
+            transparent);
+
+    pointer-events: none;
+}
+
+
+/* ==========================================================
+   ESTRUCTURA DE LA BARRA
+========================================================== */
 
 .bar-graphic {
 
@@ -641,49 +669,74 @@ select:focus-visible {
 
     align-items: center;
 
+    justify-content: center;
+
     z-index: 1;
 }
 
+
+/* ==========================================================
+   EJE DE LA BARRA
+========================================================== */
+
 .bar-shaft {
+
+    position: relative;
 
     width: 100%;
 
-    height: 7px;
+    height: 8px;
 
     border-radius: 10px;
 
     background:
-        linear-gradient(
-            to bottom,
+        linear-gradient(to bottom,
             #ffffff 0%,
-            #c8cdd3 35%,
-            #686f78 55%,
-            #e1e4e8 100%
-        );
+            #dce1e6 22%,
+            #8d949c 48%,
+            #555d66 55%,
+            #cfd4d9 78%,
+            #ffffff 100%);
 
     box-shadow:
-        0 2px 6px #000,
-        0 0 2px #fff;
+        0 2px 5px rgba(0, 0, 0, .8),
+        0 0 2px rgba(255, 255, 255, .8);
+
+    z-index: 1;
 }
+
+
+/* ==========================================================
+   MANGUITOS / SLEEVES
+========================================================== */
 
 .bar-sleeve {
 
     position: absolute;
 
-    width: 125px;
-    height: 22px;
+    width: 130px;
 
-    border-radius: 4px;
+    height: 25px;
+
+    top: 50%;
+
+    transform: translateY(-50%);
+
+    border-radius: 5px;
 
     background:
-        repeating-linear-gradient(
-            90deg,
-            #3d444e 0 6px,
-            #727b87 6px 9px
-        );
+        repeating-linear-gradient(90deg,
+            #343b44 0 5px,
+            #69727c 5px 8px,
+            #424a54 8px 12px);
+
+    border:
+        1px solid #89919a;
 
     box-shadow:
-        0 4px 8px rgba(0,0,0,.5);
+        0 4px 9px rgba(0, 0, 0, .6);
+
+    z-index: 2;
 }
 
 .left-sleeve {
@@ -694,49 +747,63 @@ select:focus-visible {
     right: 3%;
 }
 
+
+/* ==========================================================
+   CENTRO DE LA BARRA
+========================================================== */
+
 .bar-center {
 
     position: absolute;
 
     left: 50%;
 
-    transform: translateX(-50%);
+    top: 50%;
 
-    width: 70px;
-    height: 42px;
+    transform:
+        translate(-50%, -50%);
+
+    width: 76px;
+
+    height: 48px;
 
     display: grid;
 
     place-items: center;
 
-    border: 1px solid #424b57;
+    border:
+        1px solid #59636e;
 
-    border-radius: 9px;
+    border-radius: 10px;
 
     background:
-        linear-gradient(
-            145deg,
-            #1c232d,
-            #10151b
-        );
+        linear-gradient(145deg,
+            #252d37,
+            #11161c);
 
-    color: white;
+    color: #ffffff;
 
-    font-size: 8px;
+    font-size: 9px;
 
     font-weight: 1000;
 
-    box-shadow:
-        0 4px 10px rgba(0,0,0,.45);
+    letter-spacing: 1px;
 
-    z-index: 3;
+    box-shadow:
+        0 5px 14px rgba(0, 0, 0, .65),
+        inset 0 1px 0 rgba(255, 255, 255, .08);
+
+    z-index: 5;
 }
+
+
+/* ==========================================================
+   DISCOS VISUALES
+========================================================== */
 
 .plate-stack {
 
     position: absolute;
-
-    z-index: 4;
 
     top: 50%;
 
@@ -748,49 +815,62 @@ select:focus-visible {
 
     gap: 2px;
 
-    max-width: 42%;
+    z-index: 4;
+
+    max-width: 35%;
 
     overflow: visible;
 }
 
 .left-stack {
-
-    right: 53%;
-
+    left: 3%;
     flex-direction: row-reverse;
 }
 
 .right-stack {
-    left: 53%;
+    right: 3%;
 }
+
+
+/* ==========================================================
+   DISCO INDIVIDUAL
+========================================================== */
 
 .visual-plate {
 
     position: relative;
 
-    min-width: 14px;
-    width: 14px;
+    min-width: 17px;
 
-    border: 1px solid rgba(255,255,255,.35);
+    width: 17px;
 
-    border-radius: 4px;
+    border:
+        1px solid rgba(255, 255, 255, .45);
 
-    box-shadow:
-        0 4px 8px rgba(0,0,0,.65);
-
-    color: white;
+    border-radius: 5px;
 
     display: grid;
 
     place-items: center;
 
+    color: white;
+
     font-size: 5px;
 
     font-weight: 1000;
 
+    box-shadow:
+        0 5px 10px rgba(0, 0, 0, .7),
+        inset 1px 0 rgba(255, 255, 255, .15);
+
     animation:
         plateIn .18s ease-out;
+
+    z-index: 4;
 }
+
+
+/* Agujero central del disco */
 
 .visual-plate::after {
 
@@ -798,33 +878,103 @@ select:focus-visible {
 
     position: absolute;
 
-    top: 5px;
-    bottom: 5px;
+    top: 50%;
 
     left: 50%;
 
-    width: 2px;
+    width: 4px;
 
-    transform: translateX(-50%);
+    height: 4px;
 
-    background: rgba(255,255,255,.25);
+    transform:
+        translate(-50%, -50%);
 
-    border-radius: 10px;
+    border-radius: 50%;
+
+    background:
+        #11161c;
+
+    border:
+        1px solid rgba(255, 255, 255, .35);
+
+    box-shadow:
+        0 0 0 1px rgba(0, 0, 0, .35);
 }
+
+
+/* Borde interior */
+
+.visual-plate::before {
+
+    content: "";
+
+    position: absolute;
+
+    inset: 5px 2px;
+
+    border-left:
+        1px solid rgba(255, 255, 255, .12);
+
+    border-right:
+        1px solid rgba(0, 0, 0, .25);
+
+    border-radius: 3px;
+
+    pointer-events: none;
+}
+
 
 @keyframes plateIn {
 
     from {
+
         opacity: 0;
-        transform: scale(.65);
+
+        transform:
+            scale(.65) translateY(8px);
     }
 
     to {
+
         opacity: 1;
-        transform: scale(1);
+
+        transform:
+            scale(1) translateY(0);
     }
 }
 
+
+/* ==========================================================
+   TAMAÑOS DE LOS DISCOS
+========================================================== */
+
+.visual-45 {
+    height: 128px;
+}
+
+.visual-25 {
+    height: 112px;
+}
+
+.visual-10 {
+    height: 96px;
+}
+
+.visual-5 {
+    height: 80px;
+}
+
+.visual-2-5 {
+    height: 66px;
+}
+
+.visual-1-25 {
+    height: 55px;
+}
+
+.visual-0-5 {
+    height: 45px;
+}
 
 /* ==========================================================
    PLATE COLORS
@@ -833,31 +983,25 @@ select:focus-visible {
 .visual-45,
 .plate-45 {
     background:
-        linear-gradient(
-            145deg,
+        linear-gradient(145deg,
             #2563eb,
-            #123a9b
-        );
+            #123a9b);
 }
 
 .visual-25,
 .plate-25 {
     background:
-        linear-gradient(
-            145deg,
+        linear-gradient(145deg,
             #22c55e,
-            #087a36
-        );
+            #087a36);
 }
 
 .visual-10,
 .plate-10 {
     background:
-        linear-gradient(
-            145deg,
+        linear-gradient(145deg,
             #facc15,
-            #a87500
-        );
+            #a87500);
 
     color: #17120a;
 }
@@ -865,11 +1009,9 @@ select:focus-visible {
 .visual-5,
 .plate-5 {
     background:
-        linear-gradient(
-            145deg,
+        linear-gradient(145deg,
             #f5f7fa,
-            #9aa2ad
-        );
+            #9aa2ad);
 
     color: #20242a;
 }
@@ -877,31 +1019,25 @@ select:focus-visible {
 .visual-2-5,
 .plate-2-5 {
     background:
-        linear-gradient(
-            145deg,
+        linear-gradient(145deg,
             #ef4444,
-            #991b1b
-        );
+            #991b1b);
 }
 
 .visual-1-25,
 .plate-1-25 {
     background:
-        linear-gradient(
-            145deg,
+        linear-gradient(145deg,
             #a855f7,
-            #6b21a8
-        );
+            #6b21a8);
 }
 
 .visual-0-5,
 .plate-0-5 {
     background:
-        linear-gradient(
-            145deg,
+        linear-gradient(145deg,
             #f97316,
-            #9a3412
-        );
+            #9a3412);
 }
 
 .visual-45 {
@@ -1008,7 +1144,7 @@ select:focus-visible {
 
     display: grid;
 
-    grid-template-columns: repeat(3,1fr);
+    grid-template-columns: repeat(3, 1fr);
 
     margin-top: 9px;
 
@@ -1066,14 +1202,12 @@ select:focus-visible {
 .plate-row.has-plates {
 
     border-color:
-        rgba(217,255,63,.14);
+        rgba(217, 255, 63, .14);
 
     background:
-        linear-gradient(
-            90deg,
-            rgba(217,255,63,.035),
-            var(--surface-2)
-        );
+        linear-gradient(90deg,
+            rgba(217, 255, 63, .035),
+            var(--surface-2));
 }
 
 .plate-info {
@@ -1094,7 +1228,7 @@ select:focus-visible {
 
     place-items: center;
 
-    border: 3px solid rgba(255,255,255,.25);
+    border: 3px solid rgba(255, 255, 255, .25);
 
     border-radius: 50%;
 
@@ -1105,7 +1239,7 @@ select:focus-visible {
     color: white;
 
     box-shadow:
-        0 4px 10px rgba(0,0,0,.3);
+        0 4px 10px rgba(0, 0, 0, .3);
 }
 
 .plate-info strong {
@@ -1228,8 +1362,7 @@ select:focus {
     border-color: var(--accent);
 
     box-shadow:
-        0 0 0 3px
-        rgba(217,255,63,.07);
+        0 0 0 3px rgba(217, 255, 63, .07);
 }
 
 .input-wrap {
@@ -1343,7 +1476,7 @@ select:focus {
     color: var(--accent);
 
     background:
-        rgba(217,255,63,.05);
+        rgba(217, 255, 63, .05);
 }
 
 .target-result {
@@ -1425,7 +1558,7 @@ select:focus {
 .accuracy.exact {
 
     background:
-        rgba(142,230,106,.1);
+        rgba(142, 230, 106, .1);
 
     color: var(--success);
 }
@@ -1433,7 +1566,7 @@ select:focus {
 .accuracy.close {
 
     background:
-        rgba(255,189,89,.1);
+        rgba(255, 189, 89, .1);
 
     color: var(--warning);
 }
@@ -1441,7 +1574,7 @@ select:focus {
 .accuracy.unavailable {
 
     background:
-        rgba(255,102,102,.1);
+        rgba(255, 102, 102, .1);
 
     color: var(--danger);
 }
@@ -1475,7 +1608,7 @@ select:focus {
     display: grid;
 
     grid-template-columns:
-        repeat(3,1fr);
+        repeat(3, 1fr);
 
     gap: 6px;
 
@@ -1488,7 +1621,7 @@ select:focus {
 
     border-radius: 8px;
 
-    background: rgba(0,0,0,.15);
+    background: rgba(0, 0, 0, .15);
 }
 
 .target-values span {
@@ -1555,7 +1688,7 @@ select:focus {
     margin-top: 14px;
 }
 
-.formula-selector > span {
+.formula-selector>span {
 
     display: block;
 
@@ -1716,7 +1849,7 @@ select:focus {
     display: grid;
 
     grid-template-columns:
-        repeat(5,1fr);
+        repeat(5, 1fr);
 
     gap: 5px;
 }
@@ -1748,7 +1881,7 @@ select:focus {
     border-color: var(--accent);
 
     background:
-        rgba(217,255,63,.06);
+        rgba(217, 255, 63, .06);
 }
 
 .percentage-cell span {
@@ -1968,7 +2101,7 @@ select:focus {
     color: var(--text);
 
     box-shadow:
-        0 15px 40px rgba(0,0,0,.35);
+        0 15px 40px rgba(0, 0, 0, .35);
 
     font-size: 10px;
 
@@ -1980,22 +2113,22 @@ select:focus {
 
 .toast.success {
     border-color:
-        rgba(142,230,106,.35);
+        rgba(142, 230, 106, .35);
 }
 
 .toast.error {
     border-color:
-        rgba(255,102,102,.35);
+        rgba(255, 102, 102, .35);
 }
 
 .toast.warning {
     border-color:
-        rgba(255,189,89,.35);
+        rgba(255, 189, 89, .35);
 }
 
 .toast.info {
     border-color:
-        rgba(109,183,255,.35);
+        rgba(109, 183, 255, .35);
 }
 
 @keyframes toastIn {
@@ -2071,31 +2204,25 @@ body.light {
     --muted: #68717d;
 
     background:
-        radial-gradient(
-            circle at top,
+        radial-gradient(circle at top,
             #fff,
-            #e7eaee
-        );
+            #e7eaee);
 }
 
 body.light .hero-card {
 
     background:
-        linear-gradient(
-            145deg,
+        linear-gradient(145deg,
             #fff,
-            #f1f3f6
-        );
+            #f1f3f6);
 }
 
 body.light .bar-stage {
 
     background:
-        radial-gradient(
-            circle,
+        radial-gradient(circle,
             #dce1e6,
-            #c8ced5
-        );
+            #c8ced5);
 }
 
 body.light .target-values div {
@@ -2137,7 +2264,7 @@ body.light .target-values div {
         grid-template-columns: 1fr;
     }
 
-    .hero-stats > div {
+    .hero-stats>div {
 
         display: flex;
 
@@ -2151,7 +2278,7 @@ body.light .target-values div {
             1px solid var(--border);
     }
 
-    .hero-stats > div:last-child {
+    .hero-stats>div:last-child {
         border-bottom: 0;
     }
 
@@ -2166,7 +2293,7 @@ body.light .target-values div {
 
     .percentage-grid {
         grid-template-columns:
-            repeat(3,1fr);
+            repeat(3, 1fr);
     }
 
     .estimator-grid {

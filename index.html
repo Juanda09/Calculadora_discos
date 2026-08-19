@@ -4,20 +4,11 @@
 <head>
     <meta charset="UTF-8">
 
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <meta
-        name="theme-color"
-        content="#080b10"
-    >
+    <meta name="theme-color" content="#080b10">
 
-    <meta
-        name="description"
-        content="PowerLoad - Calculadora de discos y cargas para powerlifting"
-    >
+    <meta name="description" content="PowerLoad - Calculadora de discos y cargas para powerlifting">
 
     <title>PowerLoad v6</title>
 
@@ -26,346 +17,310 @@
 
 <body>
 
-<div class="app">
+    <div class="app">
 
-    <!-- =====================================================
+        <!-- =====================================================
          HEADER
     ====================================================== -->
 
-    <header class="header">
+        <header class="header">
 
-        <div class="brand">
+            <div class="brand">
 
-            <div class="brand-mark">
-                PL
+                <div class="brand-mark">
+                    PL
+                </div>
+
+                <div class="brand-info">
+
+                    <h1>PowerLoad</h1>
+
+                    <p>
+                        Powerlifting Training Calculator
+                        <b>v6</b>
+                    </p>
+
+                </div>
+
             </div>
 
-            <div class="brand-info">
+            <div class="header-actions">
 
-                <h1>PowerLoad</h1>
-
-                <p>
-                    Powerlifting Training Calculator
-                    <b>v6</b>
-                </p>
+                <button id="themeButton" class="icon-button" title="Cambiar tema" aria-label="Cambiar tema"
+                    type="button">
+                    ☾
+                </button>
 
             </div>
 
-        </div>
-
-        <div class="header-actions">
-
-            <button
-                id="themeButton"
-                class="icon-button"
-                title="Cambiar tema"
-                aria-label="Cambiar tema"
-                type="button"
-            >
-                ☾
-            </button>
-
-        </div>
-
-    </header>
+        </header>
 
 
-    <!-- =====================================================
+        <!-- =====================================================
          UNIDADES
     ====================================================== -->
 
-    <div
-        class="unit-switch"
-        role="group"
-        aria-label="Unidad de peso"
-    >
+        <div class="unit-switch" role="group" aria-label="Unidad de peso">
 
-        <button
-            id="kgButton"
-            class="unit active"
-            type="button"
-        >
-            KG
-        </button>
+            <button id="kgButton" class="unit active" type="button">
+                KG
+            </button>
 
-        <button
-            id="lbButton"
-            class="unit"
-            type="button"
-        >
-            LB
-        </button>
+            <button id="lbButton" class="unit" type="button">
+                LB
+            </button>
 
-    </div>
+        </div>
 
 
-    <!-- =====================================================
+        <!-- =====================================================
          HERO
     ====================================================== -->
 
-    <section class="hero-card">
+        <section class="hero-card">
 
-        <div class="hero-header">
+            <div class="hero-header">
 
-            <div>
+                <div>
 
-                <span class="eyebrow">
-                    CARGA ACTUAL
+                    <span class="eyebrow">
+                        CARGA ACTUAL
+                    </span>
+
+                    <div class="live-indicator">
+                        <i></i>
+                        CALCULADA
+                    </div>
+
+                </div>
+
+                <button id="saveCurrentButton" class="save-button" type="button">
+                    ☆ Guardar
+                </button>
+
+            </div>
+
+
+            <div class="hero-number">
+
+                <strong id="mainWeight">
+                    20.41
+                </strong>
+
+                <span id="mainUnit">
+                    kg
                 </span>
 
-                <div class="live-indicator">
-                    <i></i>
-                    CALCULADA
+            </div>
+
+
+            <div id="secondaryWeight" class="secondary-weight">
+                45 lb
+            </div>
+
+
+            <div class="hero-stats">
+
+                <div>
+                    <span>POR LADO</span>
+                    <strong id="sideWeight">0 kg</strong>
+                </div>
+
+                <div>
+                    <span>DISCOS</span>
+                    <strong id="platesWeight">0 kg</strong>
+                </div>
+
+                <div>
+                    <span>BARRA</span>
+                    <strong id="barDisplay">20.41 kg</strong>
                 </div>
 
             </div>
 
-            <button
-                id="saveCurrentButton"
-                class="save-button"
-                type="button"
-            >
-                ☆ Guardar
-            </button>
-
-        </div>
+        </section>
 
 
-        <div class="hero-number">
-
-            <strong id="mainWeight">
-                20.41
-            </strong>
-
-            <span id="mainUnit">
-                kg
-            </span>
-
-        </div>
-
-
-        <div
-            id="secondaryWeight"
-            class="secondary-weight"
-        >
-            45 lb
-        </div>
-
-
-        <div class="hero-stats">
-
-            <div>
-                <span>POR LADO</span>
-                <strong id="sideWeight">0 kg</strong>
-            </div>
-
-            <div>
-                <span>DISCOS</span>
-                <strong id="platesWeight">0 kg</strong>
-            </div>
-
-            <div>
-                <span>BARRA</span>
-                <strong id="barDisplay">20.41 kg</strong>
-            </div>
-
-        </div>
-
-    </section>
-
-
-    <!-- =====================================================
+        <!-- =====================================================
          BARRA
     ====================================================== -->
 
-    <section class="card bar-card">
+        <section class="card bar-card">
 
-        <div class="section-title">
+            <div class="section-title">
 
-            <div>
+                <div>
 
-                <h2>Configuración de barra</h2>
+                    <h2>Configuración de barra</h2>
 
-                <p>
-                    Vista en tiempo real de tu montaje
-                </p>
+                    <p>
+                        Vista en tiempo real de tu montaje
+                    </p>
 
-            </div>
-
-            <button
-                id="clearPlates"
-                class="text-button"
-                type="button"
-            >
-                Limpiar
-            </button>
-
-        </div>
-
-
-        <div class="bar-stage">
-
-            <div
-                id="leftVisual"
-                class="plate-stack left-stack"
-                aria-label="Discos del lado izquierdo"
-            ></div>
-
-
-            <div class="bar-graphic">
-
-                <div class="bar-sleeve left-sleeve"></div>
-
-                <div class="bar-shaft"></div>
-
-                <div class="bar-center">
-                    POWER
                 </div>
 
-                <div class="bar-sleeve right-sleeve"></div>
+                <button id="clearPlates" class="text-button" type="button">
+                    Limpiar
+                </button>
 
             </div>
 
 
-            <div
-                id="rightVisual"
-                class="plate-stack right-stack"
-                aria-label="Discos del lado derecho"
-            ></div>
+            <div class="bar-stage">
 
-        </div>
+                <div id="leftVisual" class="plate-stack left-stack" aria-label="Discos del lado izquierdo"></div>
 
+                <div class="bar-graphic">
 
-        <div class="bar-summary">
+                    <div class="bar-sleeve left-sleeve"></div>
 
-            <div class="bar-count">
+                    <div class="bar-shaft"></div>
 
-                <strong id="visualPlateCount">
-                    0
-                </strong>
+                    <div class="bar-center">
+                        POWER
+                    </div>
 
-                <span>
-                    discos / lado
-                </span>
+                    <div class="bar-sleeve right-sleeve"></div>
 
-            </div>
+                </div>
 
-            <div class="bar-total">
-
-                <strong id="visualTotal">
-                    20.41 kg
-                </strong>
-
-                <span>
-                    total
-                </span>
+                <div id="rightVisual" class="plate-stack right-stack" aria-label="Discos del lado derecho"></div>
 
             </div>
 
-        </div>
+
+            <div class="bar-summary">
+
+                <div class="bar-count">
+
+                    <strong id="visualPlateCount">
+                        0
+                    </strong>
+
+                    <span>
+                        discos / lado
+                    </span>
+
+                </div>
+
+                <div class="bar-total">
+
+                    <strong id="visualTotal">
+                        20.41 kg
+                    </strong>
+
+                    <span>
+                        total
+                    </span>
+
+                </div>
+
+            </div>
 
 
-        <div class="bar-labels">
+            <div class="bar-labels">
 
-            <span>IZQUIERDA</span>
-            <span>BARRA</span>
-            <span>DERECHA</span>
+                <span>IZQUIERDA</span>
+                <span>BARRA</span>
+                <span>DERECHA</span>
 
-        </div>
+            </div>
 
-    </section>
+        </section>
 
 
-    <!-- =====================================================
+        <!-- =====================================================
          DISCOS POR LADO
     ====================================================== -->
 
-    <section class="card">
+        <section class="card">
 
-        <div class="section-title">
+            <div class="section-title">
 
-            <div>
+                <div>
 
-                <h2>Discos por lado</h2>
+                    <h2>Discos por lado</h2>
 
-                <p>
-                    Selecciona tu combinación actual
-                </p>
+                    <p>
+                        Selecciona tu combinación actual
+                    </p>
+
+                </div>
+
+                <span class="side-badge">
+                    × 2
+                </span>
 
             </div>
 
-            <span class="side-badge">
-                × 2
-            </span>
 
-        </div>
+            <div id="platesContainer" class="plates"></div>
 
 
-        <div id="platesContainer" class="plates"></div>
+            <div class="bar-control">
+
+                <label for="barWeight">
+                    Peso de la barra
+                </label>
+
+                <select id="barWeight">
+
+                    <option value="45">
+                        45 lb · 20.41 kg
+                    </option>
+
+                    <option value="55">
+                        55 lb · 24.95 kg
+                    </option>
+
+                    <option value="35">
+                        35 lb · 15.88 kg
+                    </option>
+
+                    <option value="44.0924">
+                        20 kg
+                    </option>
+
+                    <option value="33.0693">
+                        15 kg
+                    </option>
+
+                    <option value="0">
+                        Sin barra
+                    </option>
+
+                </select>
+
+            </div>
+
+        </section>
 
 
-        <div class="bar-control">
-
-            <label for="barWeight">
-                Peso de la barra
-            </label>
-
-            <select id="barWeight">
-
-                <option value="45">
-                    45 lb · 20.41 kg
-                </option>
-
-                <option value="55">
-                    55 lb · 24.95 kg
-                </option>
-
-                <option value="35">
-                    35 lb · 15.88 kg
-                </option>
-
-                <option value="44.0924">
-                    20 kg
-                </option>
-
-                <option value="33.0693">
-                    15 kg
-                </option>
-
-                <option value="0">
-                    Sin barra
-                </option>
-
-            </select>
-
-        </div>
-
-    </section>
-
-
-    <!-- =====================================================
+        <!-- =====================================================
          OBJETIVO
     ====================================================== -->
 
-    <section class="card target-card">
+        <section class="card target-card">
 
-        <div class="section-title">
+            <div class="section-title">
 
-            <div>
+                <div>
 
-                <div class="section-heading">
+                    <div class="section-heading">
 
-                    <span class="section-icon">
-                        🎯
-                    </span>
+                        <span class="section-icon">
+                            🎯
+                        </span>
 
-                    <div>
+                        <div>
 
-                        <h2>Objetivo</h2>
+                            <h2>Objetivo</h2>
 
-                        <p>
-                            ¿Qué peso quieres levantar?
-                        </p>
+                            <p>
+                                ¿Qué peso quieres levantar?
+                            </p>
+
+                        </div>
 
                     </div>
 
@@ -373,492 +328,398 @@
 
             </div>
 
-        </div>
 
-
-        <div class="target-input">
-
-            <div class="input-wrap">
-
-                <input
-                    id="targetWeight"
-                    type="number"
-                    min="0"
-                    step="0.1"
-                    inputmode="decimal"
-                    placeholder="100"
-                    aria-label="Peso objetivo"
-                >
-
-                <span id="targetUnit">
-                    kg
-                </span>
-
-            </div>
-
-
-            <button
-                id="calculateTarget"
-                class="primary-button"
-                type="button"
-            >
-                Encontrar discos
-            </button>
-
-        </div>
-
-
-        <div
-            id="quickTargets"
-            class="quick-targets"
-        ></div>
-
-
-        <div
-            id="targetResult"
-            class="target-result hidden"
-        >
-
-            <div class="result-header">
-
-                <div>
-
-                    <span>
-                        COMBINACIÓN
-                    </span>
-
-                    <strong id="targetResultTitle">
-                        Recomendada
-                    </strong>
-
-                </div>
-
-
-                <div
-                    id="targetAccuracy"
-                    class="accuracy exact"
-                >
-                    EXACTO
-                </div>
-
-            </div>
-
-
-            <div
-                id="targetCombination"
-                class="combination"
-            ></div>
-
-
-            <div class="target-values">
-
-                <div>
-
-                    <span>OBJETIVO</span>
-
-                    <strong id="targetRequested">
-                        -
-                    </strong>
-
-                </div>
-
-
-                <div>
-
-                    <span>REAL</span>
-
-                    <strong id="targetReal">
-                        -
-                    </strong>
-
-                </div>
-
-
-                <div>
-
-                    <span>DIFERENCIA</span>
-
-                    <strong id="targetDifference">
-                        -
-                    </strong>
-
-                </div>
-
-            </div>
-
-
-            <button
-                id="applyTarget"
-                class="apply-button"
-                type="button"
-            >
-                ✓ Aplicar configuración
-            </button>
-
-        </div>
-
-    </section>
-
-
-    <!-- =====================================================
-         CALCULADORA 1RM
-    ====================================================== -->
-
-    <section class="card">
-
-        <div class="section-title">
-
-            <div>
-
-                <h2>📈 Calculadora de 1RM</h2>
-
-                <p>
-                    Calcula cargas según tu máximo
-                </p>
-
-            </div>
-
-        </div>
-
-
-        <div class="rm-input">
-
-            <div class="input-wrap">
-
-                <input
-                    id="oneRm"
-                    type="number"
-                    min="0"
-                    step="0.5"
-                    inputmode="decimal"
-                    placeholder="Ej. 100"
-                    aria-label="1RM"
-                >
-
-                <span id="oneRmUnit">
-                    kg
-                </span>
-
-            </div>
-
-
-            <select id="percentage">
-
-                <option value="0.50">50%</option>
-                <option value="0.55">55%</option>
-                <option value="0.60">60%</option>
-                <option value="0.65">65%</option>
-                <option value="0.70">70%</option>
-                <option value="0.75">75%</option>
-                <option value="0.775">77.5%</option>
-                <option value="0.80">80%</option>
-                <option value="0.825">82.5%</option>
-                <option value="0.85">85%</option>
-                <option value="0.875">87.5%</option>
-                <option value="0.90">90%</option>
-                <option value="0.925">92.5%</option>
-                <option value="0.95">95%</option>
-                <option value="1">100%</option>
-
-            </select>
-
-        </div>
-
-
-        <div class="formula-selector">
-
-            <span>
-                FÓRMULA
-            </span>
-
-            <div
-                class="formula-buttons"
-                role="group"
-                aria-label="Fórmula de 1RM"
-            >
-
-                <button
-                    type="button"
-                    class="formula-button active"
-                    data-formula="epley"
-                >
-                    Epley
-                </button>
-
-                <button
-                    type="button"
-                    class="formula-button"
-                    data-formula="brzycki"
-                >
-                    Brzycki
-                </button>
-
-                <button
-                    type="button"
-                    class="formula-button"
-                    data-formula="lombardi"
-                >
-                    Lombardi
-                </button>
-
-            </div>
-
-        </div>
-
-
-        <div class="rm-result">
-
-            <div>
-
-                <span>
-                    CARGA
-                </span>
-
-                <strong id="rmResult">
-                    0 kg
-                </strong>
-
-            </div>
-
-
-            <button
-                id="sendRmToTarget"
-                class="small-button"
-                type="button"
-            >
-                Usar objetivo
-            </button>
-
-        </div>
-
-
-        <div class="percentage-table">
-
-            <div class="percentage-title">
-                TABLA DE REFERENCIA
-            </div>
-
-            <div
-                id="percentageGrid"
-                class="percentage-grid"
-            ></div>
-
-        </div>
-
-    </section>
-
-
-    <!-- =====================================================
-         ESTIMADOR DE 1RM
-    ====================================================== -->
-
-    <section class="card">
-
-        <div class="section-title">
-
-            <div>
-
-                <h2>🧠 Estimador de 1RM</h2>
-
-                <p>
-                    Calcula tu máximo a partir de repeticiones
-                </p>
-
-            </div>
-
-        </div>
-
-
-        <div class="estimator-grid">
-
-            <div>
-
-                <label for="estimateWeight">
-                    Peso utilizado
-                </label>
+            <div class="target-input">
 
                 <div class="input-wrap">
 
-                    <input
-                        id="estimateWeight"
-                        type="number"
-                        min="0"
-                        step="0.5"
-                        inputmode="decimal"
-                        placeholder="100"
-                    >
+                    <input id="targetWeight" type="number" min="0" step="0.1" inputmode="decimal" placeholder="100"
+                        aria-label="Peso objetivo">
 
-                    <span id="estimateUnit">
+                    <span id="targetUnit">
                         kg
                     </span>
 
                 </div>
 
-            </div>
 
-
-            <div>
-
-                <label for="estimateReps">
-                    Repeticiones
-                </label>
-
-                <input
-                    id="estimateReps"
-                    type="number"
-                    min="1"
-                    max="30"
-                    step="1"
-                    inputmode="numeric"
-                    placeholder="5"
-                >
+                <button id="calculateTarget" class="primary-button" type="button">
+                    Encontrar discos
+                </button>
 
             </div>
 
-        </div>
+
+            <div id="quickTargets" class="quick-targets"></div>
 
 
-        <div class="estimate-result">
+            <div id="targetResult" class="target-result hidden">
 
-            <div>
+                <div class="result-header">
+
+                    <div>
+
+                        <span>
+                            COMBINACIÓN
+                        </span>
+
+                        <strong id="targetResultTitle">
+                            Recomendada
+                        </strong>
+
+                    </div>
+
+
+                    <div id="targetAccuracy" class="accuracy exact">
+                        EXACTO
+                    </div>
+
+                </div>
+
+
+                <div id="targetCombination" class="combination"></div>
+
+
+                <div class="target-values">
+
+                    <div>
+
+                        <span>OBJETIVO</span>
+
+                        <strong id="targetRequested">
+                            -
+                        </strong>
+
+                    </div>
+
+
+                    <div>
+
+                        <span>REAL</span>
+
+                        <strong id="targetReal">
+                            -
+                        </strong>
+
+                    </div>
+
+
+                    <div>
+
+                        <span>DIFERENCIA</span>
+
+                        <strong id="targetDifference">
+                            -
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <button id="applyTarget" class="apply-button" type="button">
+                    ✓ Aplicar configuración
+                </button>
+
+            </div>
+
+        </section>
+
+
+        <!-- =====================================================
+         CALCULADORA 1RM
+    ====================================================== -->
+
+        <section class="card">
+
+            <div class="section-title">
+
+                <div>
+
+                    <h2>📈 Calculadora de 1RM</h2>
+
+                    <p>
+                        Calcula cargas según tu máximo
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="rm-input">
+
+                <div class="input-wrap">
+
+                    <input id="oneRm" type="number" min="0" step="0.5" inputmode="decimal" placeholder="Ej. 100"
+                        aria-label="1RM">
+
+                    <span id="oneRmUnit">
+                        kg
+                    </span>
+
+                </div>
+
+
+                <select id="percentage">
+
+                    <option value="0.50">50%</option>
+                    <option value="0.55">55%</option>
+                    <option value="0.60">60%</option>
+                    <option value="0.65">65%</option>
+                    <option value="0.70">70%</option>
+                    <option value="0.75">75%</option>
+                    <option value="0.775">77.5%</option>
+                    <option value="0.80">80%</option>
+                    <option value="0.825">82.5%</option>
+                    <option value="0.85">85%</option>
+                    <option value="0.875">87.5%</option>
+                    <option value="0.90">90%</option>
+                    <option value="0.925">92.5%</option>
+                    <option value="0.95">95%</option>
+                    <option value="1">100%</option>
+
+                </select>
+
+            </div>
+
+
+            <div class="formula-selector">
 
                 <span>
-                    1RM ESTIMADO
+                    FÓRMULA
                 </span>
 
-                <strong id="estimatedOneRm">
-                    0 kg
-                </strong>
+                <div class="formula-buttons" role="group" aria-label="Fórmula de 1RM">
+
+                    <button type="button" class="formula-button active" data-formula="epley">
+                        Epley
+                    </button>
+
+                    <button type="button" class="formula-button" data-formula="brzycki">
+                        Brzycki
+                    </button>
+
+                    <button type="button" class="formula-button" data-formula="lombardi">
+                        Lombardi
+                    </button>
+
+                </div>
 
             </div>
 
-            <button
-                id="sendEstimatedToTarget"
-                class="small-button"
-                type="button"
-            >
-                Usar objetivo
-            </button>
 
-        </div>
+            <div class="rm-result">
 
-    </section>
+                <div>
+
+                    <span>
+                        CARGA
+                    </span>
+
+                    <strong id="rmResult">
+                        0 kg
+                    </strong>
+
+                </div>
 
 
-    <!-- =====================================================
+                <button id="sendRmToTarget" class="small-button" type="button">
+                    Usar objetivo
+                </button>
+
+            </div>
+
+
+            <div class="percentage-table">
+
+                <div class="percentage-title">
+                    TABLA DE REFERENCIA
+                </div>
+
+                <div id="percentageGrid" class="percentage-grid"></div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =====================================================
+         ESTIMADOR DE 1RM
+    ====================================================== -->
+
+        <section class="card">
+
+            <div class="section-title">
+
+                <div>
+
+                    <h2>🧠 Estimador de 1RM</h2>
+
+                    <p>
+                        Calcula tu máximo a partir de repeticiones
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="estimator-grid">
+
+                <div>
+
+                    <label for="estimateWeight">
+                        Peso utilizado
+                    </label>
+
+                    <div class="input-wrap">
+
+                        <input id="estimateWeight" type="number" min="0" step="0.5" inputmode="decimal"
+                            placeholder="100">
+
+                        <span id="estimateUnit">
+                            kg
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <div>
+
+                    <label for="estimateReps">
+                        Repeticiones
+                    </label>
+
+                    <input id="estimateReps" type="number" min="1" max="30" step="1" inputmode="numeric"
+                        placeholder="5">
+
+                </div>
+
+            </div>
+
+
+            <div class="estimate-result">
+
+                <div>
+
+                    <span>
+                        1RM ESTIMADO
+                    </span>
+
+                    <strong id="estimatedOneRm">
+                        0 kg
+                    </strong>
+
+                </div>
+
+                <button id="sendEstimatedToTarget" class="small-button" type="button">
+                    Usar objetivo
+                </button>
+
+            </div>
+
+        </section>
+
+
+        <!-- =====================================================
          FAVORITOS
     ====================================================== -->
 
-    <section class="card">
+        <section class="card">
 
-        <div class="section-title">
+            <div class="section-title">
 
-            <div>
+                <div>
 
-                <h2>⭐ Favoritos</h2>
+                    <h2>⭐ Favoritos</h2>
 
-                <p>
-                    Tus cargas guardadas
-                </p>
+                    <p>
+                        Tus cargas guardadas
+                    </p>
+
+                </div>
+
+
+                <button id="clearFavorites" class="text-button" type="button">
+                    Limpiar
+                </button>
 
             </div>
 
 
-            <button
-                id="clearFavorites"
-                class="text-button"
-                type="button"
-            >
-                Limpiar
-            </button>
+            <div id="favoritesContainer" class="favorites"></div>
 
-        </div>
+        </section>
 
 
-        <div
-            id="favoritesContainer"
-            class="favorites"
-        ></div>
-
-    </section>
-
-
-    <!-- =====================================================
+        <!-- =====================================================
          HISTORIAL
     ====================================================== -->
 
-    <section class="card">
+        <section class="card">
 
-        <div class="section-title">
+            <div class="section-title">
 
-            <div>
+                <div>
 
-                <h2>📜 Historial</h2>
+                    <h2>📜 Historial</h2>
 
-                <p>
-                    Últimas configuraciones aplicadas
-                </p>
+                    <p>
+                        Últimas configuraciones aplicadas
+                    </p>
+
+                </div>
+
+
+                <button id="clearHistory" class="text-button danger" type="button">
+                    Limpiar
+                </button>
 
             </div>
 
 
-            <button
-                id="clearHistory"
-                class="text-button danger"
-                type="button"
-            >
-                Limpiar
-            </button>
+            <div id="historyContainer" class="history"></div>
 
-        </div>
+        </section>
 
 
-        <div
-            id="historyContainer"
-            class="history"
-        ></div>
-
-    </section>
-
-
-    <!-- =====================================================
+        <!-- =====================================================
          FOOTER
     ====================================================== -->
 
-    <footer>
+        <footer>
 
-        <strong>PowerLoad</strong>
+            <strong>PowerLoad</strong>
 
-        <span>•</span>
+            <span>•</span>
 
-        <span>
-            Built for strength
-        </span>
+            <span>
+                Built for strength
+            </span>
 
-        <span>•</span>
+            <span>•</span>
 
-        <span>
-            v6
-        </span>
+            <span>
+                v6
+            </span>
 
-    </footer>
+        </footer>
 
-</div>
+    </div>
 
 
-<!-- =========================================================
+    <!-- =========================================================
      TOAST
 ========================================================== -->
 
-<div
-    id="toastContainer"
-    class="toast-container"
-    aria-live="polite"
-    aria-atomic="true"
-></div>
+    <div id="toastContainer" class="toast-container" aria-live="polite" aria-atomic="true"></div>
 
 
-<script src="script.js"></script>
+    <script src="script.js"></script>
 
 </body>
+
 </html>
