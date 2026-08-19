@@ -12,16 +12,21 @@
     --muted: #84909f;
 
     --accent: #d9ff3f;
-    --accent-hover: #e9ff82;
+    --accent-hover: #eaff86;
 
     --danger: #ff6666;
     --warning: #ffbd59;
     --success: #8ee66a;
+    --info: #6db7ff;
 
     --radius: 19px;
 
     --shadow:
-        0 18px 50px rgba(0,0,0,.28);
+        0 18px 50px rgba(0, 0, 0, .28);
+
+    --transition:
+        .18s ease;
+
 }
 
 
@@ -30,20 +35,14 @@
 ========================================================== */
 
 * {
-
     box-sizing: border-box;
-
     margin: 0;
-
     padding: 0;
-
 }
 
 
 html {
-
     scroll-behavior: smooth;
-
 }
 
 
@@ -52,7 +51,6 @@ body {
     min-height: 100vh;
 
     background:
-
         radial-gradient(
             circle at 50% -15%,
             #202833 0,
@@ -69,7 +67,11 @@ body {
         "Segoe UI",
         sans-serif;
 
-    padding: 24px 12px;
+    padding: 24px 14px;
+
+    transition:
+        background .25s ease,
+        color .25s ease;
 
 }
 
@@ -77,16 +79,20 @@ body {
 button,
 input,
 select {
-
     font: inherit;
-
 }
 
 
 button {
-
     cursor: pointer;
+}
 
+
+button:focus-visible,
+input:focus-visible,
+select:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
 }
 
 
@@ -98,7 +104,7 @@ button {
 
     width: 100%;
 
-    max-width: 700px;
+    max-width: 920px;
 
     margin: auto;
 
@@ -136,7 +142,6 @@ button {
 .brand-mark {
 
     width: 49px;
-
     height: 49px;
 
     display: grid;
@@ -182,25 +187,19 @@ button {
 
 
 .brand p b {
-
     color: var(--accent);
-
 }
 
 
 .header-actions {
-
     display: flex;
-
     gap: 7px;
-
 }
 
 
 .icon-button {
 
     width: 41px;
-
     height: 41px;
 
     border: 1px solid var(--border);
@@ -211,7 +210,7 @@ button {
 
     color: var(--text);
 
-    transition: .2s;
+    transition: var(--transition);
 
 }
 
@@ -226,7 +225,7 @@ button {
 
 
 /* ==========================================================
-   UNIT SWITCH
+   UNITS
 ========================================================== */
 
 .unit-switch {
@@ -266,8 +265,13 @@ button {
 
     font-weight: 950;
 
-    transition: .15s;
+    transition: var(--transition);
 
+}
+
+
+.unit:hover {
+    color: var(--text);
 }
 
 
@@ -291,14 +295,24 @@ button {
 
     border-radius: var(--radius);
 
-    background: rgba(16,20,26,.95);
+    background:
+        rgba(16, 20, 26, .95);
 
     box-shadow: var(--shadow);
 
-    padding: 19px;
+    padding: 20px;
 
     margin-bottom: 13px;
 
+    transition:
+        background .25s ease,
+        border-color .25s ease;
+
+}
+
+
+.card:hover {
+    border-color: #364251;
 }
 
 
@@ -311,17 +325,6 @@ button {
     justify-content: space-between;
 
     margin-bottom: 17px;
-
-}
-
-
-.section-title > div:first-child {
-
-    display: flex;
-
-    align-items: center;
-
-    gap: 9px;
 
 }
 
@@ -346,6 +349,35 @@ button {
 }
 
 
+.section-heading {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 9px;
+
+}
+
+
+.section-icon {
+
+    width: 34px;
+    height: 34px;
+
+    display: grid;
+
+    place-items: center;
+
+    border-radius: 10px;
+
+    background: var(--surface-3);
+
+    font-size: 16px;
+
+}
+
+
 .text-button {
 
     border: 0;
@@ -362,20 +394,17 @@ button {
 
 
 .text-button:hover {
-
     color: var(--accent);
-
 }
 
 
 .text-button.danger:hover {
-
     color: var(--danger);
-
 }
 
 
-.side-badge {
+.side-badge,
+.inventory-badge {
 
     padding: 7px 10px;
 
@@ -389,6 +418,11 @@ button {
 
     font-weight: 950;
 
+}
+
+
+.inventory-badge {
+    color: var(--accent);
 }
 
 
@@ -418,13 +452,11 @@ button {
 
     position: absolute;
 
-    width: 280px;
+    width: 330px;
+    height: 330px;
 
-    height: 280px;
-
-    right: -160px;
-
-    top: -170px;
+    right: -180px;
+    top: -190px;
 
     border-radius: 50%;
 
@@ -483,7 +515,6 @@ button {
 .live-indicator i {
 
     width: 5px;
-
     height: 5px;
 
     border-radius: 50%;
@@ -523,7 +554,7 @@ button {
 
     font-weight: 900;
 
-    transition: .15s;
+    transition: var(--transition);
 
 }
 
@@ -545,14 +576,14 @@ button {
 
     gap: 8px;
 
-    margin-top: 3px;
+    margin-top: 8px;
 
 }
 
 
 .hero-number strong {
 
-    font-size: 70px;
+    font-size: clamp(58px, 10vw, 82px);
 
     line-height: .95;
 
@@ -620,9 +651,7 @@ button {
 
 
 .hero-stats strong {
-
     font-size: 12px;
-
 }
 
 
@@ -631,15 +660,13 @@ button {
 ========================================================== */
 
 .bar-card {
-
     padding-bottom: 17px;
-
 }
 
 
 .bar-stage {
 
-    height: 170px;
+    height: 190px;
 
     position: relative;
 
@@ -656,7 +683,6 @@ button {
     border-radius: 16px;
 
     background:
-
         radial-gradient(
             circle at center,
             #171d25,
@@ -713,7 +739,6 @@ button {
     border-radius: 10px;
 
     background:
-
         linear-gradient(
             to bottom,
             #ffffff 0%,
@@ -733,14 +758,12 @@ button {
 
     position: absolute;
 
-    width: 110px;
-
+    width: 125px;
     height: 22px;
 
     border-radius: 4px;
 
     background:
-
         repeating-linear-gradient(
             90deg,
             #3d444e 0 6px,
@@ -754,16 +777,12 @@ button {
 
 
 .left-sleeve {
-
     left: 3%;
-
 }
 
 
 .right-sleeve {
-
     right: 3%;
-
 }
 
 
@@ -775,9 +794,8 @@ button {
 
     transform: translateX(-50%);
 
-    width: 64px;
-
-    height: 40px;
+    width: 70px;
+    height: 42px;
 
     display: grid;
 
@@ -824,7 +842,7 @@ button {
 
     gap: 2px;
 
-    max-width: 40%;
+    max-width: 42%;
 
     overflow: visible;
 
@@ -841,9 +859,7 @@ button {
 
 
 .right-stack {
-
     left: 53%;
-
 }
 
 
@@ -852,7 +868,6 @@ button {
     position: relative;
 
     min-width: 14px;
-
     width: 14px;
 
     border: 1px solid rgba(255,255,255,.35);
@@ -872,7 +887,8 @@ button {
 
     font-weight: 1000;
 
-    animation: plateIn .18s ease-out;
+    animation:
+        plateIn .18s ease-out;
 
 }
 
@@ -884,7 +900,6 @@ button {
     position: absolute;
 
     top: 5px;
-
     bottom: 5px;
 
     left: 50%;
@@ -903,69 +918,44 @@ button {
 @keyframes plateIn {
 
     from {
-
         opacity: 0;
-
         transform: scale(.65);
-
     }
 
     to {
-
         opacity: 1;
-
         transform: scale(1);
-
     }
 
 }
 
 
-/* ==========================================================
-   COLORES DE DISCOS
-========================================================== */
+/* PLATE COLORS */
 
-/*
-   45 lb = AZUL
-   25 lb = VERDE
-   10 lb = AMARILLO
-   5 lb  = BLANCO
-   2.5  = ROJO
-*/
-
-
-.visual-45 {
-
-    height: 108px;
-
+.visual-45,
+.plate-45 {
     background:
         linear-gradient(
             145deg,
             #2563eb,
             #123a9b
         );
-
 }
 
 
-.visual-25 {
-
-    height: 94px;
-
+.visual-25,
+.plate-25 {
     background:
         linear-gradient(
             145deg,
             #22c55e,
             #087a36
         );
-
 }
 
 
-.visual-10 {
-
-    height: 80px;
-
+.visual-10,
+.plate-10 {
     background:
         linear-gradient(
             145deg,
@@ -974,14 +964,11 @@ button {
         );
 
     color: #17120a;
-
 }
 
 
-.visual-5 {
-
-    height: 66px;
-
+.visual-5,
+.plate-5 {
     background:
         linear-gradient(
             145deg,
@@ -990,21 +977,38 @@ button {
         );
 
     color: #20242a;
-
 }
 
 
-.visual-2-5 {
-
-    height: 54px;
-
+.visual-2-5,
+.plate-2-5 {
     background:
         linear-gradient(
             145deg,
             #ef4444,
             #991b1b
         );
+}
 
+
+.visual-45 {
+    height: 116px;
+}
+
+.visual-25 {
+    height: 101px;
+}
+
+.visual-10 {
+    height: 86px;
+}
+
+.visual-5 {
+    height: 71px;
+}
+
+.visual-2-5 {
+    height: 58px;
 }
 
 
@@ -1145,7 +1149,7 @@ button {
 
     background: var(--surface-2);
 
-    transition: .18s;
+    transition: var(--transition);
 
 }
 
@@ -1161,7 +1165,8 @@ button {
 
 .plate-row.has-plates {
 
-    border-color: rgba(217,255,63,.14);
+    border-color:
+        rgba(217,255,63,.14);
 
     background:
         linear-gradient(
@@ -1187,7 +1192,6 @@ button {
 .plate-circle {
 
     width: 45px;
-
     height: 45px;
 
     display: grid;
@@ -1206,70 +1210,6 @@ button {
 
     box-shadow:
         0 4px 10px rgba(0,0,0,.3);
-
-}
-
-
-.plate-45 {
-
-    background:
-        linear-gradient(
-            145deg,
-            #2563eb,
-            #123a9b
-        );
-
-}
-
-
-.plate-25 {
-
-    background:
-        linear-gradient(
-            145deg,
-            #22c55e,
-            #087a36
-        );
-
-}
-
-
-.plate-10 {
-
-    background:
-        linear-gradient(
-            145deg,
-            #facc15,
-            #a87500
-        );
-
-    color: #17120a;
-
-}
-
-
-.plate-5 {
-
-    background:
-        linear-gradient(
-            145deg,
-            #f5f7fa,
-            #9aa2ad
-        );
-
-    color: #20242a;
-
-}
-
-
-.plate-2-5 {
-
-    background:
-        linear-gradient(
-            145deg,
-            #ef4444,
-            #991b1b
-        );
 
 }
 
@@ -1296,6 +1236,19 @@ button {
 }
 
 
+.plate-limit {
+
+    display: block;
+
+    color: var(--muted);
+
+    font-size: 8px;
+
+    margin-top: 3px;
+
+}
+
+
 /* ==========================================================
    COUNTER
 ========================================================== */
@@ -1314,7 +1267,6 @@ button {
 .counter button {
 
     width: 38px;
-
     height: 38px;
 
     border: 1px solid var(--border);
@@ -1329,12 +1281,12 @@ button {
 
     font-weight: 500;
 
-    transition: .15s;
+    transition: var(--transition);
 
 }
 
 
-.counter button:hover {
+.counter button:hover:not(:disabled) {
 
     background: var(--accent);
 
@@ -1343,6 +1295,15 @@ button {
     color: #111508;
 
     transform: scale(1.05);
+
+}
+
+
+.counter button:disabled {
+
+    opacity: .3;
+
+    cursor: not-allowed;
 
 }
 
@@ -1398,7 +1359,7 @@ select {
 
     padding: 10px 11px;
 
-    transition: .15s;
+    transition: var(--transition);
 
 }
 
@@ -1423,9 +1384,7 @@ select:focus {
 
 
 .input-wrap input {
-
     padding-right: 45px;
-
 }
 
 
@@ -1451,8 +1410,147 @@ select:focus {
 
 
 .bar-control {
-
     margin-top: 15px;
+}
+
+
+/* ==========================================================
+   INVENTORY
+========================================================== */
+
+.inventory-info {
+
+    padding: 10px 12px;
+
+    border-radius: 10px;
+
+    background:
+        rgba(109,183,255,.06);
+
+    border: 1px solid
+        rgba(109,183,255,.14);
+
+    color: var(--muted);
+
+    font-size: 9px;
+
+    margin-bottom: 10px;
+
+}
+
+
+.inventory-grid {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(5, 1fr);
+
+    gap: 8px;
+
+}
+
+
+.inventory-item {
+
+    padding: 12px 8px;
+
+    border-radius: 12px;
+
+    background: var(--surface-2);
+
+    border: 1px solid var(--border);
+
+    text-align: center;
+
+}
+
+
+.inventory-color {
+
+    width: 30px;
+    height: 30px;
+
+    margin: 0 auto 7px;
+
+    border-radius: 50%;
+
+    border: 2px solid rgba(255,255,255,.25);
+
+}
+
+
+.inventory-item strong {
+
+    display: block;
+
+    font-size: 11px;
+
+}
+
+
+.inventory-item small {
+
+    display: block;
+
+    color: var(--muted);
+
+    font-size: 8px;
+
+    margin-top: 3px;
+
+}
+
+
+.inventory-counter {
+
+    display: flex;
+
+    justify-content: center;
+
+    align-items: center;
+
+    gap: 6px;
+
+    margin-top: 9px;
+
+}
+
+
+.inventory-counter button {
+
+    width: 25px;
+    height: 25px;
+
+    border: 1px solid var(--border);
+
+    border-radius: 7px;
+
+    background: var(--surface-3);
+
+    color: var(--text);
+
+    font-weight: 900;
+
+}
+
+
+.inventory-counter button:hover {
+
+    border-color: var(--accent);
+
+    color: var(--accent);
+
+}
+
+
+.inventory-counter span {
+
+    min-width: 20px;
+
+    font-size: 10px;
+
+    font-weight: 950;
 
 }
 
@@ -1465,7 +1563,8 @@ select:focus {
 
     display: grid;
 
-    grid-template-columns: 1fr 160px;
+    grid-template-columns:
+        1fr 180px;
 
     gap: 8px;
 
@@ -1484,7 +1583,7 @@ select:focus {
 
     font-weight: 950;
 
-    transition: .15s;
+    transition: var(--transition);
 
 }
 
@@ -1517,9 +1616,9 @@ select:focus {
 
     flex: 1;
 
-    min-width: 48px;
+    min-width: 55px;
 
-    padding: 7px 6px;
+    padding: 8px 6px;
 
     border: 1px solid var(--border);
 
@@ -1533,6 +1632,8 @@ select:focus {
 
     font-weight: 900;
 
+    transition: var(--transition);
+
 }
 
 
@@ -1541,6 +1642,9 @@ select:focus {
     border-color: var(--accent);
 
     color: var(--accent);
+
+    background:
+        rgba(217,255,63,.05);
 
 }
 
@@ -1565,28 +1669,20 @@ select:focus {
 @keyframes resultIn {
 
     from {
-
         opacity: 0;
-
         transform: translateY(5px);
-
     }
 
     to {
-
         opacity: 1;
-
         transform: translateY(0);
-
     }
 
 }
 
 
 .hidden {
-
-    display: none;
-
+    display: none !important;
 }
 
 
@@ -1644,7 +1740,8 @@ select:focus {
 
 .accuracy.exact {
 
-    background: rgba(142,230,106,.1);
+    background:
+        rgba(142,230,106,.1);
 
     color: var(--success);
 
@@ -1653,9 +1750,20 @@ select:focus {
 
 .accuracy.close {
 
-    background: rgba(255,189,89,.1);
+    background:
+        rgba(255,189,89,.1);
 
     color: var(--warning);
+
+}
+
+
+.accuracy.unavailable {
+
+    background:
+        rgba(255,102,102,.1);
+
+    color: var(--danger);
 
 }
 
@@ -1692,7 +1800,8 @@ select:focus {
 
     display: grid;
 
-    grid-template-columns: repeat(3,1fr);
+    grid-template-columns:
+        repeat(3,1fr);
 
     gap: 6px;
 
@@ -1726,9 +1835,7 @@ select:focus {
 
 
 .target-values strong {
-
     font-size: 10px;
-
 }
 
 
@@ -1752,6 +1859,17 @@ select:focus {
 
     font-weight: 950;
 
+    transition: var(--transition);
+
+}
+
+
+.apply-button:hover {
+
+    background: var(--accent-hover);
+
+    transform: translateY(-1px);
+
 }
 
 
@@ -1763,9 +1881,86 @@ select:focus {
 
     display: grid;
 
-    grid-template-columns: 1fr 150px;
+    grid-template-columns:
+        1fr 150px;
 
     gap: 8px;
+
+}
+
+
+.formula-selector {
+
+    margin-top: 14px;
+
+}
+
+
+.formula-selector > span {
+
+    display: block;
+
+    color: var(--muted);
+
+    font-size: 7px;
+
+    letter-spacing: 1px;
+
+    font-weight: 950;
+
+    margin-bottom: 7px;
+
+}
+
+
+.formula-buttons {
+
+    display: flex;
+
+    gap: 6px;
+
+}
+
+
+.formula-button {
+
+    flex: 1;
+
+    padding: 8px;
+
+    border: 1px solid var(--border);
+
+    border-radius: 8px;
+
+    background: var(--surface-2);
+
+    color: var(--muted);
+
+    font-size: 9px;
+
+    font-weight: 900;
+
+    transition: var(--transition);
+
+}
+
+
+.formula-button:hover {
+
+    color: var(--text);
+
+    border-color: var(--accent);
+
+}
+
+
+.formula-button.active {
+
+    color: #111508;
+
+    background: var(--accent);
+
+    border-color: var(--accent);
 
 }
 
@@ -1836,6 +2031,8 @@ select:focus {
 
     font-weight: 900;
 
+    transition: var(--transition);
+
 }
 
 
@@ -1847,6 +2044,10 @@ select:focus {
 
 }
 
+
+/* ==========================================================
+   PERCENTAGES
+========================================================== */
 
 .percentage-table {
 
@@ -1878,7 +2079,8 @@ select:focus {
 
     display: grid;
 
-    grid-template-columns: repeat(4,1fr);
+    grid-template-columns:
+        repeat(5,1fr);
 
     gap: 5px;
 
@@ -1897,12 +2099,16 @@ select:focus {
 
     cursor: pointer;
 
+    transition: var(--transition);
+
 }
 
 
 .percentage-cell:hover {
 
     border-color: var(--border);
+
+    transform: translateY(-1px);
 
 }
 
@@ -1911,7 +2117,8 @@ select:focus {
 
     border-color: var(--accent);
 
-    background: rgba(217,255,63,.06);
+    background:
+        rgba(217,255,63,.06);
 
 }
 
@@ -1939,14 +2146,15 @@ select:focus {
 
 
 /* ==========================================================
-   ESTIMADOR
+   ESTIMATOR
 ========================================================== */
 
 .estimator-grid {
 
     display: grid;
 
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns:
+        1fr 1fr;
 
     gap: 8px;
 
@@ -1976,9 +2184,13 @@ select:focus {
 
 .estimate-result strong {
 
+    display: block;
+
     color: var(--accent);
 
     font-size: 19px;
+
+    margin-top: 3px;
 
 }
 
@@ -2021,7 +2233,7 @@ select:focus {
 
     justify-content: space-between;
 
-    padding: 10px 11px;
+    padding: 11px;
 
     border: 1px solid transparent;
 
@@ -2029,7 +2241,7 @@ select:focus {
 
     background: var(--surface-2);
 
-    transition: .15s;
+    transition: var(--transition);
 
 }
 
@@ -2038,6 +2250,8 @@ select:focus {
 .history-item:hover {
 
     border-color: var(--border);
+
+    transform: translateX(2px);
 
 }
 
@@ -2089,6 +2303,8 @@ select:focus {
 
     font-weight: 900;
 
+    transition: var(--transition);
+
 }
 
 
@@ -2111,6 +2327,118 @@ select:focus {
 
 
 /* ==========================================================
+   TOAST
+========================================================== */
+
+.toast-container {
+
+    position: fixed;
+
+    right: 18px;
+    bottom: 18px;
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: flex-end;
+
+    gap: 8px;
+
+    z-index: 9999;
+
+    pointer-events: none;
+
+}
+
+
+.toast {
+
+    min-width: 250px;
+
+    max-width: 360px;
+
+    padding: 12px 14px;
+
+    border: 1px solid var(--border);
+
+    border-radius: 11px;
+
+    background: var(--surface);
+
+    color: var(--text);
+
+    box-shadow:
+        0 15px 40px rgba(0,0,0,.35);
+
+    font-size: 10px;
+
+    font-weight: 800;
+
+    animation:
+        toastIn .22s ease-out;
+
+}
+
+
+.toast.success {
+    border-color:
+        rgba(142,230,106,.35);
+}
+
+
+.toast.error {
+    border-color:
+        rgba(255,102,102,.35);
+}
+
+
+.toast.warning {
+    border-color:
+        rgba(255,189,89,.35);
+}
+
+
+.toast.info {
+    border-color:
+        rgba(109,183,255,.35);
+}
+
+
+@keyframes toastIn {
+
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+}
+
+
+.toast.out {
+
+    animation:
+        toastOut .2s ease-in forwards;
+
+}
+
+
+@keyframes toastOut {
+
+    to {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+
+}
+
+
+/* ==========================================================
    FOOTER
 ========================================================== */
 
@@ -2121,6 +2449,8 @@ footer {
     align-items: center;
 
     justify-content: center;
+
+    flex-wrap: wrap;
 
     gap: 6px;
 
@@ -2198,20 +2528,30 @@ body.light .target-values div {
    RESPONSIVE
 ========================================================== */
 
-@media(max-width:560px) {
+@media(max-width: 760px) {
+
+    .app {
+        max-width: 700px;
+    }
+
+    .inventory-grid {
+        grid-template-columns:
+            repeat(3, 1fr);
+    }
+
+}
+
+
+@media(max-width: 560px) {
 
     body {
-
         padding: 13px 8px;
-
     }
 
 
     .card,
     .hero-card {
-
         padding: 15px;
-
     }
 
 
@@ -2225,9 +2565,7 @@ body.light .target-values div {
 
 
     .hero-stats {
-
         grid-template-columns: 1fr;
-
     }
 
 
@@ -2241,72 +2579,63 @@ body.light .target-values div {
 
         padding-bottom: 7px;
 
-        border-bottom: 1px solid var(--border);
+        border-bottom:
+            1px solid var(--border);
 
     }
 
 
     .hero-stats > div:last-child {
-
         border-bottom: 0;
-
     }
 
 
     .target-input,
     .rm-input {
-
         grid-template-columns: 1fr;
-
     }
 
 
     .primary-button {
-
         min-height: 42px;
-
     }
 
 
     .percentage-grid {
-
-        grid-template-columns: repeat(3,1fr);
-
+        grid-template-columns:
+            repeat(3,1fr);
     }
 
 
     .estimator-grid {
-
         grid-template-columns: 1fr;
-
     }
 
 
     .target-values {
-
         grid-template-columns: 1fr;
+    }
 
+
+    .inventory-grid {
+        grid-template-columns:
+            repeat(2,1fr);
     }
 
 
     .bar-stage {
-
         height: 120px;
-
     }
 
 
     .bar-sleeve {
-
         width: 70px;
-
     }
 
 
     .bar-center {
 
         width: 48px;
-
         height: 30px;
 
         font-size: 6px;
@@ -2317,7 +2646,6 @@ body.light .target-values div {
     .visual-plate {
 
         min-width: 10px;
-
         width: 10px;
 
     }
@@ -2327,20 +2655,29 @@ body.light .target-values div {
         height: 82px;
     }
 
+
     .visual-25 {
         height: 73px;
     }
+
 
     .visual-10 {
         height: 63px;
     }
 
+
     .visual-5 {
         height: 54px;
     }
 
+
     .visual-2-5 {
         height: 45px;
+    }
+
+
+    .formula-buttons {
+        flex-direction: column;
     }
 
 
@@ -2351,6 +2688,38 @@ body.light .target-values div {
 
         gap: 8px;
 
+    }
+
+
+    .toast-container {
+
+        left: 10px;
+        right: 10px;
+        bottom: 10px;
+
+        align-items: stretch;
+
+    }
+
+
+    .toast {
+
+        min-width: 0;
+        max-width: none;
+
+    }
+
+}
+
+
+@media(max-width: 380px) {
+
+    .inventory-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .plate-row {
+        gap: 8px;
     }
 
 }

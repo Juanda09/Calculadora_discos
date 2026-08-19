@@ -2,7 +2,6 @@
 <html lang="es">
 
 <head>
-
     <meta charset="UTF-8">
 
     <meta
@@ -17,28 +16,19 @@
 
     <meta
         name="description"
-        content="PowerLoad - Calculadora de discos, cargas y 1RM para powerlifting"
+        content="PowerLoad - Calculadora y gestor de cargas para powerlifting"
     >
 
-    <title>PowerLoad</title>
+    <title>PowerLoad v6</title>
 
-    <link
-        rel="stylesheet"
-        href="style.css"
-    >
-
+    <link rel="stylesheet" href="style.css">
 </head>
-
 
 <body>
 
 <div class="app">
 
-
-    <!-- =====================================================
-         HEADER
-    ====================================================== -->
-
+    <!-- HEADER -->
     <header class="header">
 
         <div class="brand">
@@ -49,19 +39,16 @@
 
             <div class="brand-info">
 
-                <h1>
-                    PowerLoad
-                </h1>
+                <h1>PowerLoad</h1>
 
                 <p>
-                    Powerlifting Calculator
-                    <b>v5</b>
+                    Powerlifting Training Calculator
+                    <b>v6</b>
                 </p>
 
             </div>
 
         </div>
-
 
         <div class="header-actions">
 
@@ -79,16 +66,18 @@
     </header>
 
 
+    <!-- UNIDADES -->
 
-    <!-- =====================================================
-         UNIDADES
-    ====================================================== -->
-
-    <div class="unit-switch">
+    <div
+        class="unit-switch"
+        role="group"
+        aria-label="Unidad de peso"
+    >
 
         <button
             id="kgButton"
             class="unit active"
+            type="button"
         >
             KG
         </button>
@@ -96,6 +85,7 @@
         <button
             id="lbButton"
             class="unit"
+            type="button"
         >
             LB
         </button>
@@ -103,10 +93,7 @@
     </div>
 
 
-
-    <!-- =====================================================
-         HERO
-    ====================================================== -->
+    <!-- HERO -->
 
     <section class="hero-card">
 
@@ -119,19 +106,16 @@
                 </span>
 
                 <div class="live-indicator">
-
                     <i></i>
-
-                    LIVE
-
+                    CALCULADA
                 </div>
 
             </div>
 
-
             <button
                 id="saveCurrentButton"
                 class="save-button"
+                type="button"
             >
                 ☆ Guardar
             </button>
@@ -163,41 +147,18 @@
         <div class="hero-stats">
 
             <div>
-
-                <span>
-                    POR LADO
-                </span>
-
-                <strong id="sideWeight">
-                    0 kg
-                </strong>
-
+                <span>POR LADO</span>
+                <strong id="sideWeight">0 kg</strong>
             </div>
 
-
             <div>
-
-                <span>
-                    DISCOS
-                </span>
-
-                <strong id="platesWeight">
-                    0 kg
-                </strong>
-
+                <span>DISCOS</span>
+                <strong id="platesWeight">0 kg</strong>
             </div>
 
-
             <div>
-
-                <span>
-                    BARRA
-                </span>
-
-                <strong id="barDisplay">
-                    20.41 kg
-                </strong>
-
+                <span>BARRA</span>
+                <strong id="barDisplay">20.41 kg</strong>
             </div>
 
         </div>
@@ -205,31 +166,24 @@
     </section>
 
 
-
-    <!-- =====================================================
-         BARRA
-    ====================================================== -->
+    <!-- BARRA -->
 
     <section class="card bar-card">
 
         <div class="section-title">
 
             <div>
-
-                <h2>
-                    Configuración de barra
-                </h2>
+                <h2>Configuración de barra</h2>
 
                 <p>
                     Vista en tiempo real de tu montaje
                 </p>
-
             </div>
-
 
             <button
                 id="clearPlates"
                 class="text-button"
+                type="button"
             >
                 Limpiar
             </button>
@@ -242,6 +196,7 @@
             <div
                 id="leftVisual"
                 class="plate-stack left-stack"
+                aria-label="Discos del lado izquierdo"
             ></div>
 
 
@@ -263,6 +218,7 @@
             <div
                 id="rightVisual"
                 class="plate-stack right-stack"
+                aria-label="Discos del lado derecho"
             ></div>
 
         </div>
@@ -282,7 +238,6 @@
 
             </div>
 
-
             <div class="bar-total">
 
                 <strong id="visualTotal">
@@ -300,27 +255,16 @@
 
         <div class="bar-labels">
 
-            <span>
-                IZQUIERDA
-            </span>
-
-            <span>
-                BARRA
-            </span>
-
-            <span>
-                DERECHA
-            </span>
+            <span>IZQUIERDA</span>
+            <span>BARRA</span>
+            <span>DERECHA</span>
 
         </div>
 
     </section>
 
 
-
-    <!-- =====================================================
-         DISCOS
-    ====================================================== -->
+    <!-- DISCOS ACTUALES -->
 
     <section class="card">
 
@@ -328,16 +272,13 @@
 
             <div>
 
-                <h2>
-                    Discos por lado
-                </h2>
+                <h2>Discos por lado</h2>
 
                 <p>
-                    Selecciona tu combinación
+                    Selecciona tu combinación actual
                 </p>
 
             </div>
-
 
             <span class="side-badge">
                 × 2
@@ -346,10 +287,7 @@
         </div>
 
 
-        <div
-            id="platesContainer"
-            class="plates"
-        ></div>
+        <div id="platesContainer" class="plates"></div>
 
 
         <div class="bar-control">
@@ -358,36 +296,27 @@
                 Peso de la barra
             </label>
 
-
             <select id="barWeight">
 
-                <option
-                    value="45"
-                    selected
-                >
+                <option value="45">
                     45 lb · 20.41 kg
                 </option>
-
 
                 <option value="55">
                     55 lb · 24.95 kg
                 </option>
 
-
                 <option value="35">
                     35 lb · 15.88 kg
                 </option>
-
 
                 <option value="44.0924">
                     20 kg
                 </option>
 
-
                 <option value="33.0693">
                     15 kg
                 </option>
-
 
                 <option value="0">
                     Sin barra
@@ -400,10 +329,47 @@
     </section>
 
 
+    <!-- INVENTARIO -->
 
-    <!-- =====================================================
-         OBJETIVO
-    ====================================================== -->
+    <section class="card">
+
+        <div class="section-title">
+
+            <div>
+
+                <h2>📦 Inventario de discos</h2>
+
+                <p>
+                    Cantidad física disponible
+                </p>
+
+            </div>
+
+            <span class="inventory-badge">
+                REAL
+            </span>
+
+        </div>
+
+
+        <div class="inventory-info">
+
+            <span>
+                El buscador de objetivos solo utilizará discos disponibles.
+            </span>
+
+        </div>
+
+
+        <div
+            id="inventoryContainer"
+            class="inventory-grid"
+        ></div>
+
+    </section>
+
+
+    <!-- OBJETIVO -->
 
     <section class="card target-card">
 
@@ -411,19 +377,21 @@
 
             <div>
 
-                <span class="section-icon">
-                    🎯
-                </span>
+                <div class="section-heading">
 
-                <div class="inline-title">
+                    <span class="section-icon">
+                        🎯
+                    </span>
 
-                    <h2>
-                        Objetivo
-                    </h2>
+                    <div>
 
-                    <p>
-                        ¿Qué peso quieres levantar?
-                    </p>
+                        <h2>Objetivo</h2>
+
+                        <p>
+                            ¿Qué peso quieres levantar?
+                        </p>
+
+                    </div>
 
                 </div>
 
@@ -441,7 +409,9 @@
                     type="number"
                     min="0"
                     step="0.1"
+                    inputmode="decimal"
                     placeholder="100"
+                    aria-label="Peso objetivo"
                 >
 
                 <span id="targetUnit">
@@ -454,6 +424,7 @@
             <button
                 id="calculateTarget"
                 class="primary-button"
+                type="button"
             >
                 Encontrar discos
             </button>
@@ -461,37 +432,10 @@
         </div>
 
 
-        <div class="quick-targets">
-
-            <button data-target="60">
-                60
-            </button>
-
-            <button data-target="70">
-                70
-            </button>
-
-            <button data-target="80">
-                80
-            </button>
-
-            <button data-target="90">
-                90
-            </button>
-
-            <button data-target="100">
-                100
-            </button>
-
-            <button data-target="120">
-                120
-            </button>
-
-            <button data-target="140">
-                140
-            </button>
-
-        </div>
+        <div
+            id="quickTargets"
+            class="quick-targets"
+        ></div>
 
 
         <div
@@ -534,9 +478,7 @@
 
                 <div>
 
-                    <span>
-                        OBJETIVO
-                    </span>
+                    <span>OBJETIVO</span>
 
                     <strong id="targetRequested">
                         -
@@ -547,9 +489,7 @@
 
                 <div>
 
-                    <span>
-                        REAL
-                    </span>
+                    <span>REAL</span>
 
                     <strong id="targetReal">
                         -
@@ -560,9 +500,7 @@
 
                 <div>
 
-                    <span>
-                        DIFERENCIA
-                    </span>
+                    <span>DIFERENCIA</span>
 
                     <strong id="targetDifference">
                         -
@@ -576,6 +514,7 @@
             <button
                 id="applyTarget"
                 class="apply-button"
+                type="button"
             >
                 ✓ Aplicar configuración
             </button>
@@ -585,10 +524,7 @@
     </section>
 
 
-
-    <!-- =====================================================
-         1RM
-    ====================================================== -->
+    <!-- 1RM -->
 
     <section class="card">
 
@@ -596,12 +532,10 @@
 
             <div>
 
-                <h2>
-                    📈 1RM
-                </h2>
+                <h2>📈 Calculadora de 1RM</h2>
 
                 <p>
-                    Calcula tus cargas de entrenamiento
+                    Calcula cargas según tu máximo
                 </p>
 
             </div>
@@ -618,10 +552,12 @@
                     type="number"
                     min="0"
                     step="0.5"
+                    inputmode="decimal"
                     placeholder="Ej. 100"
+                    aria-label="1RM"
                 >
 
-                <span>
+                <span id="oneRmUnit">
                     kg
                 </span>
 
@@ -630,67 +566,64 @@
 
             <select id="percentage">
 
-                <option value="0.50">
-                    50%
-                </option>
-
-                <option value="0.55">
-                    55%
-                </option>
-
-                <option value="0.60">
-                    60%
-                </option>
-
-                <option value="0.65">
-                    65%
-                </option>
-
-                <option value="0.70">
-                    70%
-                </option>
-
-                <option value="0.75">
-                    75%
-                </option>
-
-                <option value="0.775">
-                    77.5%
-                </option>
-
-                <option value="0.80">
-                    80%
-                </option>
-
-                <option value="0.825">
-                    82.5%
-                </option>
-
-                <option value="0.85">
-                    85%
-                </option>
-
-                <option value="0.875">
-                    87.5%
-                </option>
-
-                <option value="0.90">
-                    90%
-                </option>
-
-                <option value="0.925">
-                    92.5%
-                </option>
-
-                <option value="0.95">
-                    95%
-                </option>
-
-                <option value="1">
-                    100%
-                </option>
+                <option value="0.50">50%</option>
+                <option value="0.55">55%</option>
+                <option value="0.60">60%</option>
+                <option value="0.65">65%</option>
+                <option value="0.70">70%</option>
+                <option value="0.75">75%</option>
+                <option value="0.775">77.5%</option>
+                <option value="0.80">80%</option>
+                <option value="0.825">82.5%</option>
+                <option value="0.85">85%</option>
+                <option value="0.875">87.5%</option>
+                <option value="0.90">90%</option>
+                <option value="0.925">92.5%</option>
+                <option value="0.95">95%</option>
+                <option value="1">100%</option>
 
             </select>
+
+        </div>
+
+
+        <div class="formula-selector">
+
+            <span>
+                FÓRMULA
+            </span>
+
+            <div
+                class="formula-buttons"
+                role="group"
+                aria-label="Fórmula de 1RM"
+            >
+
+                <button
+                    type="button"
+                    class="formula-button active"
+                    data-formula="epley"
+                >
+                    Epley
+                </button>
+
+                <button
+                    type="button"
+                    class="formula-button"
+                    data-formula="brzycki"
+                >
+                    Brzycki
+                </button>
+
+                <button
+                    type="button"
+                    class="formula-button"
+                    data-formula="lombardi"
+                >
+                    Lombardi
+                </button>
+
+            </div>
 
         </div>
 
@@ -713,6 +646,7 @@
             <button
                 id="sendRmToTarget"
                 class="small-button"
+                type="button"
             >
                 Usar objetivo
             </button>
@@ -736,10 +670,7 @@
     </section>
 
 
-
-    <!-- =====================================================
-         ESTIMADOR
-    ====================================================== -->
+    <!-- ESTIMADOR -->
 
     <section class="card">
 
@@ -747,12 +678,10 @@
 
             <div>
 
-                <h2>
-                    🧠 Estimador de 1RM
-                </h2>
+                <h2>🧠 Estimador de 1RM</h2>
 
                 <p>
-                    Calcula tu 1RM a partir de repeticiones
+                    Calcula tu máximo a partir de repeticiones
                 </p>
 
             </div>
@@ -775,10 +704,11 @@
                         type="number"
                         min="0"
                         step="0.5"
+                        inputmode="decimal"
                         placeholder="100"
                     >
 
-                    <span>
+                    <span id="estimateUnit">
                         kg
                     </span>
 
@@ -799,6 +729,7 @@
                     min="1"
                     max="30"
                     step="1"
+                    inputmode="numeric"
                     placeholder="5"
                 >
 
@@ -809,23 +740,32 @@
 
         <div class="estimate-result">
 
-            <span>
-                1RM ESTIMADO
-            </span>
+            <div>
 
-            <strong id="estimatedOneRm">
-                0 kg
-            </strong>
+                <span>
+                    1RM ESTIMADO
+                </span>
+
+                <strong id="estimatedOneRm">
+                    0 kg
+                </strong>
+
+            </div>
+
+            <button
+                id="sendEstimatedToTarget"
+                class="small-button"
+                type="button"
+            >
+                Usar objetivo
+            </button>
 
         </div>
 
     </section>
 
 
-
-    <!-- =====================================================
-         FAVORITOS
-    ====================================================== -->
+    <!-- FAVORITOS -->
 
     <section class="card">
 
@@ -833,9 +773,7 @@
 
             <div>
 
-                <h2>
-                    ⭐ Favoritos
-                </h2>
+                <h2>⭐ Favoritos</h2>
 
                 <p>
                     Tus cargas guardadas
@@ -847,6 +785,7 @@
             <button
                 id="clearFavorites"
                 class="text-button"
+                type="button"
             >
                 Limpiar
             </button>
@@ -862,10 +801,7 @@
     </section>
 
 
-
-    <!-- =====================================================
-         HISTORIAL
-    ====================================================== -->
+    <!-- HISTORIAL -->
 
     <section class="card">
 
@@ -873,12 +809,10 @@
 
             <div>
 
-                <h2>
-                    📜 Historial
-                </h2>
+                <h2>📜 Historial</h2>
 
                 <p>
-                    Últimas configuraciones
+                    Últimas configuraciones aplicadas
                 </p>
 
             </div>
@@ -887,6 +821,7 @@
             <button
                 id="clearHistory"
                 class="text-button danger"
+                type="button"
             >
                 Limpiar
             </button>
@@ -902,33 +837,40 @@
     </section>
 
 
-
-    <!-- =====================================================
-         FOOTER
-    ====================================================== -->
+    <!-- FOOTER -->
 
     <footer>
 
-        <strong>
-            PowerLoad
-        </strong>
+        <strong>PowerLoad</strong>
 
-        <span>
-            •
-        </span>
+        <span>•</span>
 
         <span>
             Built for strength
         </span>
 
+        <span>•</span>
+
+        <span>
+            v6
+        </span>
+
     </footer>
 
-
 </div>
+
+
+<!-- TOAST -->
+
+<div
+    id="toastContainer"
+    class="toast-container"
+    aria-live="polite"
+    aria-atomic="true"
+></div>
 
 
 <script src="script.js"></script>
 
 </body>
-
 </html>
