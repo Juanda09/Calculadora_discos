@@ -5395,11 +5395,11 @@ function setupEvents() {
         );
 
 
-    elements.sendWeightForRepsToTarget
-        ?.addEventListener(
-            "click",
-            sendWeightForRepsToTarget
-        );
+    document.addEventListener("click", function (event) {
+        if (event.target.closest("#sendWeightForRepsToTarget")) {
+            sendWeightForRepsToTarget();
+        }
+    });
 
 
     /*
