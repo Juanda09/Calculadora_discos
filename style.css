@@ -732,13 +732,16 @@ select:focus-visible {
     overflow: visible;
 }
 
+/* Discos izquierdos: empiezan más cerca del centro */
 .left-stack {
-    left: 15%;
-    flex-direction: row-reverse;
+    right: 10%;
+    flex-direction: row;
 }
 
+/* Discos derechos: empiezan más cerca del centro */
 .right-stack {
-    right: 15%;
+    left: 10%;
+    flex-direction: row-reverse;
 }
 
 .visual-plate {
