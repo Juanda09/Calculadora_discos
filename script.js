@@ -2,11 +2,24 @@
    POWERLOAD v6
    Calculadora de discos para Powerlifting
 
+   FUNCIONES:
+   - Discos estándar
+   - Discos calibrados
+   - KG / LB
+   - Calculadora de discos
+   - Objetivos rápidos
+   - Calculadora de 1RM por porcentaje
+   - Estimador de 1RM
+   - ¿Cuántas reps necesito?
+   - ¿Qué peso necesito para X reps?
+   - Favoritos
+   - Historial
+   - Tema claro / oscuro
+
    IMPORTANTE:
-   - Los DISCOS están definidos SIEMPRE en LIBRAS.
+   - Los discos se manejan internamente en LIBRAS.
    - La barra se maneja internamente en LIBRAS.
-   - El usuario puede visualizar el peso total en KG o LB.
-   - NO existe inventario de discos.
+   - El usuario puede visualizar KG o LB.
 ========================================================== */
 
 "use strict";
@@ -16,146 +29,572 @@
    CONFIGURACIÓN
 ========================================================== */
 
-const PLATES = [
+
+/* ==========================================================
+   DISCOS ESTÁNDAR
+========================================================== */
+
+const STANDARD_PLATES = [
+
     {
         weight: 45,
         label: "45 lb",
         className: "45"
     },
+
     {
         weight: 25,
         label: "25 lb",
         className: "25"
     },
+
     {
         weight: 10,
         label: "10 lb",
         className: "10"
     },
+
     {
         weight: 5,
         label: "5 lb",
         className: "5"
     },
+
     {
         weight: 2.5,
         label: "2.5 lb",
         className: "2-5"
     }
+
+];
+
+
+/* ==========================================================
+   DISCOS CALIBRADOS
+========================================================== */
+
+const CALIBRATED_PLATES = [
+
+    {
+        weight: 25 * 2.2046226218,
+        kg: 25,
+        label: "25 kg",
+        className: "cal-25"
+    },
+
+    {
+        weight: 20 * 2.2046226218,
+        kg: 20,
+        label: "20 kg",
+        className: "cal-20"
+    },
+
+    {
+        weight: 15 * 2.2046226218,
+        kg: 15,
+        label: "15 kg",
+        className: "cal-15"
+    },
+
+    {
+        weight: 10 * 2.2046226218,
+        kg: 10,
+        label: "10 kg",
+        className: "cal-10"
+    },
+
+    {
+        weight: 5 * 2.2046226218,
+        kg: 5,
+        label: "5 kg",
+        className: "cal-5"
+    },
+
+    {
+        weight: 2.5 * 2.2046226218,
+        kg: 2.5,
+        label: "2.5 kg",
+        className: "cal-2-5"
+    },
+
+    {
+        weight: 1.25 * 2.2046226218,
+        kg: 1.25,
+        label: "1.25 kg",
+        className: "cal-1-25"
+    },
+
+    {
+        weight: 1 * 2.2046226218,
+        kg: 1,
+        label: "1 kg",
+        className: "cal-1"
+    },
+
+    {
+        weight: 0.5 * 2.2046226218,
+        kg: 0.5,
+        label: "0.5 kg",
+        className: "cal-0-5"
+    },
+
+    {
+        weight: 0.25 * 2.2046226218,
+        kg: 0.25,
+        label: "0.25 kg",
+        className: "cal-0-25"
+    }
+
 ];
 
 
 /*
- * Conversión oficial utilizada por la aplicación.
+ * Alias de compatibilidad.
  */
+let PLATES = STANDARD_PLATES;
+
+
+/* ==========================================================
+   CONVERSIONES
+========================================================== */
+
 const LB_TO_KG = 0.45359237;
 const KG_TO_LB = 1 / LB_TO_KG;
 
 
-/*
- * Estado principal.
- */
+/* ==========================================================
+   ESTADO
+========================================================== */
+
+const savedPlateMode =
+    localStorage.getItem(
+        "powerload_plate_mode"
+    ) || "standard";
+
+
+const validPlateMode =
+    savedPlateMode === "calibrated"
+        ? "calibrated"
+        : "standard";
+
+
 const state = {
 
-    unit: localStorage.getItem("powerload_unit") || "kg",
+    unit:
+        localStorage.getItem(
+            "powerload_unit"
+        ) || "kg",
 
-    theme: localStorage.getItem("powerload_theme") || "dark",
+    theme:
+        localStorage.getItem(
+            "powerload_theme"
+        ) || "dark",
+
+    plateMode:
+        validPlateMode,
 
     barWeight: 45,
 
-    plates: {
-        45: 0,
-        25: 0,
-        10: 0,
-        5: 0,
-        2.5: 0
+    plates: {},
+
+    platesByMode: {
+
+        standard: {},
+
+        calibrated: {}
+
     },
 
+    /*
+     * Fórmula de la calculadora tradicional.
+     */
     formula: "epley",
+
+    /*
+     * Fórmula de la calculadora
+     * "¿Cuántas reps necesito?"
+     */
+    repsFormula: "epley",
+
+    /*
+     * Fórmula de la calculadora
+     * "¿Qué peso necesito para X reps?"
+     */
+    weightForRepsFormula: "epley",
 
     targetCombination: null,
 
     favorites: JSON.parse(
-        localStorage.getItem("powerload_favorites") || "[]"
+        localStorage.getItem(
+            "powerload_favorites"
+        ) || "[]"
     ),
 
     history: JSON.parse(
-        localStorage.getItem("powerload_history") || "[]"
+        localStorage.getItem(
+            "powerload_history"
+        ) || "[]"
     )
 
 };
 
 
 /* ==========================================================
+   INICIALIZAR ESTADO DE DISCOS
+========================================================== */
+
+function createPlateState(plates) {
+
+    const result = {};
+
+    plates.forEach(plate => {
+
+        result[plate.weight] = 0;
+
+    });
+
+    return result;
+}
+
+
+function initializePlateStates() {
+
+    state.platesByMode.standard =
+        createPlateState(
+            STANDARD_PLATES
+        );
+
+
+    state.platesByMode.calibrated =
+        createPlateState(
+            CALIBRATED_PLATES
+        );
+
+
+    /*
+     * Compatibilidad con versiones anteriores.
+     */
+    const oldPlates =
+        JSON.parse(
+            localStorage.getItem(
+                "powerload_plates"
+            ) || "null"
+        );
+
+
+    if (
+        oldPlates &&
+        typeof oldPlates === "object"
+    ) {
+
+        Object.keys(oldPlates)
+            .forEach(weight => {
+
+                const numericWeight =
+                    Number(weight);
+
+
+                if (
+                    Number.isFinite(
+                        numericWeight
+                    ) &&
+                    Object.prototype.hasOwnProperty.call(
+                        state.platesByMode.standard,
+                        numericWeight
+                    )
+                ) {
+
+                    state.platesByMode
+                        .standard[numericWeight] =
+                        Number(
+                            oldPlates[weight]
+                        ) || 0;
+
+                }
+
+            });
+
+    }
+
+
+    state.plates =
+        state.platesByMode[
+        state.plateMode
+        ];
+
+}
+
+
+initializePlateStates();
+
+
+/* ==========================================================
    DOM
 ========================================================== */
 
-const $ = (id) => document.getElementById(id);
+const $ = id =>
+    document.getElementById(id);
+
 
 const elements = {
 
-    themeButton: $("themeButton"),
+    /* ======================================================
+       GENERAL
+    ====================================================== */
 
-    kgButton: $("kgButton"),
-    lbButton: $("lbButton"),
+    themeButton:
+        $("themeButton"),
 
-    mainWeight: $("mainWeight"),
-    mainUnit: $("mainUnit"),
-    secondaryWeight: $("secondaryWeight"),
+    kgButton:
+        $("kgButton"),
 
-    sideWeight: $("sideWeight"),
-    platesWeight: $("platesWeight"),
-    barDisplay: $("barDisplay"),
+    lbButton:
+        $("lbButton"),
 
-    saveCurrentButton: $("saveCurrentButton"),
 
-    clearPlates: $("clearPlates"),
+    /* ======================================================
+       DISPLAY PRINCIPAL
+    ====================================================== */
 
-    leftVisual: $("leftVisual"),
-    rightVisual: $("rightVisual"),
+    mainWeight:
+        $("mainWeight"),
 
-    visualPlateCount: $("visualPlateCount"),
-    visualTotal: $("visualTotal"),
+    mainUnit:
+        $("mainUnit"),
 
-    platesContainer: $("platesContainer"),
+    secondaryWeight:
+        $("secondaryWeight"),
 
-    barWeight: $("barWeight"),
+    sideWeight:
+        $("sideWeight"),
 
-    targetWeight: $("targetWeight"),
-    targetUnit: $("targetUnit"),
-    calculateTarget: $("calculateTarget"),
-    quickTargets: $("quickTargets"),
+    platesWeight:
+        $("platesWeight"),
 
-    targetResult: $("targetResult"),
-    targetResultTitle: $("targetResultTitle"),
-    targetAccuracy: $("targetAccuracy"),
-    targetCombination: $("targetCombination"),
-    targetRequested: $("targetRequested"),
-    targetReal: $("targetReal"),
-    targetDifference: $("targetDifference"),
-    applyTarget: $("applyTarget"),
+    barDisplay:
+        $("barDisplay"),
 
-    oneRm: $("oneRm"),
-    oneRmUnit: $("oneRmUnit"),
-    percentage: $("percentage"),
-    rmResult: $("rmResult"),
-    sendRmToTarget: $("sendRmToTarget"),
 
-    percentageGrid: $("percentageGrid"),
+    /* ======================================================
+       DISCOS
+    ====================================================== */
 
-    estimateWeight: $("estimateWeight"),
-    estimateUnit: $("estimateUnit"),
-    estimateReps: $("estimateReps"),
-    estimatedOneRm: $("estimatedOneRm"),
-    sendEstimatedToTarget: $("sendEstimatedToTarget"),
+    saveCurrentButton:
+        $("saveCurrentButton"),
 
-    favoritesContainer: $("favoritesContainer"),
-    clearFavorites: $("clearFavorites"),
+    clearPlates:
+        $("clearPlates"),
 
-    historyContainer: $("historyContainer"),
-    clearHistory: $("clearHistory"),
+    leftVisual:
+        $("leftVisual"),
 
-    toastContainer: $("toastContainer")
+    rightVisual:
+        $("rightVisual"),
+
+    visualPlateCount:
+        $("visualPlateCount"),
+
+    visualTotal:
+        $("visualTotal"),
+
+    platesContainer:
+        $("platesContainer"),
+
+    plateMode:
+        $("plateMode"),
+
+    barWeight:
+        $("barWeight"),
+
+
+    /* ======================================================
+       OBJETIVO
+    ====================================================== */
+
+    targetWeight:
+        $("targetWeight"),
+
+    targetUnit:
+        $("targetUnit"),
+
+    calculateTarget:
+        $("calculateTarget"),
+
+    quickTargets:
+        $("quickTargets"),
+
+    targetResult:
+        $("targetResult"),
+
+    targetResultTitle:
+        $("targetResultTitle"),
+
+    targetAccuracy:
+        $("targetAccuracy"),
+
+    targetCombination:
+        $("targetCombination"),
+
+    targetRequested:
+        $("targetRequested"),
+
+    targetReal:
+        $("targetReal"),
+
+    targetDifference:
+        $("targetDifference"),
+
+    applyTarget:
+        $("applyTarget"),
+
+
+    /* ======================================================
+       CALCULADORA 1RM
+    ====================================================== */
+
+    oneRm:
+        $("oneRm"),
+
+    oneRmUnit:
+        $("oneRmUnit"),
+
+    percentage:
+        $("percentage"),
+
+    rmResult:
+        $("rmResult"),
+
+    sendRmToTarget:
+        $("sendRmToTarget"),
+
+    percentageGrid:
+        $("percentageGrid"),
+
+
+    /* ======================================================
+       ESTIMADOR 1RM
+    ====================================================== */
+
+    estimateWeight:
+        $("estimateWeight"),
+
+    estimateUnit:
+        $("estimateUnit"),
+
+    estimateReps:
+        $("estimateReps"),
+
+    estimatedOneRm:
+        $("estimatedOneRm"),
+
+    sendEstimatedToTarget:
+        $("sendEstimatedToTarget"),
+
+
+    /* ======================================================
+       CALCULADORA:
+       ¿CUÁNTAS REPS NECESITO?
+    ====================================================== */
+
+    repsWeight:
+        $("repsWeight"),
+
+    repsWeightUnit:
+        $("repsWeightUnit"),
+
+    repsTarget:
+        $("repsTarget"),
+
+    repsTargetUnit:
+        $("repsTargetUnit"),
+
+    calculateRequiredReps:
+        $("calculateRequiredReps"),
+
+    requiredRepsResult:
+        $("requiredRepsResult"),
+
+    requiredReps:
+        $("requiredReps"),
+
+    requiredRepsWeight:
+        $("requiredRepsWeight"),
+
+    requiredRepsTarget:
+        $("requiredRepsTarget"),
+
+    requiredRepsEstimatedRm:
+        $("requiredRepsEstimatedRm"),
+
+    requiredRepsMessage:
+        $("requiredRepsMessage"),
+
+    sendRepsTargetToTarget:
+        $("sendRepsTargetToTarget"),
+
+
+    /* ======================================================
+       NUEVA CALCULADORA:
+       ¿QUÉ PESO NECESITO PARA X REPS?
+    ====================================================== */
+
+    weightForRepsOneRm:
+        $("weightForRepsOneRm"),
+
+    weightForRepsOneRmUnit:
+        $("weightForRepsOneRmUnit"),
+
+    weightForRepsReps:
+        $("weightForReps"),
+
+    calculateWeightForReps:
+        $("calculateWeightForReps"),
+
+    weightForRepsResult:
+        $("weightForRepsResult"),
+
+    weightForRepsResultValue:
+        $("weightForRepsResultValue"),
+
+    weightForRepsResultUnit:
+        $("weightForRepsResultUnit"),
+
+    weightForRepsReferenceRm:
+        $("weightForRepsReferenceRm"),
+
+    weightForRepsTargetRepsDisplay:
+        $("weightForRepsTargetReps"),
+
+    weightForRepsPercentage:
+        $("weightForRepsPercentage"),
+    /* ======================================================
+       FAVORITOS
+    ====================================================== */
+
+    favoritesContainer:
+        $("favoritesContainer"),
+
+    clearFavorites:
+        $("clearFavorites"),
+
+
+    /* ======================================================
+       HISTORIAL
+    ====================================================== */
+
+    historyContainer:
+        $("historyContainer"),
+
+    clearHistory:
+        $("clearHistory"),
+
+
+    /* ======================================================
+       TOAST
+    ====================================================== */
+
+    toastContainer:
+        $("toastContainer")
 
 };
 
@@ -164,55 +603,115 @@ const elements = {
    UTILIDADES
 ========================================================== */
 
-function round(value, decimals = 2) {
+function round(
+    value,
+    decimals = 2
+) {
 
-    const factor = Math.pow(10, decimals);
+    const factor =
+        Math.pow(
+            10,
+            decimals
+        );
 
-    return Math.round((value + Number.EPSILON) * factor) / factor;
+
+    return Math.round(
+        (
+            value +
+            Number.EPSILON
+        ) * factor
+    ) / factor;
 
 }
 
 
-function formatNumber(value, decimals = 2) {
+function formatNumber(
+    value,
+    decimals = 2
+) {
 
-    if (!Number.isFinite(value)) {
+    if (
+        !Number.isFinite(value)
+    ) {
         return "0";
     }
 
-    const rounded = round(value, decimals);
+
+    const rounded =
+        round(
+            value,
+            decimals
+        );
+
 
     return rounded
         .toFixed(decimals)
-        .replace(/\.00$/, "")
-        .replace(/(\.\d)0$/, "$1");
+        .replace(
+            /\.00$/,
+            ""
+        )
+        .replace(
+            /(\.\d)0$/,
+            "$1"
+        );
 
 }
 
 
-function formatWeight(weightLb, unit = state.unit) {
+function formatWeight(
+    weightLb,
+    unit = state.unit
+) {
 
-    if (!Number.isFinite(weightLb)) {
+    if (
+        !Number.isFinite(
+            weightLb
+        )
+    ) {
+
         return `0 ${unit}`;
-    }
-
-    if (unit === "kg") {
-
-        return `${formatNumber(weightLb * LB_TO_KG, 2)} kg`;
 
     }
 
-    return `${formatNumber(weightLb, 2)} lb`;
+
+    if (
+        unit === "kg"
+    ) {
+
+        return `${formatNumber(
+            weightLb *
+            LB_TO_KG,
+            2
+        )} kg`;
+
+    }
+
+
+    return `${formatNumber(
+        weightLb,
+        2
+    )} lb`;
 
 }
 
 
-function toLb(value, unit) {
+function toLb(
+    value,
+    unit
+) {
 
-    const number = Number(value);
+    const number =
+        Number(value);
 
-    if (!Number.isFinite(number)) {
+
+    if (
+        !Number.isFinite(
+            number
+        )
+    ) {
         return 0;
     }
+
 
     return unit === "kg"
         ? number * KG_TO_LB
@@ -221,7 +720,10 @@ function toLb(value, unit) {
 }
 
 
-function fromLb(valueLb, unit) {
+function fromLb(
+    valueLb,
+    unit
+) {
 
     return unit === "kg"
         ? valueLb * LB_TO_KG
@@ -230,14 +732,31 @@ function fromLb(valueLb, unit) {
 }
 
 
-function escapeHTML(value) {
+function escapeHTML(
+    value
+) {
 
     return String(value)
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
+        .replace(
+            /&/g,
+            "&amp;"
+        )
+        .replace(
+            /</g,
+            "&lt;"
+        )
+        .replace(
+            />/g,
+            "&gt;"
+        )
+        .replace(
+            /"/g,
+            "&quot;"
+        )
+        .replace(
+            /'/g,
+            "&#039;"
+        );
 
 }
 
@@ -246,29 +765,58 @@ function escapeHTML(value) {
    TOAST
 ========================================================== */
 
-function showToast(message, type = "info") {
+function showToast(
+    message,
+    type = "info"
+) {
 
-    if (!elements.toastContainer) {
+    if (
+        !elements.toastContainer
+    ) {
         return;
     }
 
-    const toast = document.createElement("div");
 
-    toast.className = `toast ${type}`;
+    const toast =
+        document.createElement(
+            "div"
+        );
 
-    toast.textContent = message;
 
-    elements.toastContainer.appendChild(toast);
+    toast.className =
+        `toast ${type}`;
 
-    setTimeout(() => {
 
-        toast.classList.add("out");
+    toast.textContent =
+        message;
 
-        setTimeout(() => {
-            toast.remove();
-        }, 220);
 
-    }, 2800);
+    elements.toastContainer
+        .appendChild(
+            toast
+        );
+
+
+    setTimeout(
+        () => {
+
+            toast.classList.add(
+                "out"
+            );
+
+
+            setTimeout(
+                () => {
+
+                    toast.remove();
+
+                },
+                220
+            );
+
+        },
+        2800
+    );
 
 }
 
@@ -284,12 +832,16 @@ function applyTheme() {
         state.theme === "light"
     );
 
-    if (elements.themeButton) {
+
+    if (
+        elements.themeButton
+    ) {
 
         elements.themeButton.textContent =
             state.theme === "light"
                 ? "☀"
                 : "☾";
+
 
         elements.themeButton.title =
             state.theme === "light"
@@ -308,10 +860,12 @@ function toggleTheme() {
             ? "dark"
             : "light";
 
+
     localStorage.setItem(
         "powerload_theme",
         state.theme
     );
+
 
     applyTheme();
 
@@ -324,68 +878,273 @@ function toggleTheme() {
 
 function updateUnitButtons() {
 
-    if (elements.kgButton) {
+    elements.kgButton?.classList.toggle(
+        "active",
+        state.unit === "kg"
+    );
 
-        elements.kgButton.classList.toggle(
-            "active",
-            state.unit === "kg"
-        );
 
-    }
-
-    if (elements.lbButton) {
-
-        elements.lbButton.classList.toggle(
-            "active",
-            state.unit === "lb"
-        );
-
-    }
+    elements.lbButton?.classList.toggle(
+        "active",
+        state.unit === "lb"
+    );
 
 }
 
 
 function updateUnitLabels() {
 
-    if (elements.mainUnit) {
-        elements.mainUnit.textContent = state.unit;
+    if (
+        elements.mainUnit
+    ) {
+
+        elements.mainUnit.textContent =
+            state.unit;
+
     }
 
-    if (elements.targetUnit) {
-        elements.targetUnit.textContent = state.unit;
+
+    if (
+        elements.targetUnit
+    ) {
+
+        elements.targetUnit.textContent =
+            state.unit;
+
     }
 
-    if (elements.oneRmUnit) {
-        elements.oneRmUnit.textContent = state.unit;
+
+    if (
+        elements.oneRmUnit
+    ) {
+
+        elements.oneRmUnit.textContent =
+            state.unit;
+
     }
 
-    if (elements.estimateUnit) {
-        elements.estimateUnit.textContent = state.unit;
+
+    if (
+        elements.estimateUnit
+    ) {
+
+        elements.estimateUnit.textContent =
+            state.unit;
+
+    }
+
+
+    if (
+        elements.repsWeightUnit
+    ) {
+
+        elements.repsWeightUnit.textContent =
+            state.unit;
+
+    }
+
+
+    if (
+        elements.repsTargetUnit
+    ) {
+
+        elements.repsTargetUnit.textContent =
+            state.unit;
+
+    }
+
+
+    if (
+        elements.weightForRepsOneRmUnit
+    ) {
+
+        elements.weightForRepsOneRmUnit.textContent =
+            state.unit;
+
     }
 
 }
 
 
-function changeUnit(unit) {
+function changeUnit(
+    unit
+) {
 
-    if (unit !== "kg" && unit !== "lb") {
+    if (
+        unit !== "kg" &&
+        unit !== "lb"
+    ) {
         return;
     }
 
-    state.unit = unit;
+
+    state.unit =
+        unit;
+
 
     localStorage.setItem(
         "powerload_unit",
         state.unit
     );
 
+
     updateUnitButtons();
+
     updateUnitLabels();
+
     updateQuickTargets();
 
     updateMainDisplay();
+
     calculateOneRM();
+
     calculateEstimatedOneRM();
+
+    calculateRequiredReps();
+
+    calculateWeightForReps();
+
+}
+
+
+/* ==========================================================
+   MODO DE DISCOS
+========================================================== */
+
+function getActivePlates() {
+
+    return state.plateMode ===
+        "calibrated"
+
+        ? CALIBRATED_PLATES
+
+        : STANDARD_PLATES;
+
+}
+
+
+function getPlateModeLabel() {
+
+    return state.plateMode ===
+        "calibrated"
+
+        ? "calibrados"
+
+        : "estándar";
+
+}
+
+
+function updatePlateModeSelect() {
+
+    if (
+        elements.plateMode
+    ) {
+
+        elements.plateMode.value =
+            state.plateMode;
+
+    }
+
+}
+
+
+function changePlateMode(
+    mode
+) {
+
+    if (
+        mode !== "standard" &&
+        mode !== "calibrated"
+    ) {
+        return;
+    }
+
+
+    /*
+     * Guardar configuración actual.
+     */
+    state.platesByMode[
+        state.plateMode
+    ] = {
+        ...state.plates
+    };
+
+
+    state.plateMode =
+        mode;
+
+
+    /*
+     * Cargar nuevo modo.
+     */
+    state.plates =
+        state.platesByMode[
+        mode
+        ];
+
+
+    /*
+     * Crear si no existe.
+     */
+    if (
+        !state.plates ||
+        typeof state.plates !== "object"
+    ) {
+
+        state.plates =
+            createPlateState(
+                getActivePlates()
+            );
+
+
+        state.platesByMode[
+            mode
+        ] =
+            state.plates;
+
+    }
+
+
+    localStorage.setItem(
+        "powerload_plate_mode",
+        state.plateMode
+    );
+
+
+    if (
+        mode === "standard"
+    ) {
+
+        localStorage.setItem(
+            "powerload_plates",
+            JSON.stringify(
+                state.plates
+            )
+        );
+
+    }
+
+
+    PLATES =
+        getActivePlates();
+
+
+    state.targetCombination =
+        null;
+
+
+    renderPlates();
+
+    updateVisualBar();
+
+    updateMainDisplay();
+
+
+    showToast(
+        `Modo de discos ${getPlateModeLabel()} activado.`,
+        "info"
+    );
 
 }
 
@@ -396,9 +1155,11 @@ function changeUnit(unit) {
 
 function getBarWeight() {
 
-    const value = Number(
-        elements.barWeight?.value
-    );
+    const value =
+        Number(
+            elements.barWeight?.value
+        );
+
 
     return Number.isFinite(value)
         ? value
@@ -411,13 +1172,23 @@ function getPlatesPerSideWeight() {
 
     let total = 0;
 
-    Object.keys(state.plates).forEach(weight => {
 
-        total +=
-            Number(weight) *
-            Number(state.plates[weight]);
+    Object.keys(
+        state.plates
+    ).forEach(
+        weight => {
 
-    });
+            total +=
+                Number(weight) *
+                Number(
+                    state.plates[
+                    weight
+                    ]
+                );
+
+        }
+    );
+
 
     return total;
 
@@ -426,7 +1197,10 @@ function getPlatesPerSideWeight() {
 
 function getTotalPlateWeight() {
 
-    return getPlatesPerSideWeight() * 2;
+    return (
+        getPlatesPerSideWeight() *
+        2
+    );
 
 }
 
@@ -447,179 +1221,294 @@ function getCurrentTotalWeight() {
 
 function renderPlates() {
 
-    if (!elements.platesContainer) {
+    if (
+        !elements.platesContainer
+    ) {
         return;
     }
 
-    elements.platesContainer.innerHTML = "";
 
-    PLATES.forEach(plate => {
+    PLATES =
+        getActivePlates();
 
-        const count =
-            state.plates[plate.weight] || 0;
 
-        const row =
-            document.createElement("div");
+    elements.platesContainer
+        .innerHTML = "";
 
-        row.className =
-            `plate-row ${count > 0 ? "has-plates" : ""}`;
 
-        row.innerHTML = `
+    PLATES.forEach(
+        plate => {
 
-            <div class="plate-info">
+            const count =
+                state.plates[
+                plate.weight
+                ] || 0;
 
-                <div
-                    class="plate-circle plate-${plate.className}"
-                >
-                    ${plate.weight}
+
+            const row =
+                document.createElement(
+                    "div"
+                );
+
+
+            row.className =
+                `plate-row ${count > 0
+                    ? "has-plates"
+                    : ""
+                }`;
+
+
+            row.innerHTML = `
+
+                <div class="plate-info">
+
+                    <div
+                        class="plate-circle plate-${plate.className}"
+                    >
+                        ${state.plateMode ===
+                    "calibrated"
+                    ? plate.kg
+                    : plate.weight
+                }
+                    </div>
+
+                    <div>
+
+                        <strong>
+                            ${plate.label}
+                        </strong>
+
+                        <small>
+                            Por lado
+                        </small>
+
+                    </div>
+
                 </div>
 
-                <div>
 
-                    <strong>
-                        ${plate.label}
-                    </strong>
+                <div class="counter">
 
-                    <small>
-                        Por lado
-                    </small>
+                    <button
+                        type="button"
+                        data-action="decrease"
+                        data-weight="${plate.weight}"
+                        aria-label="Quitar disco de ${plate.label}"
+                        ${count <= 0 ? "disabled" : ""}
+                    >
+                        −
+                    </button>
+
+                    <span>
+                        ${count}
+                    </span>
+
+                    <button
+                        type="button"
+                        data-action="increase"
+                        data-weight="${plate.weight}"
+                        aria-label="Agregar disco de ${plate.label}"
+                    >
+                        +
+                    </button>
 
                 </div>
 
-            </div>
+            `;
 
-            <div class="counter">
 
-                <button
-                    type="button"
-                    data-action="decrease"
-                    data-weight="${plate.weight}"
-                    aria-label="Quitar disco de ${plate.label}"
-                    ${count <= 0 ? "disabled" : ""}
-                >
-                    −
-                </button>
+            elements.platesContainer
+                .appendChild(
+                    row
+                );
 
-                <span>
-                    ${count}
-                </span>
-
-                <button
-                    type="button"
-                    data-action="increase"
-                    data-weight="${plate.weight}"
-                    aria-label="Agregar disco de ${plate.label}"
-                >
-                    +
-                </button>
-
-            </div>
-
-        `;
-
-        elements.platesContainer.appendChild(row);
-
-    });
+        }
+    );
 
 }
 
 
-function changePlate(weight, amount) {
+function changePlate(
+    weight,
+    amount
+) {
 
     const current =
-        state.plates[weight] || 0;
+        state.plates[
+        weight
+        ] || 0;
+
 
     const next =
-        Math.max(0, current + amount);
+        Math.max(
+            0,
+            current + amount
+        );
 
-    state.plates[weight] = next;
+
+    state.plates[
+        weight
+    ] =
+        next;
+
+
+    state.platesByMode[
+        state.plateMode
+    ] = {
+        ...state.plates
+    };
+
+
+    if (
+        state.plateMode ===
+        "standard"
+    ) {
+
+        localStorage.setItem(
+            "powerload_plates",
+            JSON.stringify(
+                state.plates
+            )
+        );
+
+    }
+
 
     renderPlates();
+
     updateVisualBar();
+
     updateMainDisplay();
 
 }
 
 
 /* ==========================================================
-   VISUALIZACIÓN DE LA BARRA
+   VISUALIZACIÓN DE BARRA
 ========================================================== */
 
-function createVisualPlate(plate) {
+function createVisualPlate(
+    plate
+) {
 
     const element =
-        document.createElement("div");
+        document.createElement(
+            "div"
+        );
+
 
     element.className =
         `visual-plate visual-${plate.className}`;
 
+
     element.title =
         `${plate.label} por lado`;
 
+
     element.textContent =
-        plate.weight;
+        state.plateMode ===
+            "calibrated"
+
+            ? plate.kg
+
+            : plate.weight;
+
 
     return element;
 
 }
 
 
-function renderVisualStack(container) {
+function renderVisualStack(
+    container
+) {
 
     if (!container) {
         return;
     }
 
-    container.innerHTML = "";
 
-    /*
-     * Los discos se dibujan desde los más pesados
-     * hacia los más pequeños.
-     */
-    PLATES.forEach(plate => {
+    container.innerHTML =
+        "";
 
-        const count =
-            state.plates[plate.weight] || 0;
 
-        for (let i = 0; i < count; i++) {
+    PLATES.forEach(
+        plate => {
 
-            container.appendChild(
-                createVisualPlate(plate)
-            );
+            const count =
+                state.plates[
+                plate.weight
+                ] || 0;
+
+
+            for (
+                let i = 0;
+                i < count;
+                i++
+            ) {
+
+                container.appendChild(
+                    createVisualPlate(
+                        plate
+                    )
+                );
+
+            }
 
         }
-
-    });
+    );
 
 }
 
 
 function updateVisualBar() {
 
-    renderVisualStack(elements.leftVisual);
-    renderVisualStack(elements.rightVisual);
+    renderVisualStack(
+        elements.leftVisual
+    );
+
+
+    renderVisualStack(
+        elements.rightVisual
+    );
+
 
     const count =
-        Object.values(state.plates)
-            .reduce(
-                (sum, value) => sum + Number(value),
-                0
-            );
+        Object.values(
+            state.plates
+        ).reduce(
+            (
+                sum,
+                value
+            ) =>
+                sum +
+                Number(value),
+            0
+        );
+
 
     const total =
         getCurrentTotalWeight();
 
-    if (elements.visualPlateCount) {
+
+    if (
+        elements.visualPlateCount
+    ) {
 
         elements.visualPlateCount.textContent =
             count;
 
     }
 
-    if (elements.visualTotal) {
+
+    if (
+        elements.visualTotal
+    ) {
 
         elements.visualTotal.textContent =
-            formatWeight(total);
+            formatWeight(
+                total
+            );
 
     }
 
@@ -635,45 +1524,75 @@ function updateMainDisplay() {
     const total =
         getCurrentTotalWeight();
 
+
     const platesPerSide =
         getPlatesPerSideWeight();
+
 
     const bar =
         getBarWeight();
 
+
     const mainValue =
-        fromLb(total, state.unit);
+        fromLb(
+            total,
+            state.unit
+        );
+
 
     const sideValue =
-        fromLb(platesPerSide, state.unit);
+        fromLb(
+            platesPerSide,
+            state.unit
+        );
+
 
     const platesTotalValue =
-        fromLb(platesPerSide * 2, state.unit);
+        fromLb(
+            platesPerSide * 2,
+            state.unit
+        );
+
 
     const barValue =
-        fromLb(bar, state.unit);
+        fromLb(
+            bar,
+            state.unit
+        );
 
 
-    if (elements.mainWeight) {
+    if (
+        elements.mainWeight
+    ) {
 
         elements.mainWeight.textContent =
-            formatNumber(mainValue, 2);
+            formatNumber(
+                mainValue,
+                2
+            );
 
     }
 
-    if (elements.mainUnit) {
+
+    if (
+        elements.mainUnit
+    ) {
 
         elements.mainUnit.textContent =
             state.unit;
 
     }
 
-    if (elements.secondaryWeight) {
+
+    if (
+        elements.secondaryWeight
+    ) {
 
         const otherUnit =
             state.unit === "kg"
                 ? "lb"
                 : "kg";
+
 
         elements.secondaryWeight.textContent =
             formatWeight(
@@ -683,24 +1602,42 @@ function updateMainDisplay() {
 
     }
 
-    if (elements.sideWeight) {
+
+    if (
+        elements.sideWeight
+    ) {
 
         elements.sideWeight.textContent =
-            `${formatNumber(sideValue, 2)} ${state.unit}`;
+            `${formatNumber(
+                sideValue,
+                2
+            )} ${state.unit}`;
 
     }
 
-    if (elements.platesWeight) {
+
+    if (
+        elements.platesWeight
+    ) {
 
         elements.platesWeight.textContent =
-            `${formatNumber(platesTotalValue, 2)} ${state.unit}`;
+            `${formatNumber(
+                platesTotalValue,
+                2
+            )} ${state.unit}`;
 
     }
 
-    if (elements.barDisplay) {
+
+    if (
+        elements.barDisplay
+    ) {
 
         elements.barDisplay.textContent =
-            `${formatNumber(barValue, 2)} ${state.unit}`;
+            `${formatNumber(
+                barValue,
+                2
+            )} ${state.unit}`;
 
     }
 
@@ -713,15 +1650,47 @@ function updateMainDisplay() {
 
 function clearPlates() {
 
-    Object.keys(state.plates).forEach(weight => {
+    Object.keys(
+        state.plates
+    ).forEach(
+        weight => {
 
-        state.plates[weight] = 0;
+            state.plates[
+                weight
+            ] = 0;
 
-    });
+        }
+    );
+
+
+    state.platesByMode[
+        state.plateMode
+    ] = {
+        ...state.plates
+    };
+
+
+    if (
+        state.plateMode ===
+        "standard"
+    ) {
+
+        localStorage.setItem(
+            "powerload_plates",
+            JSON.stringify(
+                state.plates
+            )
+        );
+
+    }
+
 
     renderPlates();
+
     updateVisualBar();
+
     updateMainDisplay();
+
 
     showToast(
         "Configuración de discos limpiada.",
@@ -737,7 +1706,9 @@ function clearPlates() {
 
 function getQuickTargets() {
 
-    if (state.unit === "kg") {
+    if (
+        state.unit === "kg"
+    ) {
 
         return [
             60,
@@ -751,6 +1722,7 @@ function getQuickTargets() {
         ];
 
     }
+
 
     return [
         135,
@@ -768,41 +1740,62 @@ function getQuickTargets() {
 
 function updateQuickTargets() {
 
-    if (!elements.quickTargets) {
+    if (
+        !elements.quickTargets
+    ) {
         return;
     }
 
-    elements.quickTargets.innerHTML = "";
 
-    getQuickTargets().forEach(value => {
+    elements.quickTargets.innerHTML =
+        "";
 
-        const button =
-            document.createElement("button");
 
-        button.type = "button";
+    getQuickTargets()
+        .forEach(
+            value => {
 
-        button.textContent =
-            `${value} ${state.unit}`;
+                const button =
+                    document.createElement(
+                        "button"
+                    );
 
-        button.addEventListener(
-            "click",
-            () => {
 
-                if (elements.targetWeight) {
+                button.type =
+                    "button";
 
-                    elements.targetWeight.value =
-                        value;
 
-                }
+                button.textContent =
+                    `${value} ${state.unit}`;
 
-                findTarget();
+
+                button.addEventListener(
+                    "click",
+                    () => {
+
+                        if (
+                            elements.targetWeight
+                        ) {
+
+                            elements.targetWeight.value =
+                                value;
+
+                        }
+
+
+                        findTarget();
+
+                    }
+                );
+
+
+                elements.quickTargets
+                    .appendChild(
+                        button
+                    );
 
             }
         );
-
-        elements.quickTargets.appendChild(button);
-
-    });
 
 }
 
@@ -811,15 +1804,9 @@ function updateQuickTargets() {
    COMBINACIONES DE DISCOS
 ========================================================== */
 
-/*
- * Genera combinaciones de discos por lado.
- *
- * IMPORTANTE:
- * Los discos SIEMPRE están en LIBRAS.
- *
- * No existe inventario:
- * cualquier cantidad de discos es válida.
- */
+/* ==========================================================
+   COMBINACIONES DE DISCOS (CORREGIDA)
+========================================================== */
 
 function findBestPlateCombination(
     requiredPerSideLb
@@ -828,89 +1815,168 @@ function findBestPlateCombination(
     requiredPerSideLb =
         Math.max(
             0,
-            Number(requiredPerSideLb) || 0
+            Number(
+                requiredPerSideLb
+            ) || 0
         );
 
 
-    /*
-     * Los discos se trabajan en incrementos de 2.5 lb.
-     */
-    const roundedTarget =
-        Math.round(
-            requiredPerSideLb / 2.5
-        ) * 2.5;
+    const plates =
+        getActivePlates();
+
+
+    const isCalibrated =
+        state.plateMode ===
+        "calibrated";
 
 
     /*
-     * Conversión a unidades de 2.5 lb.
+     * IMPORTANTE:
+     * Los discos calibrados son valores "limpios" en KG
+     * (25, 20, 15, 10, 5, 2.5...). Si convertimos todo a
+     * libras antes de calcular, el redondeo rompe esa
+     * relación limpia y el algoritmo puede terminar
+     * buscando una combinación "exacta" en libras que en
+     * la práctica requiere una cantidad absurda de discos.
+     *
+     * Por eso, cuando el modo es calibrado, hacemos el
+     * cálculo directamente en KG (la unidad nativa de esos
+     * discos) y solo convertimos el resultado final de
+     * vuelta a libras para mantener el resto de la app
+     * funcionando igual.
      */
+
+    const nativeRequiredPerSide =
+        isCalibrated
+            ? requiredPerSideLb * LB_TO_KG
+            : requiredPerSideLb;
+
+
+    /*
+     * Precisión de 0.01 en la unidad nativa.
+     */
+    const SCALE = 100;
+
+
     const targetUnits =
         Math.round(
-            roundedTarget / 2.5
+            nativeRequiredPerSide *
+            SCALE
         );
 
 
-    const denominations = [
-        18, // 45 lb
-        10, // 25 lb
-        4,  // 10 lb
-        2,  // 5 lb
-        1   // 2.5 lb
-    ];
+    const denominations =
+        plates.map(
+            plate => {
+
+                const nativeValue =
+                    isCalibrated
+                        ? plate.kg
+                        : plate.weight;
+
+
+                return Math.max(
+                    1,
+                    Math.round(
+                        nativeValue *
+                        SCALE
+                    )
+                );
+
+            }
+        );
 
 
     /*
-     * Programación dinámica para encontrar
-     * la combinación con menor cantidad de discos.
+     * Protección contra objetivos
+     * absurdamente grandes.
      */
+    const MAX_TARGET_UNITS =
+        1000000;
+
+
+    const safeTargetUnits =
+        Math.min(
+            targetUnits,
+            MAX_TARGET_UNITS
+        );
+
+
     const dp =
-        new Array(targetUnits + 1)
-            .fill(null);
+        new Array(
+            safeTargetUnits + 1
+        ).fill(null);
+
 
     dp[0] = {
+
         count: 0,
-        combo: [0, 0, 0, 0, 0]
+
+        combo:
+            new Array(
+                plates.length
+            ).fill(0)
+
     };
 
 
     for (
         let total = 1;
-        total <= targetUnits;
+        total <= safeTargetUnits;
         total++
     ) {
 
         let best = null;
 
+
         denominations.forEach(
-            (denomination, index) => {
+            (
+                denomination,
+                index
+            ) => {
 
                 if (
                     total >= denomination &&
-                    dp[total - denomination]
+                    dp[
+                    total -
+                    denomination
+                    ]
                 ) {
 
                     const previous =
-                        dp[total - denomination];
+                        dp[
+                        total -
+                        denomination
+                        ];
+
 
                     const candidate = {
 
                         count:
-                            previous.count + 1,
+                            previous.count +
+                            1,
 
                         combo:
-                            [...previous.combo]
+                            [
+                                ...previous.combo
+                            ]
 
                     };
 
-                    candidate.combo[index]++;
+
+                    candidate.combo[
+                        index
+                    ]++;
 
 
                     if (
                         !best ||
-                        candidate.count < best.count
+                        candidate.count <
+                        best.count
                     ) {
 
-                        best = candidate;
+                        best =
+                            candidate;
 
                     }
 
@@ -920,50 +1986,129 @@ function findBestPlateCombination(
         );
 
 
-        dp[total] = best;
+        dp[total] =
+            best;
 
     }
 
 
-    const result =
-        dp[targetUnits] || {
-            count: 0,
-            combo: [0, 0, 0, 0, 0]
-        };
+    let result =
+        dp[
+        safeTargetUnits
+        ];
 
 
-    const combination = {
+    /*
+     * Buscar la combinación más cercana
+     * cuando no existe exacta.
+     */
+    if (!result) {
 
-        45: result.combo[0],
-        25: result.combo[1],
-        10: result.combo[2],
-        5: result.combo[3],
-        2.5: result.combo[4]
-
-    };
+        let closest =
+            null;
 
 
+        for (
+            let i =
+                safeTargetUnits;
+            i >= 0;
+            i--
+        ) {
+
+            if (
+                dp[i]
+            ) {
+
+                closest =
+                    dp[i];
+
+                break;
+
+            }
+
+        }
+
+
+        result =
+            closest || {
+
+                count: 0,
+
+                combo:
+                    new Array(
+                        plates.length
+                    ).fill(0)
+
+            };
+
+    }
+
+
+    const combination = {};
+
+
+    plates.forEach(
+        (
+            plate,
+            index
+        ) => {
+
+            combination[
+                plate.weight
+            ] =
+                result.combo[
+                index
+                ] || 0;
+
+        }
+    );
+
+
+    const actualPerSideNative =
+        plates.reduce(
+            (
+                sum,
+                plate,
+                index
+            ) => {
+
+                const nativeValue =
+                    isCalibrated
+                        ? plate.kg
+                        : plate.weight;
+
+
+                return sum +
+                    nativeValue *
+                    result.combo[index];
+
+            },
+            0
+        );
+
+
+    /*
+     * Convertimos de vuelta a libras (unidad interna
+     * del resto de la app) solo si calculamos en KG.
+     */
     const actualPerSide =
-        Object.keys(combination)
-            .reduce(
-                (sum, weight) =>
-                    sum +
-                    Number(weight) *
-                    combination[weight],
-                0
-            );
+        isCalibrated
+            ? actualPerSideNative * KG_TO_LB
+            : actualPerSideNative;
 
 
     return {
 
         combination,
 
-        requestedPerSide: requiredPerSideLb,
+        requestedPerSide:
+            requiredPerSideLb,
 
         actualPerSide,
 
         differencePerSide:
-            actualPerSide - requiredPerSideLb,
+            actualPerSide -
+            requiredPerSideLb,
 
         totalPlateWeight:
             actualPerSide * 2
@@ -973,22 +2118,30 @@ function findBestPlateCombination(
 }
 
 
+
 /* ==========================================================
    ENCONTRAR OBJETIVO
 ========================================================== */
 
 function findTarget() {
 
-    if (!elements.targetWeight) {
+    if (
+        !elements.targetWeight
+    ) {
         return;
     }
 
+
     const inputValue =
-        Number(elements.targetWeight.value);
+        Number(
+            elements.targetWeight.value
+        );
 
 
     if (
-        !Number.isFinite(inputValue) ||
+        !Number.isFinite(
+            inputValue
+        ) ||
         inputValue <= 0
     ) {
 
@@ -1014,12 +2167,10 @@ function findTarget() {
 
 
     const requiredPlateTotal =
-        targetLb - barLb;
+        targetLb -
+        barLb;
 
 
-    /*
-     * No puede existir un peso de discos negativo.
-     */
     const requiredPerSide =
         Math.max(
             0,
@@ -1039,7 +2190,8 @@ function findTarget() {
 
 
     const difference =
-        realTotal - targetLb;
+        realTotal -
+        targetLb;
 
 
     state.targetCombination = {
@@ -1052,7 +2204,10 @@ function findTarget() {
 
         realTotal,
 
-        difference
+        difference,
+
+        plateMode:
+            state.plateMode
 
     };
 
@@ -1064,52 +2219,82 @@ function findTarget() {
 }
 
 
-function displayTargetResult(result) {
+/* ==========================================================
+   MOSTRAR RESULTADO OBJETIVO
+========================================================== */
 
-    if (!elements.targetResult) {
+function displayTargetResult(
+    result
+) {
+
+    if (
+        !elements.targetResult
+    ) {
         return;
     }
 
 
-    elements.targetResult.classList.remove(
-        "hidden"
-    );
+    elements.targetResult
+        .classList.remove(
+            "hidden"
+        );
 
 
     const absoluteDifference =
-        Math.abs(result.difference);
+        Math.abs(
+            result.difference
+        );
 
 
     let accuracyClass =
         "exact";
 
+
     let accuracyText =
         "EXACTO";
 
 
-    if (absoluteDifference > 0.01) {
+    if (
+        absoluteDifference >
+        0.01
+    ) {
 
-        if (absoluteDifference <= 2.5) {
+        if (
+            absoluteDifference <=
+            (
+                state.plateMode ===
+                    "calibrated"
+                    ? 1
+                    : 2.5
+            )
+        ) {
 
-            accuracyClass = "close";
+            accuracyClass =
+                "close";
 
-            accuracyText = "CERCANO";
+            accuracyText =
+                "CERCANO";
 
         } else {
 
-            accuracyClass = "unavailable";
+            accuracyClass =
+                "unavailable";
 
-            accuracyText = "APROXIMADO";
+            accuracyText =
+                "APROXIMADO";
 
         }
 
     }
 
 
-    if (elements.targetAccuracy) {
+    if (
+        elements.targetAccuracy
+    ) {
 
         elements.targetAccuracy.className =
             `accuracy ${accuracyClass}`;
+
 
         elements.targetAccuracy.textContent =
             accuracyText;
@@ -1117,43 +2302,66 @@ function displayTargetResult(result) {
     }
 
 
-    if (elements.targetResultTitle) {
+    if (
+        elements.targetResultTitle
+    ) {
 
         elements.targetResultTitle.textContent =
-            accuracyText === "EXACTO"
+            accuracyText ===
+                "EXACTO"
+
                 ? "Combinación recomendada"
+
                 : "Mejor combinación disponible";
 
     }
 
 
-    if (elements.targetCombination) {
+    if (
+        elements.targetCombination
+    ) {
 
-        elements.targetCombination.innerHTML = "";
+        elements.targetCombination.innerHTML =
+            "";
 
-        PLATES.forEach(plate => {
 
-            const count =
-                result.combination[plate.weight] || 0;
+        PLATES.forEach(
+            plate => {
 
-            if (count <= 0) {
-                return;
+                const count =
+                    result.combination[
+                    plate.weight
+                    ] || 0;
+
+
+                if (
+                    count <= 0
+                ) {
+                    return;
+                }
+
+
+                const chip =
+                    document.createElement(
+                        "div"
+                    );
+
+
+                chip.className =
+                    "plate-chip";
+
+
+                chip.textContent =
+                    `${count} × ${plate.label}`;
+
+
+                elements.targetCombination
+                    .appendChild(
+                        chip
+                    );
+
             }
-
-
-            const chip =
-                document.createElement("div");
-
-            chip.className =
-                "plate-chip";
-
-            chip.textContent =
-                `${count} × ${plate.label}`;
-
-            elements.targetCombination
-                .appendChild(chip);
-
-        });
+        );
 
 
         if (
@@ -1162,23 +2370,32 @@ function displayTargetResult(result) {
         ) {
 
             const chip =
-                document.createElement("div");
+                document.createElement(
+                    "div"
+                );
+
 
             chip.className =
                 "plate-chip";
 
+
             chip.textContent =
                 "Sin discos";
 
+
             elements.targetCombination
-                .appendChild(chip);
+                .appendChild(
+                    chip
+                );
 
         }
 
     }
 
 
-    if (elements.targetRequested) {
+    if (
+        elements.targetRequested
+    ) {
 
         elements.targetRequested.textContent =
             formatWeight(
@@ -1188,7 +2405,9 @@ function displayTargetResult(result) {
     }
 
 
-    if (elements.targetReal) {
+    if (
+        elements.targetReal
+    ) {
 
         elements.targetReal.textContent =
             formatWeight(
@@ -1198,15 +2417,20 @@ function displayTargetResult(result) {
     }
 
 
-    if (elements.targetDifference) {
+    if (
+        elements.targetDifference
+    ) {
 
         const sign =
             result.difference > 0
                 ? "+"
                 : "";
 
+
         elements.targetDifference.textContent =
-            `${sign}${formatWeight(result.difference)}`;
+            `${sign}${formatWeight(
+                result.difference
+            )}`;
 
     }
 
@@ -1231,26 +2455,83 @@ function applyTargetConfiguration() {
         );
 
         return;
+    }
+
+
+    if (
+        result.plateMode &&
+        result.plateMode !==
+        state.plateMode
+    ) {
+
+        changePlateMode(
+            result.plateMode
+        );
 
     }
 
 
-    Object.keys(state.plates).forEach(weight => {
+    Object.keys(
+        state.plates
+    ).forEach(
+        weight => {
 
-        state.plates[weight] =
-            result.combination[weight] || 0;
+            state.plates[
+                weight
+            ] =
+                result.combination[
+                weight
+                ] || 0;
 
-    });
+        }
+    );
+
+
+    state.platesByMode[
+        state.plateMode
+    ] = {
+        ...state.plates
+    };
+
+
+    if (
+        state.plateMode ===
+        "standard"
+    ) {
+
+        localStorage.setItem(
+            "powerload_plates",
+            JSON.stringify(
+                state.plates
+            )
+        );
+
+    }
 
 
     renderPlates();
+
     updateVisualBar();
+
     updateMainDisplay();
 
+
     addHistory({
-        weight: result.realTotal,
-        plates: {...state.plates},
-        bar: result.barLb
+
+        weight:
+            result.realTotal,
+
+        plates:
+        {
+            ...state.plates
+        },
+
+        bar:
+            result.barLb,
+
+        plateMode:
+            state.plateMode
+
     });
 
 
@@ -1261,18 +2542,25 @@ function applyTargetConfiguration() {
 
 
     window.scrollTo({
+
         top: 0,
+
         behavior: "smooth"
+
     });
 
 }
 
 
 /* ==========================================================
-   1RM
+   FÓRMULAS DE 1RM
 ========================================================== */
 
-function calculateOneRMValue(weight, reps, formula) {
+function calculateOneRMValue(
+    weight,
+    reps,
+    formula
+) {
 
     if (
         !Number.isFinite(weight) ||
@@ -1286,18 +2574,42 @@ function calculateOneRMValue(weight, reps, formula) {
     }
 
 
-    if (reps === 1) {
+    if (
+        reps === 1
+    ) {
+
         return weight;
+
     }
 
 
-    switch (formula) {
+    switch (
+    formula
+    ) {
 
         case "brzycki":
 
+            /*
+             * Fórmula Brzycki.
+             */
+            if (
+                reps >= 37
+            ) {
+
+                return weight;
+
+            }
+
+
             return (
                 weight *
-                (36 / (37 - reps))
+                (
+                    36 /
+                    (
+                        37 -
+                        reps
+                    )
+                )
             );
 
 
@@ -1305,7 +2617,10 @@ function calculateOneRMValue(weight, reps, formula) {
 
             return (
                 weight *
-                Math.pow(reps, 0.10)
+                Math.pow(
+                    reps,
+                    0.10
+                )
             );
 
 
@@ -1315,7 +2630,10 @@ function calculateOneRMValue(weight, reps, formula) {
 
             return (
                 weight *
-                (1 + reps / 30)
+                (
+                    1 +
+                    reps / 30
+                )
             );
 
     }
@@ -1323,38 +2641,288 @@ function calculateOneRMValue(weight, reps, formula) {
 }
 
 
+/* ==========================================================
+   INVERSA DE 1RM
+   PESO + 1RM → REPS
+========================================================== */
+
+function calculateRequiredRepsValue(
+    weight,
+    targetOneRm,
+    formula
+) {
+
+    if (
+        !Number.isFinite(weight) ||
+        !Number.isFinite(targetOneRm) ||
+        weight <= 0 ||
+        targetOneRm <= 0
+    ) {
+
+        return 0;
+
+    }
+
+
+    /*
+     * Si el peso ya representa o supera
+     * el objetivo, usamos 1 repetición.
+     */
+    if (
+        targetOneRm <= weight
+    ) {
+
+        return 1;
+
+    }
+
+
+    let reps = 0;
+
+
+    switch (
+    formula
+    ) {
+
+        case "brzycki":
+
+            reps =
+                37 -
+                (
+                    36 *
+                    weight /
+                    targetOneRm
+                );
+
+            break;
+
+
+        case "lombardi":
+
+            reps =
+                Math.pow(
+                    targetOneRm /
+                    weight,
+                    10
+                );
+
+            break;
+
+
+        case "epley":
+
+        default:
+
+            reps =
+                30 *
+                (
+                    targetOneRm /
+                    weight -
+                    1
+                );
+
+            break;
+
+    }
+
+
+    if (
+        !Number.isFinite(reps) ||
+        reps <= 0
+    ) {
+
+        return 0;
+
+    }
+
+
+    return Math.ceil(
+        reps
+    );
+
+}
+
+
+/* ==========================================================
+   INVERSA:
+   1RM + REPS → PESO
+========================================================== */
+
+function calculateWeightForRepsValue(
+    oneRm,
+    reps,
+    formula
+) {
+
+    if (
+        !Number.isFinite(oneRm) ||
+        !Number.isFinite(reps) ||
+        oneRm <= 0 ||
+        reps <= 0
+    ) {
+
+        return 0;
+
+    }
+
+
+    /*
+     * Una repetición equivale al 1RM.
+     */
+    if (
+        reps === 1
+    ) {
+
+        return oneRm;
+
+    }
+
+
+    let weight = 0;
+
+
+    switch (
+    formula
+    ) {
+
+        case "brzycki":
+
+            /*
+             *
+             * 1RM = peso × 36 / (37 - reps)
+             *
+             * peso = 1RM × (37 - reps) / 36
+             *
+             */
+
+            if (
+                reps >= 37
+            ) {
+
+                return 0;
+
+            }
+
+
+            weight =
+                oneRm *
+                (
+                    37 -
+                    reps
+                ) /
+                36;
+
+            break;
+
+
+        case "lombardi":
+
+            /*
+             *
+             * 1RM = peso × reps^0.10
+             *
+             * peso = 1RM / reps^0.10
+             *
+             */
+
+            weight =
+                oneRm /
+                Math.pow(
+                    reps,
+                    0.10
+                );
+
+            break;
+
+
+        case "epley":
+
+        default:
+
+            /*
+             *
+             * 1RM =
+             * peso × (1 + reps / 30)
+             *
+             *
+             * peso =
+             * 1RM / (1 + reps / 30)
+             *
+             */
+
+            weight =
+                oneRm /
+                (
+                    1 +
+                    reps / 30
+                );
+
+            break;
+
+    }
+
+
+    if (
+        !Number.isFinite(weight) ||
+        weight <= 0
+    ) {
+
+        return 0;
+
+    }
+
+
+    return weight;
+
+}
+
+
+/* ==========================================================
+   CALCULADORA 1RM POR PORCENTAJE
+========================================================== */
+
 function calculateOneRM() {
 
     const input =
-        Number(elements.oneRm?.value);
+        Number(
+            elements.oneRm?.value
+        );
+
 
     const percentage =
-        Number(elements.percentage?.value);
+        Number(
+            elements.percentage?.value
+        );
 
 
     if (
         !Number.isFinite(input) ||
         input <= 0 ||
-        !Number.isFinite(percentage)
+        !Number.isFinite(
+            percentage
+        )
     ) {
 
-        if (elements.rmResult) {
+        if (
+            elements.rmResult
+        ) {
 
             elements.rmResult.textContent =
                 `0 ${state.unit}`;
 
         }
 
-        renderPercentageGrid(0);
+
+        renderPercentageGrid(
+            0
+        );
+
 
         return;
 
     }
 
 
-    /*
-     * El campo 1RM representa directamente el máximo.
-     */
     const oneRmLb =
         toLb(
             input,
@@ -1363,18 +2931,25 @@ function calculateOneRM() {
 
 
     const resultLb =
-        oneRmLb * percentage;
+        oneRmLb *
+        percentage;
 
 
-    if (elements.rmResult) {
+    if (
+        elements.rmResult
+    ) {
 
         elements.rmResult.textContent =
-            formatWeight(resultLb);
+            formatWeight(
+                resultLb
+            );
 
     }
 
 
-    renderPercentageGrid(oneRmLb);
+    renderPercentageGrid(
+        oneRmLb
+    );
 
 }
 
@@ -1383,16 +2958,23 @@ function calculateOneRM() {
    TABLA DE PORCENTAJES
 ========================================================== */
 
-function renderPercentageGrid(oneRmLb) {
+function renderPercentageGrid(
+    oneRmLb
+) {
 
-    if (!elements.percentageGrid) {
+    if (
+        !elements.percentageGrid
+    ) {
         return;
     }
 
-    elements.percentageGrid.innerHTML = "";
+
+    elements.percentageGrid.innerHTML =
+        "";
 
 
     const percentages = [
+
         50,
         55,
         60,
@@ -1408,73 +2990,100 @@ function renderPercentageGrid(oneRmLb) {
         92.5,
         95,
         100
+
     ];
 
 
     const selected =
-        Number(elements.percentage?.value) || 0;
+        Number(
+            elements.percentage?.value
+        ) || 0;
 
 
-    percentages.forEach(percent => {
+    percentages.forEach(
+        percent => {
 
-        const cell =
-            document.createElement("div");
-
-        cell.className =
-            "percentage-cell";
-
-
-        if (
-            Math.abs(
-                percent / 100 - selected
-            ) < 0.0001
-        ) {
-
-            cell.classList.add("active");
-
-        }
+            const cell =
+                document.createElement(
+                    "div"
+                );
 
 
-        const valueLb =
-            oneRmLb > 0
-                ? oneRmLb * (percent / 100)
-                : 0;
+            cell.className =
+                "percentage-cell";
 
 
-        cell.innerHTML = `
+            if (
+                Math.abs(
+                    percent / 100 -
+                    selected
+                ) < 0.0001
+            ) {
 
-            <span>
-                ${percent}%
-            </span>
-
-            <strong>
-                ${formatWeight(valueLb)}
-            </strong>
-
-        `;
-
-
-        cell.addEventListener(
-            "click",
-            () => {
-
-                if (elements.percentage) {
-
-                    elements.percentage.value =
-                        String(percent / 100);
-
-                }
-
-                calculateOneRM();
+                cell.classList.add(
+                    "active"
+                );
 
             }
-        );
 
 
-        elements.percentageGrid
-            .appendChild(cell);
+            const valueLb =
+                oneRmLb > 0
 
-    });
+                    ? oneRmLb *
+                    (
+                        percent /
+                        100
+                    )
+
+                    : 0;
+
+
+            cell.innerHTML = `
+
+                <span>
+                    ${percent}%
+                </span>
+
+                <strong>
+                    ${formatWeight(
+                valueLb
+            )}
+                </strong>
+
+            `;
+
+
+            cell.addEventListener(
+                "click",
+                () => {
+
+                    if (
+                        elements.percentage
+                    ) {
+
+                        elements.percentage.value =
+                            String(
+                                percent /
+                                100
+                            );
+
+                    }
+
+
+                    calculateOneRM();
+
+                }
+            );
+
+
+            elements.percentageGrid
+                .appendChild(
+                    cell
+                );
+
+        }
+    );
 
 }
 
@@ -1486,10 +3095,15 @@ function renderPercentageGrid(oneRmLb) {
 function calculateEstimatedOneRM() {
 
     const weight =
-        Number(elements.estimateWeight?.value);
+        Number(
+            elements.estimateWeight?.value
+        );
+
 
     const reps =
-        Number(elements.estimateReps?.value);
+        Number(
+            elements.estimateReps?.value
+        );
 
 
     if (
@@ -1499,12 +3113,15 @@ function calculateEstimatedOneRM() {
         reps < 1
     ) {
 
-        if (elements.estimatedOneRm) {
+        if (
+            elements.estimatedOneRm
+        ) {
 
             elements.estimatedOneRm.textContent =
                 `0 ${state.unit}`;
 
         }
+
 
         return 0;
 
@@ -1518,26 +3135,560 @@ function calculateEstimatedOneRM() {
         );
 
 
-    /*
-     * Epley para estimación general.
-     */
     const estimatedLb =
         calculateOneRMValue(
             weightLb,
             reps,
-            "epley"
+            state.formula
         );
 
 
-    if (elements.estimatedOneRm) {
+    if (
+        elements.estimatedOneRm
+    ) {
 
         elements.estimatedOneRm.textContent =
-            formatWeight(estimatedLb);
+            formatWeight(
+                estimatedLb
+            );
 
     }
 
 
     return estimatedLb;
+
+}
+
+
+/* ==========================================================
+   CALCULADORA:
+   ¿CUÁNTAS REPS NECESITO?
+========================================================== */
+
+function calculateRequiredReps() {
+
+    if (
+        !elements.repsWeight ||
+        !elements.repsTarget
+    ) {
+
+        return 0;
+
+    }
+
+
+    const weight =
+        Number(
+            elements.repsWeight.value
+        );
+
+
+    const target =
+        Number(
+            elements.repsTarget.value
+        );
+
+
+    if (
+        !Number.isFinite(weight) ||
+        !Number.isFinite(target) ||
+        weight <= 0 ||
+        target <= 0
+    ) {
+
+        if (
+            elements.requiredRepsResult
+        ) {
+
+            elements.requiredRepsResult
+                .classList.add(
+                    "hidden"
+                );
+
+        }
+
+
+        return 0;
+
+    }
+
+
+    const weightLb =
+        toLb(
+            weight,
+            state.unit
+        );
+
+
+    const targetLb =
+        toLb(
+            target,
+            state.unit
+        );
+
+
+    const reps =
+        calculateRequiredRepsValue(
+            weightLb,
+            targetLb,
+            state.repsFormula
+        );
+
+
+    if (
+        !Number.isFinite(reps) ||
+        reps <= 0
+    ) {
+
+        showToast(
+            "No se pudo calcular las repeticiones.",
+            "warning"
+        );
+
+
+        return 0;
+
+    }
+
+
+    const estimatedLb =
+        calculateOneRMValue(
+            weightLb,
+            reps,
+            state.repsFormula
+        );
+
+
+    if (
+        elements.requiredReps
+    ) {
+
+        elements.requiredReps.textContent =
+            reps;
+
+    }
+
+
+    if (
+        elements.requiredRepsWeight
+    ) {
+
+        elements.requiredRepsWeight.textContent =
+            formatWeight(
+                weightLb
+            );
+
+    }
+
+
+    if (
+        elements.requiredRepsTarget
+    ) {
+
+        elements.requiredRepsTarget.textContent =
+            formatWeight(
+                targetLb
+            );
+
+    }
+
+
+    if (
+        elements.requiredRepsEstimatedRm
+    ) {
+
+        elements.requiredRepsEstimatedRm.textContent =
+            formatWeight(
+                estimatedLb
+            );
+
+    }
+
+
+    if (
+        elements.requiredRepsMessage
+    ) {
+
+        const difference =
+            estimatedLb -
+            targetLb;
+
+
+        if (
+            Math.abs(
+                difference
+            ) <=
+            targetLb * 0.01
+        ) {
+
+            elements.requiredRepsMessage.textContent =
+                `Con ${reps} repeticiones, ` +
+                `el 1RM estimado sería aproximadamente ` +
+                `${formatWeight(
+                    estimatedLb
+                )}.`;
+
+        } else if (
+            difference > 0
+        ) {
+
+            elements.requiredRepsMessage.textContent =
+                `Con ${reps} repeticiones, ` +
+                `la estimación supera ligeramente ` +
+                `el objetivo.`;
+
+        } else {
+
+            elements.requiredRepsMessage.textContent =
+                `La estimación queda por debajo ` +
+                `del objetivo.`;
+
+        }
+
+    }
+
+
+    if (
+        elements.requiredRepsResult
+    ) {
+
+        elements.requiredRepsResult
+            .classList.remove(
+                "hidden"
+            );
+
+    }
+
+
+    return reps;
+
+}
+
+
+/* ==========================================================
+   CALCULADORA:
+   ¿QUÉ PESO NECESITO PARA X REPS?
+========================================================== */
+
+/* ==========================================================
+   CALCULADORA:
+   ¿QUÉ PESO NECESITO PARA X REPS? (CORREGIDA)
+========================================================== */
+
+function calculateWeightForReps() {
+
+    if (
+        !elements.weightForRepsOneRm ||
+        !elements.weightForRepsReps
+    ) {
+
+        return 0;
+
+    }
+
+
+    const oneRm =
+        Number(
+            elements.weightForRepsOneRm.value
+        );
+
+
+    const reps =
+        Number(
+            elements.weightForRepsReps.value
+        );
+
+
+    if (
+        !Number.isFinite(oneRm) ||
+        !Number.isFinite(reps) ||
+        oneRm <= 0 ||
+        reps <= 0
+    ) {
+
+        if (
+            elements.weightForRepsResult
+        ) {
+
+            elements.weightForRepsResult
+                .classList.add(
+                    "hidden"
+                );
+
+        }
+
+
+        return 0;
+
+    }
+
+
+    /*
+     * Límite práctico.
+     *
+     * Brzycki deja de ser válido a partir
+     * de 37 repeticiones.
+     */
+    if (
+        state.weightForRepsFormula ===
+        "brzycki" &&
+        reps >= 37
+    ) {
+
+        showToast(
+            "Brzycki no es válida para 37 reps o más.",
+            "warning"
+        );
+
+
+        if (
+            elements.weightForRepsResult
+        ) {
+
+            elements.weightForRepsResult
+                .classList.add(
+                    "hidden"
+                );
+
+        }
+
+
+        return 0;
+
+    }
+
+
+    const oneRmLb =
+        toLb(
+            oneRm,
+            state.unit
+        );
+
+
+    const weightLb =
+        calculateWeightForRepsValue(
+            oneRmLb,
+            reps,
+            state.weightForRepsFormula
+        );
+
+
+    if (
+        !Number.isFinite(
+            weightLb
+        ) ||
+        weightLb <= 0
+    ) {
+
+        showToast(
+            "No se pudo calcular el peso.",
+            "warning"
+        );
+
+
+        return 0;
+
+    }
+
+
+    const weightDisplay =
+        fromLb(
+            weightLb,
+            state.unit
+        );
+
+
+    if (
+        elements.weightForRepsResultValue
+    ) {
+
+        elements.weightForRepsResultValue.textContent =
+            formatNumber(
+                weightDisplay,
+                2
+            );
+
+    }
+
+
+    if (
+        elements.weightForRepsResultUnit
+    ) {
+
+        elements.weightForRepsResultUnit.textContent =
+            state.unit;
+
+    }
+
+
+    if (
+        elements.weightForRepsReferenceRm
+    ) {
+
+        elements.weightForRepsReferenceRm.textContent =
+            formatWeight(
+                oneRmLb
+            );
+
+    }
+
+
+    if (
+        elements.weightForRepsTargetRepsDisplay
+    ) {
+
+        elements.weightForRepsTargetRepsDisplay.textContent =
+            reps;
+
+    }
+
+
+    if (
+        elements.weightForRepsPercentage
+    ) {
+
+        const percent =
+            (
+                weightLb /
+                oneRmLb
+            ) * 100;
+
+
+        elements.weightForRepsPercentage.textContent =
+            `${formatNumber(
+                percent,
+                1
+            )}%`;
+
+    }
+
+
+    if (
+        elements.weightForRepsMessage
+    ) {
+
+        elements.weightForRepsMessage.textContent =
+            `Para un 1RM estimado de ` +
+            `${formatWeight(
+                oneRmLb
+            )}, el peso aproximado para ` +
+            `${reps} repetición${reps === 1
+                ? ""
+                : "es"
+            } sería ` +
+            `${formatWeight(
+                weightLb
+            )}.`;
+
+    }
+
+
+    if (
+        elements.weightForRepsResult
+    ) {
+
+        elements.weightForRepsResult
+            .classList.remove(
+                "hidden"
+            );
+
+    }
+
+
+    return weightLb;
+
+}
+
+
+/* ==========================================================
+   FÓRMULA DE REPS
+========================================================== */
+
+function setRepsFormula(
+    formula
+) {
+
+    if (
+        formula !== "epley" &&
+        formula !== "brzycki" &&
+        formula !== "lombardi"
+    ) {
+
+        return;
+
+    }
+
+
+    state.repsFormula =
+        formula;
+
+
+    document
+        .querySelectorAll(
+            ".reps-formula-button"
+        )
+        .forEach(
+            button => {
+
+                button.classList.toggle(
+                    "active",
+                    button.dataset
+                        .repsFormula ===
+                    formula
+                );
+
+            }
+        );
+
+
+    calculateRequiredReps();
+
+}
+
+
+/* ==========================================================
+   FÓRMULA:
+   ¿QUÉ PESO NECESITO?
+========================================================== */
+
+function setWeightForRepsFormula(
+    formula
+) {
+
+    if (
+        formula !== "epley" &&
+        formula !== "brzycki" &&
+        formula !== "lombardi"
+    ) {
+
+        return;
+
+    }
+
+
+    state.weightForRepsFormula =
+        formula;
+
+
+    document
+        .querySelectorAll(
+            ".weight-for-reps-formula-button"
+        )
+        .forEach(
+            button => {
+
+                button.classList.toggle(
+                    "active",
+                    button.dataset
+                        .weightForRepsFormula ===
+                    formula
+                );
+
+            }
+        );
+
+
+    calculateWeightForReps();
 
 }
 
@@ -1549,10 +3700,15 @@ function calculateEstimatedOneRM() {
 function sendRmToTarget() {
 
     const input =
-        Number(elements.oneRm?.value);
+        Number(
+            elements.oneRm?.value
+        );
+
 
     const percentage =
-        Number(elements.percentage?.value);
+        Number(
+            elements.percentage?.value
+        );
 
 
     if (
@@ -1564,6 +3720,7 @@ function sendRmToTarget() {
             "Ingresa un 1RM válido.",
             "warning"
         );
+
 
         return;
 
@@ -1578,7 +3735,8 @@ function sendRmToTarget() {
 
 
     const targetLb =
-        oneRmLb * percentage;
+        oneRmLb *
+        percentage;
 
 
     const targetValue =
@@ -1588,10 +3746,15 @@ function sendRmToTarget() {
         );
 
 
-    if (elements.targetWeight) {
+    if (
+        elements.targetWeight
+    ) {
 
         elements.targetWeight.value =
-            round(targetValue, 2);
+            round(
+                targetValue,
+                2
+            );
 
     }
 
@@ -1599,10 +3762,14 @@ function sendRmToTarget() {
     findTarget();
 
 
-    elements.targetWeight?.scrollIntoView({
-        behavior: "smooth",
-        block: "center"
-    });
+    elements.targetWeight
+        ?.scrollIntoView({
+
+            behavior: "smooth",
+
+            block: "center"
+
+        });
 
 
     showToast(
@@ -1613,6 +3780,10 @@ function sendRmToTarget() {
 }
 
 
+/* ==========================================================
+   ENVIAR 1RM ESTIMADO AL OBJETIVO
+========================================================== */
+
 function sendEstimatedToTarget() {
 
     const estimatedLb =
@@ -1620,7 +3791,9 @@ function sendEstimatedToTarget() {
 
 
     if (
-        !Number.isFinite(estimatedLb) ||
+        !Number.isFinite(
+            estimatedLb
+        ) ||
         estimatedLb <= 0
     ) {
 
@@ -1628,6 +3801,7 @@ function sendEstimatedToTarget() {
             "Completa peso y repeticiones.",
             "warning"
         );
+
 
         return;
 
@@ -1641,10 +3815,15 @@ function sendEstimatedToTarget() {
         );
 
 
-    if (elements.targetWeight) {
+    if (
+        elements.targetWeight
+    ) {
 
         elements.targetWeight.value =
-            round(targetValue, 2);
+            round(
+                targetValue,
+                2
+            );
 
     }
 
@@ -1652,14 +3831,151 @@ function sendEstimatedToTarget() {
     findTarget();
 
 
-    elements.targetWeight?.scrollIntoView({
-        behavior: "smooth",
-        block: "center"
-    });
+    elements.targetWeight
+        ?.scrollIntoView({
+
+            behavior: "smooth",
+
+            block: "center"
+
+        });
 
 
     showToast(
         "1RM estimado enviado al objetivo.",
+        "success"
+    );
+
+}
+
+
+/* ==========================================================
+   ENVIAR OBJETIVO DE REPS
+========================================================== */
+
+function sendRepsTargetToTarget() {
+
+    const target =
+        Number(
+            elements.repsTarget?.value
+        );
+
+
+    if (
+        !Number.isFinite(
+            target
+        ) ||
+        target <= 0
+    ) {
+
+        showToast(
+            "Ingresa un 1RM objetivo válido.",
+            "warning"
+        );
+
+
+        return;
+
+    }
+
+
+    if (
+        elements.targetWeight
+    ) {
+
+        elements.targetWeight.value =
+            round(
+                target,
+                2
+            );
+
+    }
+
+
+    findTarget();
+
+
+    elements.targetWeight
+        ?.scrollIntoView({
+
+            behavior: "smooth",
+
+            block: "center"
+
+        });
+
+
+    showToast(
+        "Peso objetivo enviado a la calculadora de discos.",
+        "success"
+    );
+
+}
+
+
+/* ==========================================================
+   ENVIAR PESO DE X REPS AL OBJETIVO
+========================================================== */
+
+function sendWeightForRepsToTarget() {
+
+    const weightLb =
+        calculateWeightForReps();
+
+
+    if (
+        !Number.isFinite(
+            weightLb
+        ) ||
+        weightLb <= 0
+    ) {
+
+        showToast(
+            "Completa el 1RM y las repeticiones.",
+            "warning"
+        );
+
+
+        return;
+
+    }
+
+
+    const targetValue =
+        fromLb(
+            weightLb,
+            state.unit
+        );
+
+
+    if (
+        elements.targetWeight
+    ) {
+
+        elements.targetWeight.value =
+            round(
+                targetValue,
+                2
+            );
+
+    }
+
+
+    findTarget();
+
+
+    elements.targetWeight
+        ?.scrollIntoView({
+
+            behavior: "smooth",
+
+            block: "center"
+
+        });
+
+
+    showToast(
+        "Peso calculado enviado al objetivo.",
         "success"
     );
 
@@ -1681,7 +3997,12 @@ function getCurrentConfiguration() {
             getBarWeight(),
 
         plates:
-            {...state.plates},
+        {
+            ...state.plates
+        },
+
+        plateMode:
+            state.plateMode,
 
         date:
             new Date().toISOString()
@@ -1697,42 +4018,57 @@ function saveCurrentFavorite() {
         getCurrentConfiguration();
 
 
-    /*
-     * Evitar guardar exactamente la misma configuración.
-     */
     const duplicate =
-        state.favorites.some(item =>
-            item.bar === config.bar &&
-            JSON.stringify(item.plates) ===
-            JSON.stringify(config.plates)
+        state.favorites.some(
+            item =>
+
+                item.bar ===
+                config.bar &&
+
+                item.plateMode ===
+                config.plateMode &&
+
+                JSON.stringify(
+                    item.plates
+                ) ===
+                JSON.stringify(
+                    config.plates
+                )
         );
 
 
-    if (duplicate) {
+    if (
+        duplicate
+    ) {
 
         showToast(
             "Esta configuración ya está guardada.",
             "warning"
         );
 
+
         return;
 
     }
 
 
-    state.favorites.unshift(config);
+    state.favorites.unshift(
+        config
+    );
 
 
-    /*
-     * Máximo 20 favoritos.
-     */
     state.favorites =
-        state.favorites.slice(0, 20);
+        state.favorites.slice(
+            0,
+            20
+        );
 
 
     localStorage.setItem(
         "powerload_favorites",
-        JSON.stringify(state.favorites)
+        JSON.stringify(
+            state.favorites
+        )
     );
 
 
@@ -1749,20 +4085,29 @@ function saveCurrentFavorite() {
 
 function renderFavorites() {
 
-    if (!elements.favoritesContainer) {
+    if (
+        !elements.favoritesContainer
+    ) {
         return;
     }
 
 
-    elements.favoritesContainer.innerHTML = "";
+    elements.favoritesContainer
+        .innerHTML =
+        "";
 
 
-    if (state.favorites.length === 0) {
+    if (
+        state.favorites.length === 0
+    ) {
 
         elements.favoritesContainer.innerHTML =
-            `<div class="empty">
+            `
+            <div class="empty">
                 No tienes configuraciones guardadas.
-            </div>`;
+            </div>
+            `;
+
 
         return;
 
@@ -1770,10 +4115,16 @@ function renderFavorites() {
 
 
     state.favorites.forEach(
-        (favorite, index) => {
+        (
+            favorite,
+            index
+        ) => {
 
             const item =
-                document.createElement("div");
+                document.createElement(
+                    "div"
+                );
+
 
             item.className =
                 "favorite-item";
@@ -1781,8 +4132,18 @@ function renderFavorites() {
 
             const platesText =
                 getCombinationText(
-                    favorite.plates
+                    favorite.plates,
+                    favorite.plateMode
                 );
+
+
+            const modeText =
+                favorite.plateMode ===
+                    "calibrated"
+
+                    ? "Calibrados"
+
+                    : "Estándar";
 
 
             item.innerHTML = `
@@ -1790,11 +4151,19 @@ function renderFavorites() {
                 <div>
 
                     <div class="item-weight">
-                        ${formatWeight(favorite.weight)}
+                        ${formatWeight(
+                favorite.weight
+            )}
                     </div>
 
                     <div class="item-detail">
-                        ${escapeHTML(platesText)}
+                        ${escapeHTML(
+                platesText
+            )}
+                    </div>
+
+                    <div class="item-detail">
+                        ${modeText}
                     </div>
 
                 </div>
@@ -1824,7 +4193,9 @@ function renderFavorites() {
 
 
             elements.favoritesContainer
-                .appendChild(item);
+                .appendChild(
+                    item
+                );
 
         }
     );
@@ -1832,10 +4203,14 @@ function renderFavorites() {
 }
 
 
-function loadFavorite(index) {
+function loadFavorite(
+    index
+) {
 
     const favorite =
-        state.favorites[index];
+        state.favorites[
+        index
+        ];
 
 
     if (!favorite) {
@@ -1843,30 +4218,89 @@ function loadFavorite(index) {
     }
 
 
-    state.barWeight =
-        Number(favorite.bar) || 45;
+    const mode =
+        favorite.plateMode ===
+            "calibrated"
+
+            ? "calibrated"
+
+            : "standard";
 
 
-    if (elements.barWeight) {
+    if (
+        state.plateMode !==
+        mode
+    ) {
 
-        elements.barWeight.value =
-            String(state.barWeight);
+        changePlateMode(
+            mode
+        );
 
     }
 
 
-    Object.keys(state.plates).forEach(weight => {
+    state.barWeight =
+        Number(
+            favorite.bar
+        ) || 45;
 
-        state.plates[weight] =
-            Number(
-                favorite.plates?.[weight]
-            ) || 0;
 
-    });
+    if (
+        elements.barWeight
+    ) {
+
+        elements.barWeight.value =
+            String(
+                state.barWeight
+            );
+
+    }
+
+
+    const available =
+        getActivePlates();
+
+
+    const newPlates =
+        createPlateState(
+            available
+        );
+
+
+    Object.keys(
+        newPlates
+    ).forEach(
+        weight => {
+
+            newPlates[
+                weight
+            ] =
+                Number(
+                    favorite
+                        .plates?.[
+                    weight
+                    ]
+                ) || 0;
+
+        }
+    );
+
+
+    state.plates =
+        newPlates;
+
+
+    state.platesByMode[
+        mode
+    ] = {
+        ...state.plates
+    };
 
 
     renderPlates();
+
     updateVisualBar();
+
     updateMainDisplay();
 
 
@@ -1878,10 +4312,14 @@ function loadFavorite(index) {
 }
 
 
-function deleteFavorite(index) {
+function deleteFavorite(
+    index
+) {
 
     if (
-        !state.favorites[index]
+        !state.favorites[
+        index
+        ]
     ) {
         return;
     }
@@ -1895,7 +4333,9 @@ function deleteFavorite(index) {
 
     localStorage.setItem(
         "powerload_favorites",
-        JSON.stringify(state.favorites)
+        JSON.stringify(
+            state.favorites
+        )
     );
 
 
@@ -1915,9 +4355,7 @@ function clearFavorites() {
     if (
         state.favorites.length === 0
     ) {
-
         return;
-
     }
 
 
@@ -1944,38 +4382,59 @@ function clearFavorites() {
    HISTORIAL
 ========================================================== */
 
-function getCombinationText(plates) {
+function getCombinationText(
+    plates,
+    mode = state.plateMode
+) {
 
     const parts = [];
 
 
-    PLATES.forEach(plate => {
+    const available =
+        mode === "calibrated"
 
-        const count =
-            Number(
-                plates?.[plate.weight]
-            ) || 0;
+            ? CALIBRATED_PLATES
+
+            : STANDARD_PLATES;
 
 
-        if (count > 0) {
+    available.forEach(
+        plate => {
 
-            parts.push(
-                `${count}×${plate.weight} lb`
-            );
+            const count =
+                Number(
+                    plates?.[
+                    plate.weight
+                    ]
+                ) || 0;
+
+
+            if (
+                count > 0
+            ) {
+
+                parts.push(
+                    `${count}×${plate.label}`
+                );
+
+            }
 
         }
-
-    });
+    );
 
 
     return parts.length
-        ? parts.join(" + ")
+        ? parts.join(
+            " + "
+        )
         : "Sin discos";
 
 }
 
 
-function addHistory(config) {
+function addHistory(
+    config
+) {
 
     const entry = {
 
@@ -1986,7 +4445,13 @@ function addHistory(config) {
             config.bar,
 
         plates:
-            {...config.plates},
+        {
+            ...config.plates
+        },
+
+        plateMode:
+            config.plateMode ||
+            state.plateMode,
 
         date:
             new Date().toISOString()
@@ -1994,19 +4459,23 @@ function addHistory(config) {
     };
 
 
-    state.history.unshift(entry);
+    state.history.unshift(
+        entry
+    );
 
 
-    /*
-     * Máximo 30 registros.
-     */
     state.history =
-        state.history.slice(0, 30);
+        state.history.slice(
+            0,
+            30
+        );
 
 
     localStorage.setItem(
         "powerload_history",
-        JSON.stringify(state.history)
+        JSON.stringify(
+            state.history
+        )
     );
 
 
@@ -2017,20 +4486,29 @@ function addHistory(config) {
 
 function renderHistory() {
 
-    if (!elements.historyContainer) {
+    if (
+        !elements.historyContainer
+    ) {
         return;
     }
 
 
-    elements.historyContainer.innerHTML = "";
+    elements.historyContainer
+        .innerHTML =
+        "";
 
 
-    if (state.history.length === 0) {
+    if (
+        state.history.length === 0
+    ) {
 
         elements.historyContainer.innerHTML =
-            `<div class="empty">
+            `
+            <div class="empty">
                 No hay configuraciones en el historial.
-            </div>`;
+            </div>
+            `;
+
 
         return;
 
@@ -2038,31 +4516,59 @@ function renderHistory() {
 
 
     state.history.forEach(
-        (entry, index) => {
+        (
+            entry,
+            index
+        ) => {
 
             const item =
-                document.createElement("div");
+                document.createElement(
+                    "div"
+                );
+
 
             item.className =
                 "history-item";
 
 
             const date =
-                new Date(entry.date);
+                new Date(
+                    entry.date
+                );
 
 
             const dateText =
-                Number.isNaN(date.getTime())
+                Number.isNaN(
+                    date.getTime()
+                )
+
                     ? ""
+
                     : date.toLocaleString(
                         "es-CO",
                         {
-                            day: "2-digit",
-                            month: "2-digit",
-                            hour: "2-digit",
-                            minute: "2-digit"
+                            day:
+                                "2-digit",
+
+                            month:
+                                "2-digit",
+
+                            hour:
+                                "2-digit",
+
+                            minute:
+                                "2-digit"
                         }
                     );
+
+
+            const modeText =
+                entry.plateMode ===
+                    "calibrated"
+
+                    ? "Calibrados"
+
+                    : "Estándar";
 
 
             item.innerHTML = `
@@ -2070,14 +4576,27 @@ function renderHistory() {
                 <div>
 
                     <div class="item-weight">
-                        ${formatWeight(entry.weight)}
+                        ${formatWeight(
+                entry.weight
+            )}
                     </div>
 
                     <div class="item-detail">
+
                         ${escapeHTML(
-                            getCombinationText(entry.plates)
-                        )}
-                        ${dateText ? ` · ${dateText}` : ""}
+                getCombinationText(
+                    entry.plates,
+                    entry.plateMode
+                )
+            )}
+
+                        · ${modeText}
+
+                        ${dateText
+                    ? ` · ${dateText}`
+                    : ""
+                }
+
                     </div>
 
                 </div>
@@ -2107,7 +4626,9 @@ function renderHistory() {
 
 
             elements.historyContainer
-                .appendChild(item);
+                .appendChild(
+                    item
+                );
 
         }
     );
@@ -2115,10 +4636,14 @@ function renderHistory() {
 }
 
 
-function loadHistory(index) {
+function loadHistory(
+    index
+) {
 
     const entry =
-        state.history[index];
+        state.history[
+        index
+        ];
 
 
     if (!entry) {
@@ -2126,30 +4651,89 @@ function loadHistory(index) {
     }
 
 
-    state.barWeight =
-        Number(entry.bar) || 45;
+    const mode =
+        entry.plateMode ===
+            "calibrated"
+
+            ? "calibrated"
+
+            : "standard";
 
 
-    if (elements.barWeight) {
+    if (
+        state.plateMode !==
+        mode
+    ) {
 
-        elements.barWeight.value =
-            String(state.barWeight);
+        changePlateMode(
+            mode
+        );
 
     }
 
 
-    Object.keys(state.plates).forEach(weight => {
+    state.barWeight =
+        Number(
+            entry.bar
+        ) || 45;
 
-        state.plates[weight] =
-            Number(
-                entry.plates?.[weight]
-            ) || 0;
 
-    });
+    if (
+        elements.barWeight
+    ) {
+
+        elements.barWeight.value =
+            String(
+                state.barWeight
+            );
+
+    }
+
+
+    const available =
+        getActivePlates();
+
+
+    const newPlates =
+        createPlateState(
+            available
+        );
+
+
+    Object.keys(
+        newPlates
+    ).forEach(
+        weight => {
+
+            newPlates[
+                weight
+            ] =
+                Number(
+                    entry
+                        .plates?.[
+                    weight
+                    ]
+                ) || 0;
+
+        }
+    );
+
+
+    state.plates =
+        newPlates;
+
+
+    state.platesByMode[
+        mode
+    ] = {
+        ...state.plates
+    };
 
 
     renderPlates();
+
     updateVisualBar();
+
     updateMainDisplay();
 
 
@@ -2161,9 +4745,15 @@ function loadHistory(index) {
 }
 
 
-function deleteHistory(index) {
+function deleteHistory(
+    index
+) {
 
-    if (!state.history[index]) {
+    if (
+        !state.history[
+        index
+        ]
+    ) {
         return;
     }
 
@@ -2176,7 +4766,9 @@ function deleteHistory(index) {
 
     localStorage.setItem(
         "powerload_history",
-        JSON.stringify(state.history)
+        JSON.stringify(
+            state.history
+        )
     );
 
 
@@ -2193,7 +4785,9 @@ function deleteHistory(index) {
 
 function clearHistory() {
 
-    if (state.history.length === 0) {
+    if (
+        state.history.length === 0
+    ) {
         return;
     }
 
@@ -2223,60 +4817,75 @@ function clearHistory() {
 
 function setupPlateEvents() {
 
-    if (!elements.platesContainer) {
+    if (
+        !elements.platesContainer
+    ) {
         return;
     }
 
 
-    elements.platesContainer.addEventListener(
-        "click",
-        event => {
+    elements.platesContainer
+        .addEventListener(
+            "click",
+            event => {
 
-            const button =
-                event.target.closest("button");
+                const button =
+                    event.target.closest(
+                        "button"
+                    );
 
 
-            if (!button) {
-                return;
+                if (!button) {
+                    return;
+                }
+
+
+                const weight =
+                    Number(
+                        button.dataset.weight
+                    );
+
+
+                if (
+                    !Number.isFinite(
+                        weight
+                    )
+                ) {
+                    return;
+                }
+
+
+                const action =
+                    button.dataset.action;
+
+
+                if (
+                    action ===
+                    "increase"
+                ) {
+
+                    changePlate(
+                        weight,
+                        1
+                    );
+
+                }
+
+
+                if (
+                    action ===
+                    "decrease"
+                ) {
+
+                    changePlate(
+                        weight,
+                        -1
+                    );
+
+                }
+
             }
-
-
-            const weight =
-                Number(
-                    button.dataset.weight
-                );
-
-
-            if (!Number.isFinite(weight)) {
-                return;
-            }
-
-
-            const action =
-                button.dataset.action;
-
-
-            if (action === "increase") {
-
-                changePlate(
-                    weight,
-                    1
-                );
-
-            }
-
-
-            if (action === "decrease") {
-
-                changePlate(
-                    weight,
-                    -1
-                );
-
-            }
-
-        }
-    );
+        );
 
 }
 
@@ -2287,56 +4896,69 @@ function setupPlateEvents() {
 
 function setupFavoriteEvents() {
 
-    if (!elements.favoritesContainer) {
+    if (
+        !elements.favoritesContainer
+    ) {
         return;
     }
 
 
-    elements.favoritesContainer.addEventListener(
-        "click",
-        event => {
+    elements.favoritesContainer
+        .addEventListener(
+            "click",
+            event => {
 
-            const button =
-                event.target.closest("button");
+                const button =
+                    event.target.closest(
+                        "button"
+                    );
 
 
-            if (!button) {
-                return;
+                if (!button) {
+                    return;
+                }
+
+
+                const index =
+                    Number(
+                        button.dataset.index
+                    );
+
+
+                if (
+                    !Number.isInteger(
+                        index
+                    )
+                ) {
+                    return;
+                }
+
+
+                if (
+                    button.dataset.action ===
+                    "load"
+                ) {
+
+                    loadFavorite(
+                        index
+                    );
+
+                }
+
+
+                if (
+                    button.dataset.action ===
+                    "delete"
+                ) {
+
+                    deleteFavorite(
+                        index
+                    );
+
+                }
+
             }
-
-
-            const index =
-                Number(
-                    button.dataset.index
-                );
-
-
-            if (!Number.isInteger(index)) {
-                return;
-            }
-
-
-            if (
-                button.dataset.action ===
-                "load"
-            ) {
-
-                loadFavorite(index);
-
-            }
-
-
-            if (
-                button.dataset.action ===
-                "delete"
-            ) {
-
-                deleteFavorite(index);
-
-            }
-
-        }
-    );
+        );
 
 }
 
@@ -2347,51 +4969,94 @@ function setupFavoriteEvents() {
 
 function setupHistoryEvents() {
 
-    if (!elements.historyContainer) {
+    if (
+        !elements.historyContainer
+    ) {
         return;
     }
 
 
-    elements.historyContainer.addEventListener(
-        "click",
+    elements.historyContainer
+        .addEventListener(
+            "click",
+            event => {
+
+                const button =
+                    event.target.closest(
+                        "button"
+                    );
+
+
+                if (!button) {
+                    return;
+                }
+
+
+                const index =
+                    Number(
+                        button.dataset.index
+                    );
+
+
+                if (
+                    !Number.isInteger(
+                        index
+                    )
+                ) {
+                    return;
+                }
+
+
+                if (
+                    button.dataset.action ===
+                    "load"
+                ) {
+
+                    loadHistory(
+                        index
+                    );
+
+                }
+
+
+                if (
+                    button.dataset.action ===
+                    "delete"
+                ) {
+
+                    deleteHistory(
+                        index
+                    );
+
+                }
+
+            }
+        );
+
+}
+
+
+/* ==========================================================
+   ENTER — UTILIDAD
+========================================================== */
+
+function setupEnter(
+    element,
+    callback
+) {
+
+    element?.addEventListener(
+        "keydown",
         event => {
 
-            const button =
-                event.target.closest("button");
-
-
-            if (!button) {
-                return;
-            }
-
-
-            const index =
-                Number(
-                    button.dataset.index
-                );
-
-
-            if (!Number.isInteger(index)) {
-                return;
-            }
-
-
             if (
-                button.dataset.action ===
-                "load"
+                event.key ===
+                "Enter"
             ) {
 
-                loadHistory(index);
+                event.preventDefault();
 
-            }
-
-
-            if (
-                button.dataset.action ===
-                "delete"
-            ) {
-
-                deleteHistory(index);
+                callback();
 
             }
 
@@ -2407,169 +5072,438 @@ function setupHistoryEvents() {
 
 function setupEvents() {
 
-    elements.themeButton?.addEventListener(
-        "click",
-        toggleTheme
-    );
+    /* ======================================================
+       TEMA
+    ====================================================== */
+
+    elements.themeButton
+        ?.addEventListener(
+            "click",
+            toggleTheme
+        );
 
 
-    elements.kgButton?.addEventListener(
-        "click",
-        () => changeUnit("kg")
-    );
+    /* ======================================================
+       UNIDADES
+    ====================================================== */
+
+    elements.kgButton
+        ?.addEventListener(
+            "click",
+            () =>
+                changeUnit(
+                    "kg"
+                )
+        );
 
 
-    elements.lbButton?.addEventListener(
-        "click",
-        () => changeUnit("lb")
-    );
+    elements.lbButton
+        ?.addEventListener(
+            "click",
+            () =>
+                changeUnit(
+                    "lb"
+                )
+        );
 
 
-    elements.clearPlates?.addEventListener(
-        "click",
-        clearPlates
-    );
+    /* ======================================================
+       DISCOS
+    ====================================================== */
+
+    elements.clearPlates
+        ?.addEventListener(
+            "click",
+            clearPlates
+        );
 
 
-    elements.barWeight?.addEventListener(
-        "change",
-        () => {
+    elements.plateMode
+        ?.addEventListener(
+            "change",
+            () => {
 
-            state.barWeight =
-                getBarWeight();
+                changePlateMode(
+                    elements
+                        .plateMode
+                        .value
+                );
 
-            updateMainDisplay();
-            updateVisualBar();
-
-        }
-    );
+            }
+        );
 
 
-    elements.calculateTarget?.addEventListener(
-        "click",
+    elements.barWeight
+        ?.addEventListener(
+            "change",
+            () => {
+
+                state.barWeight =
+                    getBarWeight();
+
+
+                updateMainDisplay();
+
+                updateVisualBar();
+
+            }
+        );
+
+
+    /* ======================================================
+       OBJETIVO
+    ====================================================== */
+
+    elements.calculateTarget
+        ?.addEventListener(
+            "click",
+            findTarget
+        );
+
+
+    elements.applyTarget
+        ?.addEventListener(
+            "click",
+            applyTargetConfiguration
+        );
+
+
+    /* ======================================================
+       FAVORITOS
+    ====================================================== */
+
+    elements.saveCurrentButton
+        ?.addEventListener(
+            "click",
+            saveCurrentFavorite
+        );
+
+
+    elements.clearFavorites
+        ?.addEventListener(
+            "click",
+            clearFavorites
+        );
+
+
+    /* ======================================================
+       HISTORIAL
+    ====================================================== */
+
+    elements.clearHistory
+        ?.addEventListener(
+            "click",
+            clearHistory
+        );
+
+
+    /* ======================================================
+       CALCULADORA 1RM
+    ====================================================== */
+
+    elements.oneRm
+        ?.addEventListener(
+            "input",
+            calculateOneRM
+        );
+
+
+    elements.percentage
+        ?.addEventListener(
+            "change",
+            calculateOneRM
+        );
+
+
+    elements.sendRmToTarget
+        ?.addEventListener(
+            "click",
+            sendRmToTarget
+        );
+
+
+    /*
+     * Fórmulas de 1RM.
+     */
+    document
+        .querySelectorAll(
+            ".formula-button"
+        )
+        .forEach(
+            button => {
+
+                button.addEventListener(
+                    "click",
+                    () => {
+
+                        const formula =
+                            button.dataset.formula;
+
+
+                        if (
+                            formula !==
+                            "epley" &&
+                            formula !==
+                            "brzycki" &&
+                            formula !==
+                            "lombardi"
+                        ) {
+
+                            return;
+
+                        }
+
+
+                        state.formula =
+                            formula;
+
+
+                        document
+                            .querySelectorAll(
+                                ".formula-button"
+                            )
+                            .forEach(
+                                item => {
+
+                                    item.classList.toggle(
+                                        "active",
+                                        item.dataset
+                                            .formula ===
+                                        formula
+                                    );
+
+                                }
+                            );
+
+
+                        calculateEstimatedOneRM();
+
+                    }
+                );
+
+            }
+        );
+
+
+    /* ======================================================
+       ESTIMADOR 1RM
+    ====================================================== */
+
+    elements.estimateWeight
+        ?.addEventListener(
+            "input",
+            calculateEstimatedOneRM
+        );
+
+
+    elements.estimateReps
+        ?.addEventListener(
+            "input",
+            calculateEstimatedOneRM
+        );
+
+
+    elements.sendEstimatedToTarget
+        ?.addEventListener(
+            "click",
+            sendEstimatedToTarget
+        );
+
+
+    /* ======================================================
+       CALCULADORA:
+       ¿CUÁNTAS REPS?
+    ====================================================== */
+
+    elements.repsWeight
+        ?.addEventListener(
+            "input",
+            calculateRequiredReps
+        );
+
+
+    elements.repsTarget
+        ?.addEventListener(
+            "input",
+            calculateRequiredReps
+        );
+
+
+    elements.calculateRequiredReps
+        ?.addEventListener(
+            "click",
+            calculateRequiredReps
+        );
+
+
+    elements.sendRepsTargetToTarget
+        ?.addEventListener(
+            "click",
+            sendRepsTargetToTarget
+        );
+
+
+    /*
+     * Fórmulas de la calculadora inversa.
+     */
+    document
+        .querySelectorAll(
+            ".reps-formula-button"
+        )
+        .forEach(
+            button => {
+
+                button.addEventListener(
+                    "click",
+                    () => {
+
+                        setRepsFormula(
+                            button.dataset
+                                .repsFormula
+                        );
+
+                    }
+                );
+
+            }
+        );
+
+
+    /* ======================================================
+       CALCULADORA:
+       ¿QUÉ PESO PARA X REPS?
+    ====================================================== */
+
+    elements.weightForRepsOneRm
+        ?.addEventListener(
+            "input",
+            calculateWeightForReps
+        );
+
+
+    elements.weightForRepsReps
+        ?.addEventListener(
+            "input",
+            calculateWeightForReps
+        );
+
+
+    elements.calculateWeightForReps
+        ?.addEventListener(
+            "click",
+            calculateWeightForReps
+        );
+
+
+    elements.sendWeightForRepsToTarget
+        ?.addEventListener(
+            "click",
+            sendWeightForRepsToTarget
+        );
+
+
+    /*
+     * Fórmulas de la nueva calculadora.
+     */
+    document
+        .querySelectorAll(
+            ".weight-for-reps-formula-button"
+        )
+        .forEach(
+            button => {
+
+                button.addEventListener(
+                    "click",
+                    () => {
+
+                        setWeightForRepsFormula(
+                            button.dataset
+                                .weightForRepsFormula
+                        );
+
+                    }
+                );
+
+            }
+        );
+
+
+    /* ======================================================
+       ENTER — OBJETIVO
+    ====================================================== */
+
+    setupEnter(
+        elements.targetWeight,
         findTarget
     );
 
 
-    elements.applyTarget?.addEventListener(
-        "click",
-        applyTargetConfiguration
-    );
+    /* ======================================================
+       ENTER — 1RM
+    ====================================================== */
 
-
-    elements.saveCurrentButton?.addEventListener(
-        "click",
-        saveCurrentFavorite
-    );
-
-
-    elements.clearFavorites?.addEventListener(
-        "click",
-        clearFavorites
-    );
-
-
-    elements.clearHistory?.addEventListener(
-        "click",
-        clearHistory
-    );
-
-
-    elements.oneRm?.addEventListener(
-        "input",
+    setupEnter(
+        elements.oneRm,
         calculateOneRM
     );
 
 
-    elements.percentage?.addEventListener(
-        "change",
-        calculateOneRM
-    );
+    /* ======================================================
+       ENTER — ESTIMADOR
+    ====================================================== */
 
-
-    elements.sendRmToTarget?.addEventListener(
-        "click",
-        sendRmToTarget
-    );
-
-
-    elements.estimateWeight?.addEventListener(
-        "input",
+    setupEnter(
+        elements.estimateWeight,
         calculateEstimatedOneRM
     );
 
 
-    elements.estimateReps?.addEventListener(
-        "input",
+    setupEnter(
+        elements.estimateReps,
         calculateEstimatedOneRM
     );
 
 
-    elements.sendEstimatedToTarget?.addEventListener(
-        "click",
-        sendEstimatedToTarget
+    /* ======================================================
+       ENTER — REPS
+    ====================================================== */
+
+    setupEnter(
+        elements.repsWeight,
+        calculateRequiredReps
     );
 
 
-    /*
-     * Enter en el objetivo.
-     */
-    elements.targetWeight?.addEventListener(
-        "keydown",
-        event => {
-
-            if (event.key === "Enter") {
-
-                event.preventDefault();
-
-                findTarget();
-
-            }
-
-        }
+    setupEnter(
+        elements.repsTarget,
+        calculateRequiredReps
     );
 
 
-    /*
-     * Enter en el 1RM.
-     */
-    elements.oneRm?.addEventListener(
-        "keydown",
-        event => {
+    /* ======================================================
+       ENTER — PESO PARA REPS
+    ====================================================== */
 
-            if (event.key === "Enter") {
-
-                event.preventDefault();
-
-                calculateOneRM();
-
-            }
-
-        }
+    setupEnter(
+        elements.weightForRepsOneRm,
+        calculateWeightForReps
     );
 
 
-    /*
-     * Enter en el estimador.
-     */
-    elements.estimateReps?.addEventListener(
-        "keydown",
-        event => {
-
-            if (event.key === "Enter") {
-
-                event.preventDefault();
-
-                calculateEstimatedOneRM();
-
-            }
-
-        }
+    setupEnter(
+        elements.weightForRepsReps,
+        calculateWeightForReps
     );
 
+
+    /* ======================================================
+       SISTEMAS
+    ====================================================== */
 
     setupPlateEvents();
+
     setupFavoriteEvents();
+
     setupHistoryEvents();
 
 }
@@ -2581,72 +5515,125 @@ function setupEvents() {
 
 function initialize() {
 
-    /*
-     * Tema.
-     */
+    /* ======================================================
+       TEMA
+    ====================================================== */
+
     applyTheme();
 
 
-    /*
-     * Unidad.
-     */
+    /* ======================================================
+       UNIDAD
+    ====================================================== */
+
     updateUnitButtons();
+
     updateUnitLabels();
 
 
-    /*
-     * Barra.
-     */
+    /* ======================================================
+       MODO DE DISCOS
+    ====================================================== */
+
+    updatePlateModeSelect();
+
+
+    PLATES =
+        getActivePlates();
+
+
+    state.plates =
+        state.platesByMode[
+        state.plateMode
+        ];
+
+
+    /* ======================================================
+       BARRA
+    ====================================================== */
+
     state.barWeight =
         getBarWeight();
 
 
-    /*
-     * Discos.
-     */
+    /* ======================================================
+       DISCOS
+    ====================================================== */
+
     renderPlates();
 
 
-    /*
-     * Visual.
-     */
+    /* ======================================================
+       VISUAL
+    ====================================================== */
+
     updateVisualBar();
 
 
-    /*
-     * Hero.
-     */
+    /* ======================================================
+       HERO
+    ====================================================== */
+
     updateMainDisplay();
 
 
-    /*
-     * Objetivos rápidos.
-     */
+    /* ======================================================
+       OBJETIVOS
+    ====================================================== */
+
     updateQuickTargets();
 
 
-    /*
-     * 1RM.
-     */
+    /* ======================================================
+       1RM
+    ====================================================== */
+
     calculateOneRM();
 
 
-    /*
-     * Estimador.
-     */
+    /* ======================================================
+       ESTIMADOR 1RM
+    ====================================================== */
+
     calculateEstimatedOneRM();
 
 
-    /*
-     * Favoritos e historial.
-     */
+    /* ======================================================
+       CALCULADORA DE REPS
+    ====================================================== */
+
+    setRepsFormula(
+        "epley"
+    );
+
+
+    /* ======================================================
+       CALCULADORA DE PESO PARA REPS
+    ====================================================== */
+
+    setWeightForRepsFormula(
+        "epley"
+    );
+
+
+    /* ======================================================
+       FAVORITOS
+    ====================================================== */
+
     renderFavorites();
+
+
+    /* ======================================================
+       HISTORIAL
+    ====================================================== */
+
     renderHistory();
 
 
-    /*
-     * Eventos.
-     */
+    /* ======================================================
+       EVENTOS
+    ====================================================== */
+
     setupEvents();
 
 }
@@ -2657,7 +5644,8 @@ function initialize() {
 ========================================================== */
 
 if (
-    document.readyState === "loading"
+    document.readyState ===
+    "loading"
 ) {
 
     document.addEventListener(

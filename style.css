@@ -1,11 +1,13 @@
+/* ==========================================================
+   POWERLOAD v6
+   Calculadora de discos para Powerlifting
+   ========================================================== */
+
 :root {
-
     --bg: #07090d;
-
     --surface: #10141a;
     --surface-2: #171c23;
     --surface-3: #202732;
-
     --border: #2b3542;
 
     --text: #f4f7fa;
@@ -20,18 +22,15 @@
     --info: #6db7ff;
 
     --radius: 19px;
+    --shadow: 0 18px 50px rgba(0, 0, 0, 0.28);
 
-    --shadow:
-        0 18px 50px rgba(0, 0, 0, .28);
-
-    --transition:
-        .18s ease;
+    --transition: 0.18s ease;
 }
 
 
 /* ==========================================================
    RESET
-========================================================== */
+   ========================================================== */
 
 * {
     box-sizing: border-box;
@@ -44,7 +43,6 @@ html {
 }
 
 body {
-
     min-height: 100vh;
 
     background:
@@ -65,8 +63,8 @@ body {
     padding: 24px 14px;
 
     transition:
-        background .25s ease,
-        color .25s ease;
+        background 0.25s ease,
+        color 0.25s ease;
 }
 
 button,
@@ -82,89 +80,67 @@ button {
 button:focus-visible,
 input:focus-visible,
 select:focus-visible {
-
     outline: 2px solid var(--accent);
-
     outline-offset: 2px;
 }
 
 
 /* ==========================================================
    APP
-========================================================== */
+   ========================================================== */
 
 .app {
-
     width: 100%;
-
     max-width: 920px;
-
     margin: auto;
 }
 
 
 /* ==========================================================
    HEADER
-========================================================== */
+   ========================================================== */
 
 .header {
-
     display: flex;
-
     align-items: center;
-
     justify-content: space-between;
-
     margin-bottom: 17px;
 }
 
 .brand {
-
     display: flex;
-
     align-items: center;
-
     gap: 12px;
 }
 
 .brand-mark {
-
     width: 49px;
     height: 49px;
 
     display: grid;
-
     place-items: center;
 
     border-radius: 15px;
 
     background: var(--accent);
-
     color: #111508;
 
     font-size: 12px;
-
     font-weight: 1000;
 
     box-shadow:
-        0 0 35px rgba(217, 255, 63, .13);
+        0 0 35px rgba(217, 255, 63, 0.13);
 }
 
 .brand h1 {
-
     font-size: 23px;
-
     line-height: 1;
-
     letter-spacing: -1px;
 }
 
 .brand p {
-
     color: var(--muted);
-
     font-size: 10px;
-
     margin-top: 5px;
 }
 
@@ -173,73 +149,58 @@ select:focus-visible {
 }
 
 .header-actions {
-
     display: flex;
-
     gap: 7px;
 }
 
 .icon-button {
-
     width: 41px;
     height: 41px;
 
     border: 1px solid var(--border);
-
     border-radius: 12px;
 
     background: var(--surface);
-
     color: var(--text);
 
     transition: var(--transition);
 }
 
 .icon-button:hover {
-
     background: var(--surface-3);
-
     transform: translateY(-2px);
 }
 
 
 /* ==========================================================
    UNITS
-========================================================== */
+   ========================================================== */
 
 .unit-switch {
-
     display: grid;
-
     grid-template-columns: 1fr 1fr;
 
     gap: 4px;
 
     padding: 4px;
-
     margin-bottom: 13px;
 
     border: 1px solid var(--border);
-
     background: var(--surface);
 
     border-radius: 12px;
 }
 
 .unit {
-
     padding: 9px;
 
     border: 0;
-
     border-radius: 8px;
 
     background: transparent;
-
     color: var(--muted);
 
     font-size: 11px;
-
     font-weight: 950;
 
     transition: var(--transition);
@@ -250,36 +211,74 @@ select:focus-visible {
 }
 
 .unit.active {
-
     background: var(--accent);
+    color: #111508;
+}
 
+
+/* ==========================================================
+   CALIBRATED PLATES MODE
+   ========================================================== */
+
+.mode-switch {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+
+    gap: 4px;
+
+    padding: 4px;
+    margin-bottom: 13px;
+
+    border: 1px solid var(--border);
+    background: var(--surface);
+
+    border-radius: 12px;
+}
+
+.mode-button {
+    padding: 9px;
+
+    border: 0;
+    border-radius: 8px;
+
+    background: transparent;
+    color: var(--muted);
+
+    font-size: 10px;
+    font-weight: 950;
+
+    transition: var(--transition);
+}
+
+.mode-button:hover {
+    color: var(--text);
+}
+
+.mode-button.active {
+    background: var(--accent);
     color: #111508;
 }
 
 
 /* ==========================================================
    CARDS
-========================================================== */
+   ========================================================== */
 
 .card,
 .hero-card {
-
     border: 1px solid var(--border);
-
     border-radius: var(--radius);
 
-    background:
-        rgba(16, 20, 26, .95);
+    background: rgba(16, 20, 26, 0.95);
 
     box-shadow: var(--shadow);
 
     padding: 20px;
-
     margin-bottom: 13px;
 
     transition:
-        background .25s ease,
-        border-color .25s ease;
+        background 0.25s ease,
+        border-color 0.25s ease;
 }
 
 .card:hover {
@@ -287,48 +286,35 @@ select:focus-visible {
 }
 
 .section-title {
-
     display: flex;
-
     align-items: center;
-
     justify-content: space-between;
 
     margin-bottom: 17px;
 }
 
 .section-title h2 {
-
     font-size: 15px;
-
-    letter-spacing: -.3px;
+    letter-spacing: -0.3px;
 }
 
 .section-title p {
-
     color: var(--muted);
-
     font-size: 10px;
-
     margin-top: 4px;
 }
 
 .section-heading {
-
     display: flex;
-
     align-items: center;
-
     gap: 9px;
 }
 
 .section-icon {
-
     width: 34px;
     height: 34px;
 
     display: grid;
-
     place-items: center;
 
     border-radius: 10px;
@@ -339,15 +325,12 @@ select:focus-visible {
 }
 
 .text-button {
-
     border: 0;
-
     background: transparent;
 
     color: var(--muted);
 
     font-size: 9px;
-
     font-weight: 900;
 }
 
@@ -360,29 +343,24 @@ select:focus-visible {
 }
 
 .side-badge {
-
     padding: 7px 10px;
 
     border-radius: 8px;
 
     background: var(--surface-3);
-
     color: var(--muted);
 
     font-size: 9px;
-
     font-weight: 950;
 }
 
 
 /* ==========================================================
    HERO
-========================================================== */
+   ========================================================== */
 
 .hero-card {
-
     position: relative;
-
     overflow: hidden;
 
     background:
@@ -392,7 +370,6 @@ select:focus-visible {
 }
 
 .hero-card::after {
-
     content: "";
 
     position: absolute;
@@ -406,51 +383,39 @@ select:focus-visible {
     border-radius: 50%;
 
     background: var(--accent);
-
-    opacity: .045;
+    opacity: 0.045;
 
     pointer-events: none;
 }
 
 .hero-header {
-
     display: flex;
-
     align-items: center;
-
     justify-content: space-between;
 }
 
 .eyebrow {
-
     color: var(--muted);
 
     font-size: 8px;
-
     letter-spacing: 1.8px;
-
     font-weight: 950;
 }
 
 .live-indicator {
-
     display: inline-flex;
-
     align-items: center;
-
     gap: 5px;
 
     color: var(--accent);
 
     font-size: 8px;
-
     font-weight: 950;
 
     margin-left: 8px;
 }
 
 .live-indicator i {
-
     width: 5px;
     height: 5px;
 
@@ -465,103 +430,79 @@ select:focus-visible {
 }
 
 @keyframes pulse {
-
     50% {
-        opacity: .3;
+        opacity: 0.3;
     }
 }
 
 .save-button {
-
     border: 1px solid var(--border);
-
     border-radius: 8px;
 
     padding: 7px 9px;
 
     background: var(--surface-2);
-
     color: var(--muted);
 
     font-size: 9px;
-
     font-weight: 900;
 
     transition: var(--transition);
 }
 
 .save-button:hover {
-
     color: var(--accent);
-
     border-color: var(--accent);
 }
 
 .hero-number {
-
     display: flex;
-
     align-items: baseline;
-
     gap: 8px;
 
     margin-top: 8px;
 }
 
 .hero-number strong {
-
     font-size: clamp(58px, 10vw, 82px);
-
-    line-height: .95;
+    line-height: 0.95;
 
     letter-spacing: -6px;
-
     font-weight: 1000;
 }
 
 .hero-number span {
-
     color: var(--muted);
 
     font-size: 18px;
-
     font-weight: 900;
 }
 
 .secondary-weight {
-
     color: var(--muted);
-
     font-size: 11px;
-
     margin-top: 7px;
 }
 
 .hero-stats {
-
     display: grid;
-
     grid-template-columns: repeat(3, 1fr);
 
     gap: 8px;
 
     margin-top: 20px;
-
     padding-top: 15px;
 
     border-top: 1px solid var(--border);
 }
 
 .hero-stats span {
-
     display: block;
 
     color: var(--muted);
 
     font-size: 7px;
-
     letter-spacing: 1.2px;
-
     font-weight: 950;
 
     margin-bottom: 5px;
@@ -574,28 +515,24 @@ select:focus-visible {
 
 /* ==========================================================
    BAR
-========================================================== */
+   ========================================================== */
 
 .bar-card {
     padding-bottom: 17px;
 }
 
 .bar-stage {
-
     height: 220px;
 
     position: relative;
 
     display: flex;
-
     align-items: center;
-
     justify-content: center;
 
     overflow: hidden;
 
     border: 1px solid var(--border);
-
     border-radius: 16px;
 
     background:
@@ -605,21 +542,17 @@ select:focus-visible {
             #080b10 100%);
 
     box-shadow:
-        inset 0 0 40px rgba(0, 0, 0, .45);
+        inset 0 0 40px rgba(0, 0, 0, 0.45);
 }
 
-/* Líneas de fondo */
-
 .bar-stage::before {
-
     content: "";
 
     position: absolute;
-
     inset: 0;
 
     background:
-        linear-gradient(rgba(255, 255, 255, .025) 1px,
+        linear-gradient(rgba(255, 255, 255, 0.025) 1px,
             transparent 1px);
 
     background-size: 100% 22px;
@@ -627,26 +560,21 @@ select:focus-visible {
     pointer-events: none;
 }
 
-/* Brillo central */
-
 .bar-stage::after {
-
     content: "";
 
     position: absolute;
 
     width: 75%;
-
     height: 1px;
 
     left: 12.5%;
-
     top: 50%;
 
     background:
         linear-gradient(90deg,
             transparent,
-            rgba(255, 255, 255, .08),
+            rgba(255, 255, 255, 0.08),
             transparent);
 
     pointer-events: none;
@@ -654,21 +582,17 @@ select:focus-visible {
 
 
 /* ==========================================================
-   ESTRUCTURA DE LA BARRA
-========================================================== */
+   BAR GRAPHIC
+   ========================================================== */
 
 .bar-graphic {
-
     position: relative;
 
     width: 94%;
-
     height: 100%;
 
     display: flex;
-
     align-items: center;
-
     justify-content: center;
 
     z-index: 1;
@@ -676,15 +600,13 @@ select:focus-visible {
 
 
 /* ==========================================================
-   EJE DE LA BARRA
-========================================================== */
+   SHAFT
+   ========================================================== */
 
 .bar-shaft {
-
     position: relative;
 
     width: 100%;
-
     height: 8px;
 
     border-radius: 10px;
@@ -699,23 +621,21 @@ select:focus-visible {
             #ffffff 100%);
 
     box-shadow:
-        0 2px 5px rgba(0, 0, 0, .8),
-        0 0 2px rgba(255, 255, 255, .8);
+        0 2px 5px rgba(0, 0, 0, 0.8),
+        0 0 2px rgba(255, 255, 255, 0.8);
 
     z-index: 1;
 }
 
 
 /* ==========================================================
-   MANGUITOS / SLEEVES
-========================================================== */
+   SLEEVES
+   ========================================================== */
 
 .bar-sleeve {
-
     position: absolute;
 
     width: 130px;
-
     height: 25px;
 
     top: 50%;
@@ -730,11 +650,10 @@ select:focus-visible {
             #69727c 5px 8px,
             #424a54 8px 12px);
 
-    border:
-        1px solid #89919a;
+    border: 1px solid #89919a;
 
     box-shadow:
-        0 4px 9px rgba(0, 0, 0, .6);
+        0 4px 9px rgba(0, 0, 0, 0.6);
 
     z-index: 2;
 }
@@ -749,31 +668,25 @@ select:focus-visible {
 
 
 /* ==========================================================
-   CENTRO DE LA BARRA
-========================================================== */
+   BAR CENTER
+   ========================================================== */
 
 .bar-center {
-
     position: absolute;
 
     left: 50%;
-
     top: 50%;
 
     transform:
         translate(-50%, -50%);
 
     width: 76px;
-
     height: 48px;
 
     display: grid;
-
     place-items: center;
 
-    border:
-        1px solid #59636e;
-
+    border: 1px solid #59636e;
     border-radius: 10px;
 
     background:
@@ -784,25 +697,23 @@ select:focus-visible {
     color: #ffffff;
 
     font-size: 9px;
-
     font-weight: 1000;
 
     letter-spacing: 1px;
 
     box-shadow:
-        0 5px 14px rgba(0, 0, 0, .65),
-        inset 0 1px 0 rgba(255, 255, 255, .08);
+        0 5px 14px rgba(0, 0, 0, 0.65),
+        inset 0 1px 0 rgba(255, 255, 255, 0.08);
 
     z-index: 5;
 }
 
 
 /* ==========================================================
-   DISCOS VISUALES
-========================================================== */
+   VISUAL PLATES
+   ========================================================== */
 
 .plate-stack {
-
     position: absolute;
 
     top: 50%;
@@ -810,7 +721,6 @@ select:focus-visible {
     transform: translateY(-50%);
 
     display: flex;
-
     align-items: center;
 
     gap: 2px;
@@ -831,59 +741,42 @@ select:focus-visible {
     right: 15%;
 }
 
-
-/* ==========================================================
-   DISCO INDIVIDUAL
-========================================================== */
-
 .visual-plate {
-
     position: relative;
 
     min-width: 17px;
-
     width: 17px;
 
-    border:
-        1px solid rgba(255, 255, 255, .45);
-
+    border: 1px solid rgba(255, 255, 255, 0.45);
     border-radius: 5px;
 
     display: grid;
-
     place-items: center;
 
     color: white;
 
     font-size: 5px;
-
     font-weight: 1000;
 
     box-shadow:
-        0 5px 10px rgba(0, 0, 0, .7),
-        inset 1px 0 rgba(255, 255, 255, .15);
+        0 5px 10px rgba(0, 0, 0, 0.7),
+        inset 1px 0 rgba(255, 255, 255, 0.15);
 
     animation:
-        plateIn .18s ease-out;
+        plateIn 0.18s ease-out;
 
     z-index: 4;
 }
 
-
-/* Agujero central del disco */
-
 .visual-plate::after {
-
     content: "";
 
     position: absolute;
 
     top: 50%;
-
     left: 50%;
 
     width: 4px;
-
     height: 4px;
 
     transform:
@@ -891,21 +784,15 @@ select:focus-visible {
 
     border-radius: 50%;
 
-    background:
-        #11161c;
+    background: #11161c;
 
-    border:
-        1px solid rgba(255, 255, 255, .35);
+    border: 1px solid rgba(255, 255, 255, 0.35);
 
     box-shadow:
-        0 0 0 1px rgba(0, 0, 0, .35);
+        0 0 0 1px rgba(0, 0, 0, 0.35);
 }
 
-
-/* Borde interior */
-
 .visual-plate::before {
-
     content: "";
 
     position: absolute;
@@ -913,29 +800,25 @@ select:focus-visible {
     inset: 5px 2px;
 
     border-left:
-        1px solid rgba(255, 255, 255, .12);
+        1px solid rgba(255, 255, 255, 0.12);
 
     border-right:
-        1px solid rgba(0, 0, 0, .25);
+        1px solid rgba(0, 0, 0, 0.25);
 
     border-radius: 3px;
 
     pointer-events: none;
 }
 
-
 @keyframes plateIn {
-
     from {
-
         opacity: 0;
 
         transform:
-            scale(.65) translateY(8px);
+            scale(0.65) translateY(8px);
     }
 
     to {
-
         opacity: 1;
 
         transform:
@@ -945,40 +828,41 @@ select:focus-visible {
 
 
 /* ==========================================================
-   TAMAÑOS DE LOS DISCOS
-========================================================== */
+   PLATE SIZES
+   ========================================================== */
 
 .visual-45 {
-    height: 128px;
+    height: 116px;
 }
 
 .visual-25 {
-    height: 112px;
+    height: 101px;
 }
 
 .visual-10 {
-    height: 96px;
+    height: 86px;
 }
 
 .visual-5 {
-    height: 80px;
+    height: 71px;
 }
 
 .visual-2-5 {
-    height: 66px;
+    height: 58px;
 }
 
 .visual-1-25 {
-    height: 55px;
+    height: 49px;
 }
 
 .visual-0-5 {
-    height: 45px;
+    height: 40px;
 }
+
 
 /* ==========================================================
    PLATE COLORS
-========================================================== */
+   ========================================================== */
 
 .visual-45,
 .plate-45 {
@@ -1040,110 +924,165 @@ select:focus-visible {
             #9a3412);
 }
 
-.visual-45 {
+/* ==========================================================
+   CALIBRATED PLATE SIZES
+   ========================================================== */
+
+.visual-cal-25 {
     height: 116px;
 }
 
-.visual-25 {
-    height: 101px;
+.visual-cal-20 {
+    height: 104px;
 }
 
-.visual-10 {
-    height: 86px;
+.visual-cal-15 {
+    height: 92px;
 }
 
-.visual-5 {
-    height: 71px;
+.visual-cal-10 {
+    height: 80px;
 }
 
-.visual-2-5 {
-    height: 58px;
+.visual-cal-5 {
+    height: 66px;
 }
 
-.visual-1-25 {
-    height: 49px;
+.visual-cal-2-5 {
+    height: 55px;
 }
 
-.visual-0-5 {
-    height: 40px;
+.visual-cal-1-25 {
+    height: 46px;
+}
+
+.visual-cal-1 {
+    height: 42px;
+}
+
+.visual-cal-0-5 {
+    height: 38px;
+}
+
+.visual-cal-0-25 {
+    height: 34px;
 }
 
 
 /* ==========================================================
+   CALIBRATED PLATE COLORS (estándar IPF/IWF)
+   ========================================================== */
+
+.visual-cal-25,
+.plate-cal-25 {
+    background: linear-gradient(145deg, #ef4444, #991b1b);
+}
+
+.visual-cal-20,
+.plate-cal-20 {
+    background: linear-gradient(145deg, #2563eb, #123a9b);
+}
+
+.visual-cal-15,
+.plate-cal-15 {
+    background: linear-gradient(145deg, #facc15, #a87500);
+    color: #17120a;
+}
+
+.visual-cal-10,
+.plate-cal-10 {
+    background: linear-gradient(145deg, #22c55e, #087a36);
+}
+
+.visual-cal-5,
+.plate-cal-5 {
+    background: linear-gradient(145deg, #f5f7fa, #9aa2ad);
+    color: #20242a;
+}
+
+.visual-cal-2-5,
+.plate-cal-2-5 {
+    background: linear-gradient(145deg, #3f3f46, #18181b);
+}
+
+.visual-cal-1-25,
+.plate-cal-1-25 {
+    background: linear-gradient(145deg, #d4d4d8, #71717a);
+    color: #20242a;
+}
+
+.visual-cal-1,
+.plate-cal-1 {
+    background: linear-gradient(145deg, #86efac, #22c55e);
+    color: #0a2412;
+}
+
+.visual-cal-0-5,
+.plate-cal-0-5 {
+    background: linear-gradient(145deg, #f8fafc, #cbd5e1);
+    color: #20242a;
+}
+
+.visual-cal-0-25,
+.plate-cal-0-25 {
+    background: linear-gradient(145deg, #52525b, #27272a);
+}
+
+/* ==========================================================
    BAR SUMMARY
-========================================================== */
+   ========================================================== */
 
 .bar-summary {
-
     display: flex;
-
     align-items: center;
-
     justify-content: space-between;
 
     margin-top: 14px;
 }
 
 .bar-count {
-
     display: flex;
-
     align-items: baseline;
-
     gap: 5px;
 }
 
 .bar-count strong {
-
     font-size: 13px;
-
     font-weight: 1000;
 }
 
 .bar-count span {
-
     color: var(--muted);
 
     font-size: 9px;
-
     font-weight: 800;
 }
 
 .bar-total {
-
     display: flex;
-
     align-items: center;
-
     gap: 5px;
 
     padding: 7px 10px;
 
     border: 1px solid var(--border);
-
     border-radius: 9px;
 
     background: var(--surface-2);
 }
 
 .bar-total strong {
-
     font-size: 10px;
-
     color: var(--accent);
 }
 
 .bar-total span {
-
     color: var(--muted);
-
     font-size: 8px;
 }
 
 .bar-labels {
-
     display: grid;
-
     grid-template-columns: repeat(3, 1fr);
 
     margin-top: 9px;
@@ -1153,38 +1092,29 @@ select:focus-visible {
     color: #566171;
 
     font-size: 7px;
-
     letter-spacing: 1.3px;
-
     font-weight: 900;
 }
 
 
 /* ==========================================================
    PLATES
-========================================================== */
+   ========================================================== */
 
 .plates {
-
     display: flex;
-
     flex-direction: column;
-
     gap: 8px;
 }
 
 .plate-row {
-
     display: flex;
-
     align-items: center;
-
     justify-content: space-between;
 
     padding: 10px 11px;
 
     border: 1px solid transparent;
-
     border-radius: 13px;
 
     background: var(--surface-2);
@@ -1193,64 +1123,51 @@ select:focus-visible {
 }
 
 .plate-row:hover {
-
     border-color: var(--border);
-
     transform: translateX(2px);
 }
 
 .plate-row.has-plates {
-
     border-color:
-        rgba(217, 255, 63, .14);
+        rgba(217, 255, 63, 0.14);
 
     background:
         linear-gradient(90deg,
-            rgba(217, 255, 63, .035),
+            rgba(217, 255, 63, 0.035),
             var(--surface-2));
 }
 
 .plate-info {
-
     display: flex;
-
     align-items: center;
-
     gap: 11px;
 }
 
 .plate-circle {
-
     width: 45px;
     height: 45px;
 
     display: grid;
-
     place-items: center;
 
-    border: 3px solid rgba(255, 255, 255, .25);
-
+    border: 3px solid rgba(255, 255, 255, 0.25);
     border-radius: 50%;
 
     font-size: 9px;
-
     font-weight: 1000;
 
     color: white;
 
     box-shadow:
-        0 4px 10px rgba(0, 0, 0, .3);
+        0 4px 10px rgba(0, 0, 0, 0.3);
 }
 
 .plate-info strong {
-
     display: block;
-
     font-size: 12px;
 }
 
 .plate-info small {
-
     display: block;
 
     color: var(--muted);
@@ -1263,41 +1180,32 @@ select:focus-visible {
 
 /* ==========================================================
    COUNTER
-========================================================== */
+   ========================================================== */
 
 .counter {
-
     display: flex;
-
     align-items: center;
-
     gap: 7px;
 }
 
 .counter button {
-
     width: 38px;
     height: 38px;
 
     border: 1px solid var(--border);
-
     border-radius: 10px;
 
     background: var(--surface-3);
-
     color: var(--text);
 
     font-size: 20px;
-
     font-weight: 500;
 
     transition: var(--transition);
 }
 
 .counter button:hover:not(:disabled) {
-
     background: var(--accent);
-
     border-color: var(--accent);
 
     color: #111508;
@@ -1305,30 +1213,31 @@ select:focus-visible {
     transform: scale(1.05);
 }
 
-.counter span {
+.counter button:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+}
 
+.counter span {
     min-width: 25px;
 
     text-align: center;
 
     font-size: 14px;
-
     font-weight: 1000;
 }
 
 
 /* ==========================================================
    INPUTS
-========================================================== */
+   ========================================================== */
 
 label {
-
     display: block;
 
     color: var(--muted);
 
     font-size: 9px;
-
     font-weight: 800;
 
     margin-bottom: 6px;
@@ -1336,19 +1245,15 @@ label {
 
 input,
 select {
-
     width: 100%;
-
     min-height: 44px;
 
     border: 1px solid var(--border);
-
     border-radius: 11px;
 
     outline: none;
 
     background: var(--surface-2);
-
     color: var(--text);
 
     padding: 10px 11px;
@@ -1358,11 +1263,10 @@ select {
 
 input:focus,
 select:focus {
-
     border-color: var(--accent);
 
     box-shadow:
-        0 0 0 3px rgba(217, 255, 63, .07);
+        0 0 0 3px rgba(217, 255, 63, 0.07);
 }
 
 .input-wrap {
@@ -1374,11 +1278,9 @@ select:focus {
 }
 
 .input-wrap span {
-
     position: absolute;
 
     right: 12px;
-
     top: 50%;
 
     transform: translateY(-50%);
@@ -1386,7 +1288,6 @@ select:focus {
     color: var(--muted);
 
     font-size: 10px;
-
     font-weight: 900;
 
     pointer-events: none;
@@ -1399,26 +1300,25 @@ select:focus {
 
 /* ==========================================================
    TARGET
-========================================================== */
+   ========================================================== */
 
 .target-input {
-
     display: grid;
-
-    grid-template-columns:
-        1fr 180px;
+    grid-template-columns: 1fr 180px;
 
     gap: 8px;
 }
 
 .primary-button {
+    width: 100%;
+    min-height: 44px;
+
+    padding: 12px 16px;
 
     border: 0;
-
     border-radius: 10px;
 
     background: var(--accent);
-
     color: #111508;
 
     font-weight: 950;
@@ -1427,27 +1327,21 @@ select:focus {
 }
 
 .primary-button:hover {
-
     background: var(--accent-hover);
-
     transform: translateY(-1px);
 }
 
 .quick-targets {
-
     display: flex;
-
     gap: 5px;
 
     overflow-x: auto;
 
     margin-top: 9px;
-
     padding-bottom: 2px;
 }
 
 .quick-targets button {
-
     flex: 1;
 
     min-width: 55px;
@@ -1455,47 +1349,45 @@ select:focus {
     padding: 8px 6px;
 
     border: 1px solid var(--border);
-
     border-radius: 8px;
 
     background: var(--surface-2);
-
     color: var(--muted);
 
     font-size: 9px;
-
     font-weight: 900;
 
     transition: var(--transition);
 }
 
 .quick-targets button:hover {
-
     border-color: var(--accent);
-
     color: var(--accent);
 
     background:
-        rgba(217, 255, 63, .05);
+        rgba(217, 255, 63, 0.05);
 }
 
-.target-result {
 
+/* ==========================================================
+   TARGET RESULT
+   ========================================================== */
+
+.target-result {
     margin-top: 15px;
 
     padding: 14px;
 
     border: 1px solid var(--border);
-
     border-radius: 13px;
 
     background: var(--surface-2);
 
-    animation: resultIn .2s ease-out;
+    animation:
+        resultIn 0.2s ease-out;
 }
 
 @keyframes resultIn {
-
     from {
         opacity: 0;
         transform: translateY(5px);
@@ -1512,31 +1404,24 @@ select:focus {
 }
 
 .result-header {
-
     display: flex;
-
     align-items: center;
-
     justify-content: space-between;
 
     margin-bottom: 12px;
 }
 
 .result-header span {
-
     display: block;
 
     color: var(--muted);
 
     font-size: 7px;
-
     letter-spacing: 1px;
-
     font-weight: 950;
 }
 
 .result-header strong {
-
     display: block;
 
     margin-top: 3px;
@@ -1545,70 +1430,56 @@ select:focus {
 }
 
 .accuracy {
-
     padding: 6px 8px;
 
     border-radius: 7px;
 
     font-size: 7px;
-
     font-weight: 950;
 }
 
 .accuracy.exact {
-
     background:
-        rgba(142, 230, 106, .1);
+        rgba(142, 230, 106, 0.1);
 
     color: var(--success);
 }
 
 .accuracy.close {
-
     background:
-        rgba(255, 189, 89, .1);
+        rgba(255, 189, 89, 0.1);
 
     color: var(--warning);
 }
 
 .accuracy.unavailable {
-
     background:
-        rgba(255, 102, 102, .1);
+        rgba(255, 102, 102, 0.1);
 
     color: var(--danger);
 }
 
 .combination {
-
     display: flex;
-
     flex-wrap: wrap;
-
     gap: 6px;
 }
 
 .plate-chip {
-
     padding: 8px 9px;
 
     border: 1px solid var(--border);
-
     border-radius: 8px;
 
     background: var(--surface-3);
 
     font-size: 10px;
-
     font-weight: 950;
 }
 
 .target-values {
-
     display: grid;
-
-    grid-template-columns:
-        repeat(3, 1fr);
+    grid-template-columns: repeat(3, 1fr);
 
     gap: 6px;
 
@@ -1616,16 +1487,14 @@ select:focus {
 }
 
 .target-values div {
-
     padding: 9px;
 
     border-radius: 8px;
 
-    background: rgba(0, 0, 0, .15);
+    background: rgba(0, 0, 0, 0.15);
 }
 
 .target-values span {
-
     display: block;
 
     color: var(--muted);
@@ -1640,7 +1509,6 @@ select:focus {
 }
 
 .apply-button {
-
     width: 100%;
 
     margin-top: 11px;
@@ -1648,38 +1516,118 @@ select:focus {
     padding: 11px;
 
     border: 0;
-
     border-radius: 9px;
 
     background: var(--accent);
-
     color: #111508;
 
     font-size: 10px;
-
     font-weight: 950;
 
     transition: var(--transition);
 }
 
 .apply-button:hover {
-
     background: var(--accent-hover);
-
     transform: translateY(-1px);
 }
 
 
 /* ==========================================================
+   CALIBRATED PLATES
+   ========================================================== */
+
+.calibrated-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+
+    gap: 7px;
+
+    margin-top: 12px;
+}
+
+.calibrated-option {
+    padding: 10px 7px;
+
+    border: 1px solid var(--border);
+    border-radius: 10px;
+
+    background: var(--surface-2);
+    color: var(--muted);
+
+    text-align: center;
+
+    font-size: 9px;
+    font-weight: 900;
+
+    transition: var(--transition);
+}
+
+.calibrated-option:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+
+    transform: translateY(-1px);
+}
+
+.calibrated-option.active {
+    border-color: var(--accent);
+
+    background:
+        rgba(217, 255, 63, 0.08);
+
+    color: var(--accent);
+}
+
+.calibrated-option strong {
+    display: block;
+
+    color: inherit;
+
+    font-size: 13px;
+
+    margin-bottom: 3px;
+}
+
+.calibrated-option small {
+    color: var(--muted);
+    font-size: 7px;
+}
+
+.calibrated-info {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 10px;
+
+    margin-top: 12px;
+    padding: 11px;
+
+    border: 1px solid var(--border);
+    border-radius: 10px;
+
+    background: var(--surface-2);
+}
+
+.calibrated-info span {
+    color: var(--muted);
+    font-size: 8px;
+}
+
+.calibrated-info strong {
+    color: var(--accent);
+    font-size: 11px;
+}
+
+
+/* ==========================================================
    1RM
-========================================================== */
+   ========================================================== */
 
 .rm-input {
-
     display: grid;
-
-    grid-template-columns:
-        1fr 150px;
+    grid-template-columns: 1fr 150px;
 
     gap: 8px;
 }
@@ -1687,80 +1635,119 @@ select:focus {
 .formula-selector {
     margin-top: 14px;
 }
-
+.formula-selector + .primary-button {
+    margin-top: 14px;
+}
 .formula-selector>span {
-
     display: block;
 
     color: var(--muted);
 
     font-size: 7px;
-
     letter-spacing: 1px;
-
     font-weight: 950;
 
     margin-bottom: 7px;
 }
+.formula-hint {
+    margin-top: 10px;
 
-.formula-buttons {
-
-    display: flex;
-
-    gap: 6px;
-}
-
-.formula-button {
-
-    flex: 1;
-
-    padding: 8px;
+    padding: 10px 11px;
 
     border: 1px solid var(--border);
-
-    border-radius: 8px;
+    border-radius: 9px;
 
     background: var(--surface-2);
 
     color: var(--muted);
 
     font-size: 9px;
+    line-height: 1.6;
+}
 
+.formula-hint strong {
+    color: var(--text);
+    font-weight: 900;
+}
+
+.formula-buttons {
+    display: flex;
+    gap: 6px;
+}
+
+.formula-button {
+    flex: 1;
+
+    padding: 8px;
+
+    border: 1px solid var(--border);
+    border-radius: 8px;
+
+    background: var(--surface-2);
+    color: var(--muted);
+
+    font-size: 9px;
     font-weight: 900;
 
     transition: var(--transition);
 }
 
 .formula-button:hover {
-
     color: var(--text);
-
     border-color: var(--accent);
 }
 
 .formula-button.active {
-
     color: #111508;
 
     background: var(--accent);
+    border-color: var(--accent);
+}
+/* ==========================================================
+   BOTONES DE FÓRMULA — REPS Y PESO PARA REPS
+   ========================================================== */
 
+.reps-formula-button,
+.weight-reps-formula-button {
+    flex: 1;
+
+    padding: 8px;
+
+    border: 1px solid var(--border);
+    border-radius: 8px;
+
+    background: var(--surface-2);
+    color: var(--muted);
+
+    font-size: 9px;
+    font-weight: 900;
+
+    transition: var(--transition);
+}
+
+.reps-formula-button:hover,
+.weight-reps-formula-button:hover {
+    color: var(--text);
+    border-color: var(--accent);
+}
+
+.reps-formula-button.active,
+.weight-reps-formula-button.active {
+    color: #111508;
+
+    background: var(--accent);
     border-color: var(--accent);
 }
 
 .rm-result {
-
     display: flex;
-
     align-items: center;
-
     justify-content: space-between;
 
     padding: 12px;
-
     margin-top: 10px;
 
     border: 1px solid var(--border);
-
     border-radius: 11px;
 
     background: var(--surface-2);
@@ -1768,20 +1755,16 @@ select:focus {
 
 .rm-result span,
 .estimate-result span {
-
     display: block;
 
     color: var(--muted);
 
     font-size: 7px;
-
     letter-spacing: 1px;
-
     font-weight: 950;
 }
 
 .rm-result strong {
-
     display: block;
 
     margin-top: 3px;
@@ -1792,76 +1775,60 @@ select:focus {
 }
 
 .small-button {
-
     padding: 8px 10px;
 
     border: 1px solid var(--border);
-
     border-radius: 8px;
 
     background: var(--surface-3);
-
     color: var(--text);
 
     font-size: 9px;
-
     font-weight: 900;
 
     transition: var(--transition);
 }
 
 .small-button:hover {
-
     border-color: var(--accent);
-
     color: var(--accent);
 }
 
 
 /* ==========================================================
    PERCENTAGES
-========================================================== */
+   ========================================================== */
 
 .percentage-table {
-
     margin-top: 15px;
-
     padding-top: 13px;
 
     border-top: 1px solid var(--border);
 }
 
 .percentage-title {
-
     color: var(--muted);
 
     font-size: 7px;
-
     letter-spacing: 1px;
-
     font-weight: 950;
 
     margin-bottom: 8px;
 }
 
 .percentage-grid {
-
     display: grid;
-
-    grid-template-columns:
-        repeat(5, 1fr);
+    grid-template-columns: repeat(5, 1fr);
 
     gap: 5px;
 }
 
 .percentage-cell {
-
     padding: 8px;
 
     border-radius: 8px;
 
     background: var(--surface-2);
-
     border: 1px solid transparent;
 
     cursor: pointer;
@@ -1870,22 +1837,18 @@ select:focus {
 }
 
 .percentage-cell:hover {
-
     border-color: var(--border);
-
     transform: translateY(-1px);
 }
 
 .percentage-cell.active {
-
     border-color: var(--accent);
 
     background:
-        rgba(217, 255, 63, .06);
+        rgba(217, 255, 63, 0.06);
 }
 
 .percentage-cell span {
-
     display: block;
 
     color: var(--muted);
@@ -1894,7 +1857,6 @@ select:focus {
 }
 
 .percentage-cell strong {
-
     display: block;
 
     margin-top: 3px;
@@ -1904,40 +1866,246 @@ select:focus {
 
 
 /* ==========================================================
+   REP CALCULATOR
+   ¿CUÁNTAS REPS NECESITO?
+   ========================================================== */
+
+.reps-calculator {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+
+    gap: 8px;
+}
+
+.reps-result {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    margin-top: 12px;
+    padding: 13px;
+
+    border: 1px solid var(--border);
+    border-radius: 11px;
+
+    background: var(--surface-2);
+
+    animation:
+        resultIn 0.2s ease-out;
+}
+
+.reps-result strong {
+    display: block;
+
+    color: var(--accent);
+
+    font-size: 22px;
+
+    margin-top: 3px;
+}
+
+.reps-result small {
+    color: var(--muted);
+    font-size: 8px;
+}
+/* ==========================================================
+   RESULTADO — ¿CUÁNTAS REPS NECESITO?
+   ========================================================== */
+
+.required-reps-result {
+    margin-top: 12px;
+    padding: 14px;
+
+    border: 1px solid var(--border);
+    border-radius: 11px;
+
+    background: var(--surface-2);
+
+    animation: resultIn 0.2s ease-out;
+}
+
+.required-reps-main {
+    display: flex;
+    align-items: baseline;
+    gap: 7px;
+}
+
+.required-reps-main span {
+    color: var(--muted);
+
+    font-size: 7px;
+    letter-spacing: 1px;
+    font-weight: 950;
+}
+
+.required-reps-main strong {
+    color: var(--accent);
+
+    font-size: 25px;
+    font-weight: 1000;
+}
+
+.required-reps-main small {
+    color: var(--muted);
+
+    font-size: 10px;
+    font-weight: 800;
+}
+
+.required-reps-details {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+
+    gap: 6px;
+
+    margin-top: 12px;
+}
+
+.required-reps-details div {
+    padding: 8px;
+
+    border-radius: 8px;
+
+    background: rgba(0, 0, 0, 0.15);
+}
+
+.required-reps-details span {
+    display: block;
+
+    color: var(--muted);
+
+    font-size: 7px;
+
+    margin-bottom: 3px;
+}
+
+.required-reps-details strong {
+    font-size: 9px;
+}
+
+.result-message {
+    margin-top: 12px;
+    padding: 10px 11px;
+
+    border-radius: 9px;
+
+    background: rgba(0, 0, 0, 0.15);
+
+    color: var(--muted);
+
+    font-size: 9px;
+    line-height: 1.5;
+}
+
+.result-message + .small-button {
+    margin-top: 10px;
+}
+
+
+/* ==========================================================
+   WEIGHT FOR REPS
+   ¿QUÉ PESO NECESITO PARA X REPS?
+   ========================================================== */
+
+.weight-reps-calculator {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+
+    gap: 8px;
+}
+
+.weight-reps-result {
+    margin-top: 12px;
+    padding: 14px;
+
+    border: 1px solid var(--border);
+    border-radius: 11px;
+
+    background: var(--surface-2);
+
+    animation:
+        resultIn 0.2s ease-out;
+}
+
+.weight-reps-main {
+    display: flex;
+    align-items: baseline;
+
+    gap: 7px;
+}
+
+.weight-reps-main strong {
+    color: var(--accent);
+
+    font-size: 25px;
+    font-weight: 1000;
+}
+
+.weight-reps-main span {
+    color: var(--muted);
+
+    font-size: 10px;
+    font-weight: 800;
+}
+
+.weight-reps-meta {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+
+    gap: 6px;
+
+    margin-top: 12px;
+}
+
+.weight-reps-meta div {
+    padding: 8px;
+
+    border-radius: 8px;
+
+    background: rgba(0, 0, 0, 0.15);
+}
+
+.weight-reps-meta span {
+    display: block;
+
+    color: var(--muted);
+
+    font-size: 7px;
+
+    margin-bottom: 3px;
+}
+
+.weight-reps-meta strong {
+    font-size: 9px;
+}
+
+
+/* ==========================================================
    ESTIMATOR
-========================================================== */
+   ========================================================== */
 
 .estimator-grid {
-
     display: grid;
-
-    grid-template-columns:
-        1fr 1fr;
+    grid-template-columns: 1fr 1fr;
 
     gap: 8px;
 }
 
 .estimate-result {
-
     display: flex;
-
     justify-content: space-between;
-
     align-items: center;
 
     margin-top: 12px;
-
     padding: 13px;
 
     border: 1px solid var(--border);
-
     border-radius: 11px;
 
     background: var(--surface-2);
 }
 
 .estimate-result strong {
-
     display: block;
 
     color: var(--accent);
@@ -1950,20 +2118,17 @@ select:focus {
 
 /* ==========================================================
    FAVORITES / HISTORY
-========================================================== */
+   ========================================================== */
 
 .favorites,
 .history {
-
     display: flex;
-
     flex-direction: column;
 
     gap: 6px;
 }
 
 .empty {
-
     padding: 17px;
 
     text-align: center;
@@ -1975,17 +2140,13 @@ select:focus {
 
 .favorite-item,
 .history-item {
-
     display: flex;
-
     align-items: center;
-
     justify-content: space-between;
 
     padding: 11px;
 
     border: 1px solid transparent;
-
     border-radius: 10px;
 
     background: var(--surface-2);
@@ -1995,21 +2156,16 @@ select:focus {
 
 .favorite-item:hover,
 .history-item:hover {
-
     border-color: var(--border);
-
     transform: translateX(2px);
 }
 
 .item-weight {
-
     font-size: 12px;
-
     font-weight: 950;
 }
 
 .item-detail {
-
     color: var(--muted);
 
     font-size: 8px;
@@ -2018,63 +2174,50 @@ select:focus {
 }
 
 .item-actions {
-
     display: flex;
-
     align-items: center;
 
     gap: 5px;
 }
 
 .item-actions button {
-
     padding: 6px 8px;
 
     border: 1px solid var(--border);
-
     border-radius: 7px;
 
     background: var(--surface-3);
-
     color: var(--text);
 
     font-size: 8px;
-
     font-weight: 900;
 
     transition: var(--transition);
 }
 
 .item-actions button:hover {
-
     border-color: var(--accent);
-
     color: var(--accent);
 }
 
 .item-actions .delete:hover {
-
     border-color: var(--danger);
-
     color: var(--danger);
 }
 
 
 /* ==========================================================
    TOAST
-========================================================== */
+   ========================================================== */
 
 .toast-container {
-
     position: fixed;
 
     right: 18px;
     bottom: 18px;
 
     display: flex;
-
     flex-direction: column;
-
     align-items: flex-end;
 
     gap: 8px;
@@ -2085,54 +2228,48 @@ select:focus {
 }
 
 .toast {
-
     min-width: 250px;
-
     max-width: 360px;
 
     padding: 12px 14px;
 
     border: 1px solid var(--border);
-
     border-radius: 11px;
 
     background: var(--surface);
-
     color: var(--text);
 
     box-shadow:
-        0 15px 40px rgba(0, 0, 0, .35);
+        0 15px 40px rgba(0, 0, 0, 0.35);
 
     font-size: 10px;
-
     font-weight: 800;
 
     animation:
-        toastIn .22s ease-out;
+        toastIn 0.22s ease-out;
 }
 
 .toast.success {
     border-color:
-        rgba(142, 230, 106, .35);
+        rgba(142, 230, 106, 0.35);
 }
 
 .toast.error {
     border-color:
-        rgba(255, 102, 102, .35);
+        rgba(255, 102, 102, 0.35);
 }
 
 .toast.warning {
     border-color:
-        rgba(255, 189, 89, .35);
+        rgba(255, 189, 89, 0.35);
 }
 
 .toast.info {
     border-color:
-        rgba(109, 183, 255, .35);
+        rgba(109, 183, 255, 0.35);
 }
 
 @keyframes toastIn {
-
     from {
         opacity: 0;
         transform: translateY(12px);
@@ -2145,13 +2282,11 @@ select:focus {
 }
 
 .toast.out {
-
     animation:
-        toastOut .2s ease-in forwards;
+        toastOut 0.2s ease-in forwards;
 }
 
 @keyframes toastOut {
-
     to {
         opacity: 0;
         transform: translateY(12px);
@@ -2161,14 +2296,11 @@ select:focus {
 
 /* ==========================================================
    FOOTER
-========================================================== */
+   ========================================================== */
 
 footer {
-
     display: flex;
-
     align-items: center;
-
     justify-content: center;
 
     flex-wrap: wrap;
@@ -2185,64 +2317,68 @@ footer {
 
 /* ==========================================================
    LIGHT MODE
-========================================================== */
+   ========================================================== */
 
 body.light {
-
     --bg: #edf0f3;
 
     --surface: #ffffff;
-
     --surface-2: #f4f5f7;
-
     --surface-3: #e4e7eb;
 
     --border: #d3d8df;
 
     --text: #171a1f;
-
     --muted: #68717d;
 
     background:
         radial-gradient(circle at top,
-            #fff,
+            #ffffff,
             #e7eaee);
 }
 
 body.light .hero-card {
-
     background:
         linear-gradient(145deg,
-            #fff,
+            #ffffff,
             #f1f3f6);
 }
 
 body.light .bar-stage {
-
     background:
         radial-gradient(circle,
             #dce1e6,
             #c8ced5);
 }
 
-body.light .target-values div {
-
+body.light .target-values div,
+body.light .reps-result,
+body.light .weight-reps-result {
     background: #e7e9ed;
 }
 
 
 /* ==========================================================
-   RESPONSIVE
-========================================================== */
+   RESPONSIVE - TABLET
+   ========================================================== */
 
-@media(max-width: 760px) {
+@media (max-width: 760px) {
 
     .app {
         max-width: 700px;
     }
+
+    .calibrated-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
 }
 
-@media(max-width: 560px) {
+
+/* ==========================================================
+   RESPONSIVE - MOBILE
+   ========================================================== */
+
+@media (max-width: 560px) {
 
     body {
         padding: 13px 8px;
@@ -2254,9 +2390,7 @@ body.light .target-values div {
     }
 
     .hero-number strong {
-
         font-size: 55px;
-
         letter-spacing: -5px;
     }
 
@@ -2265,11 +2399,8 @@ body.light .target-values div {
     }
 
     .hero-stats>div {
-
         display: flex;
-
         align-items: center;
-
         justify-content: space-between;
 
         padding-bottom: 7px;
@@ -2283,7 +2414,9 @@ body.light .target-values div {
     }
 
     .target-input,
-    .rm-input {
+    .rm-input,
+    .reps-calculator,
+    .weight-reps-calculator {
         grid-template-columns: 1fr;
     }
 
@@ -2292,8 +2425,7 @@ body.light .target-values div {
     }
 
     .percentage-grid {
-        grid-template-columns:
-            repeat(3, 1fr);
+        grid-template-columns: repeat(3, 1fr);
     }
 
     .estimator-grid {
@@ -2301,6 +2433,10 @@ body.light .target-values div {
     }
 
     .target-values {
+        grid-template-columns: 1fr;
+    }
+
+    .weight-reps-meta {
         grid-template-columns: 1fr;
     }
 
@@ -2313,7 +2449,6 @@ body.light .target-values div {
     }
 
     .bar-center {
-
         width: 48px;
         height: 30px;
 
@@ -2321,7 +2456,6 @@ body.light .target-values div {
     }
 
     .visual-plate {
-
         min-width: 10px;
         width: 10px;
     }
@@ -2360,14 +2494,11 @@ body.light .target-values div {
 
     .favorite-item,
     .history-item {
-
         align-items: flex-start;
-
         gap: 8px;
     }
 
     .toast-container {
-
         left: 10px;
         right: 10px;
         bottom: 10px;
@@ -2376,15 +2507,68 @@ body.light .target-values div {
     }
 
     .toast {
-
         min-width: 0;
         max-width: none;
     }
+
+    .visual-cal-25 {
+        height: 82px;
+    }
+
+    .visual-cal-20 {
+        height: 74px;
+    }
+
+    .visual-cal-15 {
+        height: 65px;
+    }
+
+    .visual-cal-10 {
+        height: 57px;
+    }
+
+    .visual-cal-5 {
+        height: 47px;
+    }
+
+    .visual-cal-2-5 {
+        height: 39px;
+    }
+
+    .visual-cal-1-25 {
+        height: 33px;
+    }
+
+    .visual-cal-1 {
+        height: 30px;
+    }
+
+    .visual-cal-0-5 {
+        height: 27px;
+    }
+
+    .visual-cal-0-25 {
+        height: 24px;
+    }
 }
 
-@media(max-width: 380px) {
+
+/* ==========================================================
+   RESPONSIVE - SMALL MOBILE
+   ========================================================== */
+
+@media (max-width: 380px) {
 
     .plate-row {
         gap: 8px;
+    }
+
+    .calibrated-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .hero-number strong {
+        font-size: 48px;
+        letter-spacing: -4px;
     }
 }
