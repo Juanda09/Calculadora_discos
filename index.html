@@ -1200,6 +1200,29 @@
 
     <script src="script.js"></script>
 
+    <script>
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                const splash = document.getElementById('customSplash');
+                if (splash) {
+                    splash.classList.add('hide');
+                    setTimeout(() => splash.remove(), 500);
+                }
+            }, 5000);
+        });
+    </script>
+
 </body>
+
+<div id="customSplash" class="custom-splash">
+    <div class="splash-content">
+        <img src="Splash.png" alt="PowerLoad" class="splash-logo">
+        <div class="splash-loader">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+    </div>
+</div>
 
 </html>
